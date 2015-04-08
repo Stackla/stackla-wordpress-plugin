@@ -1,0 +1,9 @@
+node_modules
+includes/vendor
+.DS_Store
+
+stackla-phrase-key
+config.yml
+composer.lock
+*.zip
+*.psd
