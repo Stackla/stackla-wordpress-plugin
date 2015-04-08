@@ -1,0 +1,1 @@
+# stackla-wordpress-plugin
