@@ -1,5 +1,9 @@
-(function() {
+(function(window) {
 
     'use strict';
-    window.app = {};
-}());
+    window.app =
+    {
+        admin:{},
+        public:{}
+    };
+}(window));

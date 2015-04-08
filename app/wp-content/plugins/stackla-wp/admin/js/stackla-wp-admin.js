@@ -1,0 +1,1 @@
+!function(i){"use strict";i.app.admin={}}(window);
