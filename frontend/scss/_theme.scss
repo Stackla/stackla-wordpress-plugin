@@ -1,0 +1,240 @@
+html 
+{
+    height:100%;
+    box-sizing: border-box;
+}
+*, *:before, *:after 
+{
+    box-sizing: inherit;
+}
+
+body 
+{
+    height:100%;
+    font-size:1em;
+    background:$color-bg !important;
+    font-family:$font-body;
+    color:$color-font;
+    line-height:1.4em;
+}
+
+h2
+{
+    font-weight: bold;
+    margin-bottom:$layout-margin-s;
+    color:$color-header;
+    font-size:2em;
+}
+.button , a
+{
+    transition:0.2s;
+}
+
+.button
+{
+    border:0;
+    font-size:0.8em;
+    display: inline-block;
+    background-color:$color-button;
+    color:$color-bg;
+    padding:$layout-margin-s / 3 $layout-margin-s / 2 $layout-margin-s / 3 $layout-margin-s / 2;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.button:hover
+{
+    background-color: darken($color-button , 10%);
+}
+
+a.add 
+{
+    color:$color-button;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+    margin-top:$layout-margin-s / 2;
+    border:2px solid $color-button;
+    border-radius:10px;
+    padding:10px;
+}
+
+a.add:hover
+{
+    color: darken($color-button , 10%);
+    border-color: darken($color-button , 10%);
+}
+
+.button.submit
+{
+    padding:$layout-margin-s/2;
+    font-size: 1em;
+    margin-bottom: $layout-margin-s;
+}
+
+header
+{
+    padding:$layout-margin-s 0 $layout-margin-s 0;
+}
+
+.banner
+{
+    background-repeat:no-repeat;
+    background-size:cover;
+    background-position:50% 50%;
+}
+
+main
+{
+    section
+    {
+        margin-bottom:$layout-margin-m;
+        p 
+        {
+            margin-bottom:$layout-margin-s;
+        }
+
+        p:last-child
+        {
+            margin-bottom:0;
+        }
+
+        form 
+        {
+            fieldset
+            {
+                margin-bottom:$layout-margin-s;
+            }
+            label , input[type='text'] , input[type='file'] , textarea , select
+            {
+                display:block;
+                font-size:1rem;
+            }
+
+            input[type='file']
+            {
+                margin-top:$layout-margin-s / 2;
+            }
+
+            label
+            {
+                margin-bottom:$layout-margin-s / 2;
+                font-weight: bold;
+                color:white;
+            }
+            label.checkbox , input[type='checkbox']
+            {
+                float:left;
+                display:block;
+                margin-bottom:$layout-margin-s / 2;
+            }
+
+            label.checkbox
+            {
+                font-size:0.8em;
+                line-height: 1.4em;
+                font-weight: normal;
+                width:97%;
+            }
+
+            input[type='checkbox']
+            {
+                width:3%;
+                margin-top:3px;
+            }
+
+            select
+            {
+                width:100%;
+                padding:$layout-margin-s / 2;
+
+                option 
+                {
+                    width:100%;
+                }
+            }
+
+            input[type='text'] , textarea , select
+            {
+                width:100%;
+                padding:$layout-margin-s / 2;
+                border:1px solid $color-border;
+            }
+
+            #feedback 
+            {
+                display:none;
+                background-color:lighten(red , 40%);
+                border:1px solid red;
+                padding:$layout-margin-s;
+                color:lighten(red , 20%)
+            }
+
+            #feedback.display
+            {
+                display:block;
+            }
+
+            #feedback.success
+            {
+                background-color:lighten($color-label , 10%);
+                border:1px solid $color-label;
+                padding:$layout-margin-s;
+                color:$color-header;
+            }
+
+        }
+
+        #search-form
+        {
+            margin-bottom:$layout-margin-s;
+
+            input , button
+            {
+                float:left;
+            }
+
+            input
+            {
+                width:90%;
+                border-right:0;
+            }
+
+            button
+            {
+                border-top-left-radius:0;
+                border-bottom-left-radius:0;
+                width:10%;
+                height:40px;
+            }
+        }
+    }
+    section.form
+    {
+        padding-top:$layout-margin-s;
+        background-color:$color-bg-form;
+        color:white;
+
+        span.note
+        {
+            display:inline-block;
+            margin-bottom:$layout-margin-s/2;
+        }
+    }
+    .banner
+    {
+        min-height:$layout-banner-height;
+        background-color:darken($color-bg , 10%);
+    }
+}
+
+.reset 
+{
+    color:$color-header;
+}
+
+footer
+{
+    
+}
