@@ -18,14 +18,17 @@
     $set_api_key = false;
     $checked = '';
 
-    if($user_settings->stackla_post_types !== '')
+    if($user_settings)
     {
-        $set_post_types = explode("," , $user_settings->stackla_post_types);
-    }
+        if($user_settings->stackla_post_types !== '')
+        {
+            $set_post_types = explode("," , $user_settings->stackla_post_types);
+        }
 
-    if($user_settings->stackla_api_key !== '')
-    {
-        $set_api_key = $user_settings->stackla_api_key;
+        if($user_settings->stackla_api_key !== '')
+        {
+            $set_api_key = $user_settings->stackla_api_key;
+        }
     }
 ?>
 
