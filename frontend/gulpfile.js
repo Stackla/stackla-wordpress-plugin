@@ -15,14 +15,14 @@ var paths =
     {
         'admin':
         {
-            'watch':['scss/admin/*.scss'],
-            'src':['scss/admin/build.scss' , 'scss/common.scss'],
+            'watch':['scss/*.scss'],
+            'src':['scss/admin.scss'],
             'dest':pluginAdminDirectory + '/css/'
         },
         'public':
         {
-            'watch':['scss/public/*.scss'],
-            'src':['scss/public/build.scss' , 'scss/common.scss'],
+            'watch':['scss/*.scss'],
+            'src':['scss/public.scss'],
             'dest':pluginPublicDirectory + '/css/'
         }
     },
@@ -30,12 +30,12 @@ var paths =
     {
         'admin':
         {
-            'src':['js/admin/**/*.js'],
+            'src':['js/lib/*.js' , 'js/*.js' , 'js/admin/**/*.js'],
             'dest':pluginAdminDirectory + '/js/'
         },
         'public':
         {
-            'src':['js/public/**/*.js'],
+            'src':['js/lib/*.js' , 'js/*.js' , 'js/public/**/*.js'],
             'dest':pluginPublicDirectory + '/js/'
         }
     },
@@ -62,12 +62,6 @@ gulp.task('publicScss' , function()
 gulp.task('adminJs' , function()
 {
     return gulp.src(paths.js.admin.src)
-    .pipe(order(
-        [
-            'lib/jquery-1.11.1.js',
-            'admin/app.js'
-        ]
-    ))
     .pipe(concat(pluginName + '-admin.js'))
     .pipe(uglify())
     .pipe(gulp.dest(paths.js.admin.dest));

@@ -108,6 +108,12 @@ class Stackla_WP {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-i18n.php';
 
 		/**
+		 * The class responsible for handling the settings
+		 * of the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-settings.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-stackla-wp-admin.php';
@@ -117,6 +123,7 @@ class Stackla_WP {
 		 * side of the site.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-stackla-wp-public.php';
+
 
 		$this->loader = new Stackla_WP_Loader();
 

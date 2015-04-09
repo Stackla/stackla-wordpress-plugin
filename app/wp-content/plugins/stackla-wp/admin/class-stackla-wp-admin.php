@@ -47,18 +47,50 @@ class Stackla_WP_Admin {
 	 * @param      string    $plugin_name       The name of this plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $plugin_name , $version ) {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
 	}
 
+	/**
+	*   Adds the Stackla Settings link in the Settings sidebar nav;
+	*	https://codex.wordpress.org/Function_Reference/add_options_page
+	*   @return void;
+	*/
+	public function add_settings_link()
+	{
+		add_options_page(
+			'Stackla',
+			'Stackla',
+			'manage_options',
+			'stackla'
+		);
+	}
+
+	/**
+	*   Adds the Stackla Settings page;
+	*	https://codex.wordpress.org/Function_Reference/add_menu_page
+	*   @return void;
+	*/
+
 	public function add_settings_page()
 	{
-		$array = ['test'];
+		add_menu_page(
+			'Stackla', 
+			'Stackla',
+			'manage_options',
+			'stackla',
+			array($this , 'render_settings_page'),
+			plugin_dir_url(__FILE__).'/img/icon.png',
+			'21.1'
+		);
+	}
 
-		print_r($array);
+	public function render_settings_page()
+	{
+		include('partials/stackla-wp-admin-display.php');
 	}
 
 	/**
