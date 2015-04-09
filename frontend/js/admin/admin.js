@@ -6,7 +6,9 @@
     {
         config:
         {
-            settingsForm:'#stackla-settings-form'
+            settingsForm:'#stackla-settings-form',
+            settingsFormFeedback:'#feedback',
+            onSuccessMessage:'Your settings have been saved'
         },
         runSettingsForm:function()
         {
@@ -22,13 +24,20 @@
                 {
                     url:$form.attr('action'),
                     method:'POST',
-                    data:$form.serialize()
+                    data:$form.serialize(),
                 }).done(function(response)
                 {
-                    console.log(response);
+                    if(response !== '1')
+                    {
+                        $(self.config.settingsFormFeedback).addClass('failure').html(response);
+                    }
+                    else
+                    {
+                        $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
+                    }
                 }).fail(function(xhr , status , error)
                 {
-                    console.log(error);
+                    $(self.config.settingsFormFeedback).addClass('failure').html(error);
                 });
             });
         }

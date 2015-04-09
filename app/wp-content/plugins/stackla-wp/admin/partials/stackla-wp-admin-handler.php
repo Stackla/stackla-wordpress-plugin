@@ -4,5 +4,6 @@
     require_once('../../../../../wp-load.php');
     require_once('../../includes/class-stackla-wp-settings.php');
 
-    Stackla_WP_Settings::save_settings($_POST);
+    $settings = new Stackla_WP_Settings;
+    $settings->save($_POST);
 ?>

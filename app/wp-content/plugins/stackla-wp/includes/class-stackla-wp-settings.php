@@ -9,24 +9,42 @@
  * @author     Rohan Deshpande <rohan.deshpande@stackla.com>
  */
 
+require_once('class-stackla-wp-activator.php');
+
 class Stackla_WP_Settings {
 
-    private static $table;
-    public static $errors = array();
+    private $table;
+    private $wpdb;
+    private $user_id;
+    private $user_has_settings = false;
+    private $stackla_api_key;
+    private $stackla_post_types = false;
+    public $errors = array();
+
     protected static $exclude_options = array(
         'attachment'
     );
 
     public function __construct()
     {
-        self::$table = Stackla_WP_Activator::$settings_table;
+        global $wpdb;
+        $this->wpdb = $wpdb;
+        $this->table = Stackla_WP_Activator::$settings_table;
+        $this->user_id = get_current_user_id();
     }
 
-    public static function get_post_type_options()
+    protected function get_wp_post_types()
     {
         $post_types = get_post_types(array(
             'public' => true
         ));
+
+        return $post_types;
+    }
+
+    public function get_post_type_options()
+    {
+        $post_types = $this->get_wp_post_types();
 
         foreach(self::$exclude_options as $option)
         {
@@ -39,36 +57,131 @@ class Stackla_WP_Settings {
         return $post_types;
     }
 
-    public static function save_settings($data)
+    protected function get_errors()
     {
-        global $wpdb;
+        if(empty($this->errors)) return;
 
-        $key = $data['apiKey'];
-        $types;
+        echo implode(", \n" , $this->errors);
+    }
 
-        if(!isset($data['types']))
+    protected function validate_data($data)
+    {
+        $stackla_api_key = $data['apiKey'];
+        $wp_post_types = $this->get_wp_post_types();
+
+        if($stackla_api_key === false || $stackla_api_key == '')
         {
-            $types = '';
+            $this->errors[] = 'You must submit a valid API key';
+            return false;
         }
         else
         {
-            $types = implode(',' , $data['types']);
+            $this->stackla_api_key = $stackla_api_key;
         }
 
-        echo $key;
-        echo $types;
-    }
-
-    public static function validate_api_key($key)
-    {
-        if($key === false || $key == '')
+        if(isset($data['types']))
         {
-            self::$errors[] = "You must submit a valid API key"
+            foreach($data['types'] as $type)
+            {
+                if(!array_key_exists($type, $wp_post_types))
+                {
+                    $this->errors[] = "The post type $type is not valid or does not exist";
+                }
+            }
+
+            if(!empty($this->errors))
+            {
+                return false;
+            }
+
+            $this->stackla_post_types = implode(',' , $data['types']);
         }
     }
 
-    public static function validate_post_type($type)
+    protected function set_user_has_settings()
     {
-        //todo;
+        $statement = "SELECT `id` FROM $this->table WHERE `wp_user_id` = $this->user_id";
+        $results = $this->wpdb->get_results($statement , ARRAY_N);
+
+        (!empty($results) || !is_array($results)) ? $this->user_has_settings = true : $this->user_has_settings = false;
+    }
+
+    public function save($data)
+    {
+        $validated = $this->validate_data($data);
+
+        if($validated === false)
+        {
+            $this->get_errors();
+            return;
+        }
+
+        $this->set_user_has_settings();
+
+        if($this->user_has_settings)
+        {
+            try
+            {
+                $this->wpdb->update(
+                    $this->table,
+                    array(
+                        'stackla_api_key' => $this->stackla_api_key,
+                        'stackla_post_types' => $this->stackla_post_types
+                    ),
+                    array(
+                        'wp_user_id' => $this->user_id
+                    ),
+                    array(
+                        '%s',
+                        '%s'
+                    )
+                );
+            }
+            catch (Exception $e)
+            {
+                $this->errors[] = $e->getMessage();
+                $this->get_errors();
+                return;
+            }
+        }
+        else
+        {
+            try
+            {
+                $this->wpdb->insert(
+                    $this->table,
+                    array(
+                        'wp_user_id' => $this->user_id,
+                        'stackla_api_key' => $this->stackla_api_key,
+                        'stackla_post_types' => $this->stackla_post_types
+                    ),
+                    array(
+                        '%s',
+                        '%s'
+                    )
+                );
+            }
+            catch (Exception $e)
+            {
+                $this->errors[] = $e->getMessage();
+                $this->get_errors();
+                return;
+            }
+        }
+
+        echo '1';
+    }
+
+    public function get_user_settings()
+    {
+        $statement = "SELECT * FROM $this->table WHERE `wp_user_id` = $this->user_id";
+        $results = $this->wpdb->get_row($statement);
+
+        if(empty($results))
+        {
+            return false;
+        }
+
+        return $results;
     }
 }

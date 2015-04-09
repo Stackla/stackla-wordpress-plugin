@@ -53,6 +53,7 @@ class Stackla_WP_Activator {
     {
         $statement = "CREATE TABLE IF NOT EXISTS " . self::$settings_table . " (
         `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+        `wp_user_id` INT NOT NULL ,
         `stackla_api_key` TEXT NOT NULL ,
         `stackla_post_types` TEXT NOT NULL
         ) ENGINE = InnoDB ;";

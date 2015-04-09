@@ -20,6 +20,9 @@
  * @subpackage Stackla_WP/includes
  * @author     Your Name <email@example.com>
  */
+
+require_once('class-stackla-wp-activator.php');
+
 class Stackla_WP_Deactivator {
 
 	/**
@@ -29,7 +32,32 @@ class Stackla_WP_Deactivator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function deactivate() {
+	public static function deactivate() 
+    {
+        if(WP_DEBUG === false) return;
+
+        global $wpdb;
+        
+        $tables = array(
+            Stackla_WP_Activator::$settings_table,
+            Stackla_WP_Activator::$terms_table,
+            Stackla_WP_Activator::$tags_table,
+            Stackla_WP_Activator::$filters_table,
+        );
+
+        foreach($tables as $table)
+        {
+            $sql = "DROP TABLE IF EXISTS $table";
+
+            try
+            {
+                $wpdb->query($sql);
+            }
+            catch (Exception $e)
+            {
+                echo $e->getMessage();
+            }
+        }
 
 	}
 
