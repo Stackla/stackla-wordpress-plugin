@@ -12,11 +12,11 @@
  * @subpackage Stackla_WP/admin/partials
  */
     $settings = new Stackla_WP_Settings;
-    $post_types = $settings->get_post_type_options();
+    $post_type_options = $settings->get_post_type_options();
     $user_settings = $settings->get_user_settings();
     $set_post_types = false;
     $set_api_key = false;
-    $checked = '';
+    $checked;
 
     if($user_settings)
     {
@@ -46,15 +46,21 @@
                 <p>
                     Display Stackla Custom Fields on
                 </p>
-                <?php foreach($post_types as $type): ?>
+                <?php 
+                    foreach($post_type_options as $option): 
+                ?>
                     <fieldset>
                         <?php  
-                            ($set_post_types && in_array($type , $set_post_types)) ? $checked = 'checked' : $checked = '';
+                            ($set_post_types && in_array($option , $set_post_types)) ? $checked = 'checked' : $checked = '';
                         ?>
-                        <input type='checkbox' name='types[]' <?php echo $checked ?> value="<?php echo $type ?>">
-                        <label><?php echo $type ?>s</label>
+                        <input type='checkbox' name='types[]' <?php echo $checked ?> value="<?php echo $option ?>">
+                        <label>
+                            <?php echo $option ?>s
+                        </label>
                     </fieldset>
-                <?php endforeach; ?>
+                <?php 
+                    endforeach; 
+                ?>
                 <input type='submit' value='Save Settings' class='button'>
             </form>
             <div id='feedback'></div>

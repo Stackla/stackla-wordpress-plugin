@@ -4,6 +4,7 @@ var uglify = require('gulp-uglify');
 var sass = require('gulp-sass');
 var minify = require('gulp-minify-css');
 var order = require('gulp-order');
+var react = require('gulp-react');
 
 var pluginName = 'stackla-wp';
 var pluginAdminDirectory = '../app/wp-content/plugins/' + pluginName + '/admin';
@@ -11,6 +12,17 @@ var pluginPublicDirectory = '../app/wp-content/plugins/' + pluginName + '/public
 
 var paths =
 {
+    'reactComponents':
+    {
+        src:'js/components/**/*.jsx',
+        dest:'js/compiled/',
+        watch:'js/components/**/*.jsx'
+    },
+    'reactViews':
+    {
+        src:'js/views/*.jsx',
+        dest:'js/compiled/'
+    },
     'scss':
     {
         'admin':
@@ -30,7 +42,7 @@ var paths =
     {
         'admin':
         {
-            'src':['js/lib/*.js' , 'js/*.js' , 'js/admin/**/*.js'],
+            'src':['js/**/*.js'],
             'dest':pluginAdminDirectory + '/js/'
         },
         'public':
@@ -40,6 +52,22 @@ var paths =
         }
     },
 };
+
+gulp.task('reactComponents' , function()
+{
+    return gulp.src(paths.reactComponents.src)
+    .pipe(concat('components.js'))
+    .pipe(react())
+    .pipe(gulp.dest(paths.reactComponents.dest));
+});
+
+gulp.task('reactViews' , function()
+{
+    return gulp.src(paths.reactViews.src)
+    .pipe(concat('views.js'))
+    .pipe(react())
+    .pipe(gulp.dest(paths.reactViews.dest));
+});
 
 gulp.task('adminScss' , function()
 {
@@ -62,15 +90,23 @@ gulp.task('publicScss' , function()
 gulp.task('adminJs' , function()
 {
     return gulp.src(paths.js.admin.src)
+    .pipe(order([
+        'lib/jquery-1.11.1.js',
+        'lib/react.js',
+        'app.js',
+        'admin/*.js',
+        'compiled/components.js',
+        'compiled/views.js',
+    ]))
     .pipe(concat(pluginName + '-admin.js'))
-    .pipe(uglify())
+    //.pipe(uglify())
     .pipe(gulp.dest(paths.js.admin.dest));
 });
 
 
 gulp.task('watch' , function()
 {
-    gulp.watch([paths.scss.admin.watch , paths.js.admin.src] , ['adminScss' , 'adminJs']);
+    gulp.watch([paths.scss.admin.watch , paths.js.admin.src , paths.reactComponents.watch , paths.reactViews.src] , ['reactComponents' , 'reactViews', 'adminScss' , 'adminJs']);
 });
 
-gulp.task('default' , ['watch' , 'adminScss' , 'adminJs']);
+gulp.task('default' , ['watch' , 'reactComponents' , 'reactViews',  'adminScss' , 'adminJs']);

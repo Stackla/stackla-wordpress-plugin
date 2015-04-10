@@ -19,12 +19,16 @@ class Stackla_WP_Settings {
     private $user_has_settings = false;
     private $stackla_api_key;
     private $stackla_post_types = false;
-    public $errors = array();
-
     protected static $exclude_options = array(
         'attachment'
     );
+    public $errors = array();
 
+    /**
+    *   -- CONSTRUCTOR --;
+    *   Sets class properties;
+    *   @return void;
+    */
     public function __construct()
     {
         global $wpdb;
@@ -32,6 +36,11 @@ class Stackla_WP_Settings {
         $this->table = Stackla_WP_Activator::$settings_table;
         $this->user_id = get_current_user_id();
     }
+
+    /**
+    *   Gets the public wordpress post types;
+    *   @return {$post_types} an array of public post types;
+    */
 
     protected function get_wp_post_types()
     {
@@ -41,6 +50,11 @@ class Stackla_WP_Settings {
 
         return $post_types;
     }
+
+    /**
+    *   Filters the wordpress public post types against the exclude_options array;
+    *   @return {$post_types} the filtered post_types array;
+    */
 
     public function get_post_type_options()
     {
@@ -57,12 +71,23 @@ class Stackla_WP_Settings {
         return $post_types;
     }
 
+    /**
+    *   Checks the errors property, and if not empty echoes them out to the client;
+    *   @return void;
+    */
+
     protected function get_errors()
     {
         if(empty($this->errors)) return;
 
         echo implode(", \n" , $this->errors);
     }
+
+    /**
+    *   Validates the submitted options data;
+    *   @param {$data} an array of POST data;
+    *   @return {boolean} based on a valid or invalid result;
+    */
 
     protected function validate_data($data)
     {
@@ -96,15 +121,28 @@ class Stackla_WP_Settings {
 
             $this->stackla_post_types = implode(',' , $data['types']);
         }
+
+        return true;
     }
+
+    /**
+    *   Sets the user_has_settings boolean to determine if a user already has settings;
+    *   @return void;
+    */
 
     protected function set_user_has_settings()
     {
         $statement = "SELECT `id` FROM $this->table WHERE `wp_user_id` = $this->user_id";
         $results = $this->wpdb->get_results($statement , ARRAY_N);
 
-        (!empty($results) || !is_array($results)) ? $this->user_has_settings = true : $this->user_has_settings = false;
+        (!empty($results)) ? $this->user_has_settings = true : $this->user_has_settings = false;
     }
+
+    /**
+    *   Inserts the posted data into the db;
+    *   @param {$data} an array of validated POST data;
+    *   @return void;
+    */
 
     public function save($data)
     {
@@ -171,6 +209,11 @@ class Stackla_WP_Settings {
 
         echo '1';
     }
+
+    /**
+    *   Gets the current user's settings if they exist;
+    *   @return {$results || false} an array containing the settings or false if none exist;
+    */
 
     public function get_user_settings()
     {

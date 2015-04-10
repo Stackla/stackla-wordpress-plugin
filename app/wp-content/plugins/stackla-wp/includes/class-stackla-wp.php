@@ -114,6 +114,12 @@ class Stackla_WP {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-settings.php';
 
 		/**
+		 * The class responsible for handling the custom metaboxes
+		 * of the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-stackla-wp-metaboxes.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-stackla-wp-admin.php';
@@ -157,11 +163,14 @@ class Stackla_WP {
 	private function define_admin_hooks() {
 
 		$plugin_admin = new Stackla_WP_Admin( $this->get_plugin_name(), $this->get_version() );
+		$metaboxes = new Stackla_WP_Metaboxes;
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
 		$this->loader->add_action('admin_menu' , $plugin_admin , 'add_settings_page');
+		$this->loader->add_action('add_meta_boxes' , $metaboxes , 'setup_metaboxes');
+		$this->loader->add_action('save_post' , $metaboxes , 'save_metabox');
 	}
 
 	/**

@@ -44,3 +44,32 @@ form
     background-color:lighten(red , 40%);
     color:lighten(red , 10%);
 }
+
+#stackla-metabox
+{
+    fieldset
+    {
+        margin-bottom:20px;
+    }
+    label 
+    {
+        font-weight: bold;
+        margin-bottom:10px;
+    }
+    label , input[type='text'] , select
+    {
+        display:block;
+    }
+    select.hide
+    {
+        display: none;
+    }
+    select.display 
+    {
+        display: block;
+    }
+    input[type='text']
+    {
+        padding:10px;
+    }
+}
