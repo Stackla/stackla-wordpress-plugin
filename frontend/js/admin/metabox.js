@@ -2,7 +2,7 @@
 {
     'use strict';
 
-    window.app.admin.stackla =
+    window.stacklaWp.admin.metabox =
     {
         components:{},
         views:{},

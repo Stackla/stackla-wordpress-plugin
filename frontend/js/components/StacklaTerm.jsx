@@ -1,73 +1,75 @@
-(function()
+(function(window)
 {
     'use strict';
 
-    window.app.admin.stackla.components.StacklaTerm = React.createClass(
+    window.stacklaWp.admin.metabox.components.StacklaTerm = React.createClass(
     {
         propTypes:
         {
-            twitter:React.PropTypes.array,
-            facebook:React.PropTypes.array,
-            instagram:React.PropTypes.array,
-            youtube:React.PropTypes.array
         },
         getInitialState:function()
         {
             return {
-                data:[]
+                dependencies:
+                {
+                    StacklaNetworkSelect:stacklaWp.admin.metabox.components.StacklaNetworkSelect
+                },
+                count:1,
+                terms:[]
             }
         },
-        handleNetworkChange:function(e)
+        /**
+        *   Adds one to the count of StacklaNetworkSelect components to render;
+        *   @return void;
+        */
+        addTerm:function()
         {
-
+            this.setState(
+            {
+                terms:[],
+                count:this.state.count + 1
+            });
         },
+        /**
+        *   Subracts one to the count of StacklaNetworkSelect components to render;
+        *   @return void;
+        */
+        removeTerm:function()
+        {
+            if(this.state.count <= 1) return;
+            this.setState(
+            {
+                terms:[],
+                count:this.state.count - 1
+            });
+        },
+        /**
+        *   Loops through the count, pushes StacklaNetworkSelect components to the terms array;
+        *   Renders these components;
+        *   @return void;
+        */
         render:function()
         {
+            var i;
+
+            for(i = 0 ; i < this.state.count ; i++)
+            {
+                this.state.terms.push(
+                    <this.state.dependencies.StacklaNetworkSelect 
+                        twitter={stacklaWp.admin.metabox.config.network.twitter}
+                        facebook={stacklaWp.admin.metabox.config.network.facebook}
+                        instagram={stacklaWp.admin.metabox.config.network.instagram}
+                        youtube={stacklaWp.admin.metabox.config.network.youtube}
+                        key={i}
+                    />
+                );
+            }
+
             return (
                 <div className='term'>
-                <label>
-                    Choose a network
-                </label>
-                <select onChange={this.handleNetworkChange}>
-                    <option value='twitter'>Twitter</option>
-                    <option value='facebook'>Facebook</option>
-                    <option value='instagram'>Instagram</option>
-                    <option value='youtube'>YouTube</option>
-                </select>
-                <select className='twitter hide' ref='twitterOptions'>
-                    {
-                        this.props.twitter.map(function(option , i)
-                        {
-                            return <option key={i} value={option}>{option}</option>
-                        })
-                    }
-                </select>
-                <select className='facebook hide' ref='facebookOptions'>
-                    {
-                        this.props.facebook.map(function(option , i)
-                        {
-                            return <option key={i} value={option}>{option}</option>
-                        })
-                    }
-                </select>
-                <select className='instagram hide' ref='instagramOptions'>
-                    {
-                        this.props.instagram.map(function(option , i)
-                        {
-                            return <option key={i} value={option}>{option}</option>
-                        })
-                    }
-                </select>
-                <select className='youtube hide' ref='youtubeOptions'>
-                    {
-                        this.props.youtube.map(function(option , i)
-                        {
-                            return <option key={i} value={option}>{option}</option>
-                        })
-                    }
-                </select>
+                    {this.state.terms}
                 </div>
             );
         }
     });
-}());
+}(window));

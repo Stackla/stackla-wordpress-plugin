@@ -2,7 +2,7 @@
 {
     'use strict';
 
-    window.app.admin =
+    window.stacklaWp.admin.settings =
     {
         config:
         {
@@ -10,7 +10,7 @@
             settingsFormFeedback:'#feedback',
             onSuccessMessage:'Your settings have been saved'
         },
-        runSettingsForm:function()
+        run:function()
         {
             if(!$(this.config.settingsForm).length) return;
 

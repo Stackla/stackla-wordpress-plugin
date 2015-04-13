@@ -56,6 +56,11 @@ var paths =
 gulp.task('reactComponents' , function()
 {
     return gulp.src(paths.reactComponents.src)
+    .pipe(order([
+        'StacklaWidgetTitle.jsx',
+        'StacklaNetworkSelect.jsx',
+        'StacklaTerm.jsx'
+    ]))
     .pipe(concat('components.js'))
     .pipe(react())
     .pipe(gulp.dest(paths.reactComponents.dest));

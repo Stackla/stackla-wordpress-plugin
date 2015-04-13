@@ -68,8 +68,76 @@ form
     {
         display: block;
     }
-    input[type='text']
+    input[type='text'].widefat
     {
         padding:10px;
+    }
+    .react-template
+    {
+        section 
+        {
+            margin-bottom: 10px;
+        }
+        header
+        {
+            margin-bottom:10px;
+            h2 
+            {
+                margin:0;
+            }
+            h2 , a 
+            {
+                display:inline-block;
+                margin-right:10px;
+            }
+        }
+    }
+    .network-select , .stackla-filter
+    {
+        fieldset
+        {
+            display: inline-block;
+            margin-right:20px;
+            margin-bottom:10px;
+            label.hide 
+            {
+                display:none;
+            }
+            label.display 
+            {
+                display:block;
+            }
+            label.checkbox
+            {
+                display: inline-block;
+            }
+        }
+        fieldset.term-name
+        {
+            display:block;
+        }
+
+        .rule-values
+        {
+            fieldset.hide
+            {
+                display:none;
+            }
+            fieldset.display 
+            {
+                display:inline-block;
+            }
+            .decorator 
+            {
+                display: inline-block;
+                padding:2px 5px 1px 5px;
+                background-color:#eee;
+            }
+            input[type='text']
+            {
+                display: inline-block;
+                max-width:200px;
+            }
+        }
     }
 }

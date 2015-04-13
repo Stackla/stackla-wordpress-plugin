@@ -1,5 +1,5 @@
 $(function()
 {
-    app.admin.runSettingsForm();
-    app.admin.stackla.run();
+    stacklaWp.admin.settings.run();
+    stacklaWp.admin.metabox.run();
 });

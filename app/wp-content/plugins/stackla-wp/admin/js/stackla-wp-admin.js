@@ -29851,17 +29851,52 @@ module.exports = warning;
 (function(window) {
 
     'use strict';
-    window.app =
+    window.stacklaWp =
     {
         admin:{},
         public:{}
     };
 }(window));
+(function()
+{
+    'use strict';
+
+    window.stacklaWp.admin.metabox =
+    {
+        components:{},
+        views:{},
+        config:
+        {
+            viewContainer:'#stackla-metabox',
+            network:
+            {
+                twitter:['username' , 'hashtag'],
+                facebook:['page' , 'search'],
+                instagram:['user' , 'hashtag'],
+                youtube:['user' , 'search']
+            },
+            sorting:['latest' , 'greatest' , 'votes'],
+            media:['text-only' , 'images' , 'video']
+        },
+        existingData:false,
+        run:function()
+        {
+            if(!$(this.config.viewContainer).length) return;
+            this.existingData = $(this.config.viewContainer).data('stackla');
+            this.views.StacklaWP();
+        }
+    };
+}());
+$(function()
+{
+    stacklaWp.admin.settings.run();
+    stacklaWp.admin.metabox.run();
+});
 (function(window)
 {
     'use strict';
 
-    window.app.admin =
+    window.stacklaWp.admin.settings =
     {
         config:
         {
@@ -29869,7 +29904,7 @@ module.exports = warning;
             settingsFormFeedback:'#feedback',
             onSuccessMessage:'Your settings have been saved'
         },
-        runSettingsForm:function()
+        run:function()
         {
             if(!$(this.config.settingsForm).length) return;
 
@@ -29902,141 +29937,11 @@ module.exports = warning;
         }
     };
 }(window));
-$(function()
-{
-    app.admin.runSettingsForm();
-    app.admin.stackla.run();
-});
-(function()
+(function(window)
 {
     'use strict';
 
-    window.app.admin.stackla =
-    {
-        components:{},
-        views:{},
-        config:
-        {
-            viewContainer:'#stackla-metabox',
-            network:
-            {
-                twitter:['username' , 'hashtag'],
-                facebook:['page' , 'search'],
-                instagram:['user' , 'hashtag'],
-                youtube:['user' , 'search']
-            },
-            sorting:['latest' , 'greatest' , 'votes'],
-            media:['text-only' , 'images' , 'video']
-        },
-        existingData:false,
-        run:function()
-        {
-            if(!$(this.config.viewContainer).length) return;
-            this.existingData = $(this.config.viewContainer).data('stackla');
-            this.views.StacklaWP();
-        }
-    };
-}());
-(function()
-{
-    'use strict';
-
-    window.app.admin.stackla.components.StacklaTerm = React.createClass(
-    {displayName: "StacklaTerm",
-        propTypes:
-        {
-        
-        },
-        getInitialState:function()
-        {
-            return {
-                data:[]
-            }
-        },
-        render:function()
-        {
-            return false;
-        }
-    });
-}());
-(function()
-{
-    'use strict';
-
-    window.app.admin.stackla.components.StacklaTerm = React.createClass(
-    {displayName: "StacklaTerm",
-        propTypes:
-        {
-            twitter:React.PropTypes.array,
-            facebook:React.PropTypes.array,
-            instagram:React.PropTypes.array,
-            youtube:React.PropTypes.array
-        },
-        getInitialState:function()
-        {
-            return {
-                data:[]
-            }
-        },
-        handleNetworkChange:function(e)
-        {
-
-        },
-        render:function()
-        {
-            return (
-                React.createElement("div", {className: "term"}, 
-                React.createElement("label", null, 
-                    "Choose a network"
-                ), 
-                React.createElement("select", {onChange: this.handleNetworkChange}, 
-                    React.createElement("option", {value: "twitter"}, "Twitter"), 
-                    React.createElement("option", {value: "facebook"}, "Facebook"), 
-                    React.createElement("option", {value: "instagram"}, "Instagram"), 
-                    React.createElement("option", {value: "youtube"}, "YouTube")
-                ), 
-                React.createElement("select", {className: "twitter hide", ref: "twitterOptions"}, 
-                    
-                        this.props.twitter.map(function(option , i)
-                        {
-                            return React.createElement("option", {key: i, value: option}, option)
-                        })
-                    
-                ), 
-                React.createElement("select", {className: "facebook hide", ref: "facebookOptions"}, 
-                    
-                        this.props.facebook.map(function(option , i)
-                        {
-                            return React.createElement("option", {key: i, value: option}, option)
-                        })
-                    
-                ), 
-                React.createElement("select", {className: "instagram hide", ref: "instagramOptions"}, 
-                    
-                        this.props.instagram.map(function(option , i)
-                        {
-                            return React.createElement("option", {key: i, value: option}, option)
-                        })
-                    
-                ), 
-                React.createElement("select", {className: "youtube hide", ref: "youtubeOptions"}, 
-                    
-                        this.props.youtube.map(function(option , i)
-                        {
-                            return React.createElement("option", {key: i, value: option}, option)
-                        })
-                    
-                )
-                )
-            );
-        }
-    });
-}());
-(function()
-{
-    'use strict';
-
-    window.app.admin.stackla.components.StacklaWidgetTitle = React.createClass(
+    window.stacklaWp.admin.metabox.components.StacklaWidgetTitle = React.createClass(
     {displayName: "StacklaWidgetTitle",
         propTypes:
         {
@@ -30060,12 +29965,353 @@ $(function()
             );
         }
     });
-}());
-(function()
+}(window));
+
+/*
+    This shouldn't be here, it's a gulp problem, fix it
+*/
+
+(function(window)
 {
     'use strict';
 
-    window.app.admin.stackla.views.StacklaWP = function()
+    window.stacklaWp.admin.metabox.components.StacklaFilter = React.createClass(
+    {displayName: "StacklaFilter",
+        propTypes:
+        {
+            
+        },
+        getInitialState:function()
+        {
+            return {
+                data:[]
+            }
+        },
+        handleNetworkChange:function(e)
+        {
+
+        },
+        render:function()
+        {
+            return (
+                React.createElement("div", {className: "stackla-filter"}, 
+                    React.createElement("fieldset", {className: "term-name"}, 
+                        React.createElement("label", null, 
+                            "Filter name"
+                        ), 
+                        React.createElement("input", {type: "text", className: "widefat"})
+                    ), 
+                    React.createElement("fieldset", null, 
+                        React.createElement("label", null, 
+                            "Network"
+                        ), 
+                        React.createElement("select", {onChange: this.handleNetworkChange}, 
+                            React.createElement("option", null), 
+                            React.createElement("option", {value: "twitter"}, "Twitter"), 
+                            React.createElement("option", {value: "facebook"}, "Facebook"), 
+                            React.createElement("option", {value: "instagram"}, "Instagram"), 
+                            React.createElement("option", {value: "youtube"}, "YouTube")
+                        )
+                    ), 
+                     React.createElement("fieldset", null, 
+                        React.createElement("label", null, 
+                            "Media"
+                        ), 
+                        React.createElement("fieldset", null, 
+                            React.createElement("input", {type: "checkbox"}), React.createElement("label", {className: "checkbox"}, "Text-only")
+                        ), 
+                        React.createElement("fieldset", null, 
+                            React.createElement("input", {type: "checkbox"}), React.createElement("label", {className: "checkbox"}, "Images")
+                        ), 
+                        React.createElement("fieldset", null, 
+                            React.createElement("input", {type: "checkbox"}), React.createElement("label", {className: "checkbox"}, "Video")
+                        )
+                     ), 
+                     React.createElement("fieldset", null, 
+                        React.createElement("label", null, 
+                            "Sorting"
+                        ), 
+                        React.createElement("select", null, 
+                            React.createElement("option", null), 
+                            React.createElement("option", {value: "latest"}, "Latest"), 
+                            React.createElement("option", {value: "greatest"}, "Greatest"), 
+                            React.createElement("option", {value: "votes"}, "Votes")
+                        )
+                     )
+                 )
+            );
+        }
+    });
+}(window));
+/*
+    Beware all ye who enter; there's a bunch of hardcoded stuff in here
+*/
+(function(window)
+{
+    'use strict';
+
+    window.stacklaWp.admin.metabox.components.StacklaNetworkSelect = React.createClass(
+    {displayName: "StacklaNetworkSelect",
+        propTypes:
+        {
+            twitter:React.PropTypes.array,
+            facebook:React.PropTypes.array,
+            instagram:React.PropTypes.array,
+            youtube:React.PropTypes.array,
+            key:React.PropTypes.number
+        },
+        getInitialState:function()
+        {
+            return {
+                data:[]
+            }
+        },
+        /**
+        *   Handles the user changed the network option;
+        *   @param {e} a JavaScript event object;
+        *   @return void;
+        */
+        handleNetworkChange:function(e)
+        {
+            var value = e.target.value;
+
+            $(React.findDOMNode(this.refs.termRules)).find('select').removeClass('display');
+            $(React.findDOMNode(this.refs.termValue)).find('fieldset').removeClass('display');
+
+            if(value == '')
+            {
+                $(React.findDOMNode(this.refs.termRulesLabel)).removeClass('display');
+                $(React.findDOMNode(this.refs.termValue)).find('fieldset').removeClass('display');
+            }
+            else
+            {
+                $(React.findDOMNode(this.refs.termRulesLabel)).addClass('display');
+                $(React.findDOMNode(this.refs[value])).addClass('display');
+            }
+        },
+        /**
+        *   Handles the user changed the network's rule option;
+        *   @param {e} a JavaScript event object;
+        *   @return void;
+        */
+        handleRuleChange:function(e)
+        {
+            var value = e.target.value;
+
+            $(React.findDOMNode(this.refs.termValue)).find('fieldset').removeClass('display');
+
+            $(React.findDOMNode(this.refs[value])).addClass('display')
+        },
+        render:function()
+        {
+            return (
+                React.createElement("div", {className: "network-select", key: this.props.key}, 
+                    React.createElement("fieldset", {className: "term-name"}, 
+                        React.createElement("label", null, 
+                            "Term name"
+                        ), 
+                        React.createElement("input", {type: "text", className: "widefat"})
+                    ), 
+                    React.createElement("fieldset", null, 
+                        React.createElement("label", null, 
+                            "Choose a network"
+                        ), 
+                        React.createElement("select", {onChange: this.handleNetworkChange}, 
+                            React.createElement("option", null), 
+                            React.createElement("option", {value: "twitter"}, "Twitter"), 
+                            React.createElement("option", {value: "facebook"}, "Facebook"), 
+                            React.createElement("option", {value: "instagram"}, "Instagram"), 
+                            React.createElement("option", {value: "youtube"}, "YouTube")
+                        )
+                    ), 
+                    React.createElement("fieldset", {ref: "termRules"}, 
+                        React.createElement("label", {className: "hide", ref: "termRulesLabel"}, 
+                            "Choose a term"
+                        ), 
+                        React.createElement("select", {className: "hide", ref: "twitter", onChange: this.handleRuleChange}, 
+                            React.createElement("option", null), 
+                            
+                                this.props.twitter.map(function(option , i)
+                                {
+                                    return React.createElement("option", {key: i, value: 'twitter-' + option}, option)
+                                })
+                            
+                        ), 
+                        React.createElement("select", {className: "hide", ref: "facebook", onChange: this.handleRuleChange}, 
+                            React.createElement("option", null), 
+                            
+                                this.props.facebook.map(function(option , i)
+                                {
+                                    return React.createElement("option", {key: i, value: 'facebook-' + option}, option)
+                                })
+                            
+                        ), 
+                        React.createElement("select", {className: "hide", ref: "instagram", onChange: this.handleRuleChange}, 
+                            React.createElement("option", null), 
+                            
+                                this.props.instagram.map(function(option , i)
+                                {
+                                    return React.createElement("option", {key: i, value: 'instagram-' + option}, option)
+                                })
+                            
+                        ), 
+                        React.createElement("select", {className: "hide", ref: "youtube", onChange: this.handleRuleChange}, 
+                            React.createElement("option", null), 
+                            
+                                this.props.youtube.map(function(option , i)
+                                {
+                                    return React.createElement("option", {key: i, value: 'youtube-' + option}, option)
+                                })
+                            
+                        )
+                    ), 
+                    React.createElement("fieldset", {ref: "termValue", className: "rule-values"}, 
+                        React.createElement("fieldset", {ref: "twitter-username", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "Twitter Username"
+                            ), 
+                            React.createElement("span", {className: "decorator"}, 
+                                "@"
+                            ), 
+                            React.createElement("input", {type: "text", maxLength: "15", ref: "twitterUsernameInput"})
+                        ), 
+                        React.createElement("fieldset", {ref: "twitter-hashtag", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "Twitter Hashtag"
+                            ), 
+                            React.createElement("span", {className: "decorator"}, 
+                                "#"
+                            ), 
+                            React.createElement("input", {type: "text", maxLength: "129", ref: "twitterHashtagInput"})
+                        ), 
+                        React.createElement("fieldset", {ref: "facebook-page", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "Facebook Page URL or Facebook Page Name"
+                            ), 
+                            React.createElement("input", {type: "text", ref: "facebookPageInput"})
+                        ), 
+                        React.createElement("fieldset", {ref: "facebook-search", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "Facebook Search (Search for all these words)"
+                            ), 
+                            React.createElement("input", {type: "text", ref: "facebookSearchInput"})
+                        ), 
+                        React.createElement("fieldset", {ref: "instagram-user", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "Instagram User"
+                            ), 
+                            React.createElement("span", {className: "decorator"}, 
+                                "@"
+                            ), 
+                            React.createElement("input", {type: "text", ref: "instagramUserInput"})
+                        ), 
+                        React.createElement("fieldset", {ref: "instagram-hashtag", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "Instagram Hashtag"
+                            ), 
+                            React.createElement("span", {className: "decorator"}, 
+                                "#"
+                            ), 
+                            React.createElement("input", {type: "text", ref: "instagramHashtagInput"})
+                        ), 
+                        React.createElement("fieldset", {ref: "youtube-user", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "YouTube Username"
+                            ), 
+                            React.createElement("input", {type: "text", ref: "youtubeUserInput"})
+                        ), 
+                        React.createElement("fieldset", {ref: "youtube-search", className: "hide"}, 
+                            React.createElement("label", null, 
+                                "YouTube Search"
+                            ), 
+                            React.createElement("input", {type: "text", ref: "youtubeSearchInput"})
+                        )
+                    )
+                )
+            );
+        }
+    });
+}(window));
+(function(window)
+{
+    'use strict';
+
+    window.stacklaWp.admin.metabox.components.StacklaTerm = React.createClass(
+    {displayName: "StacklaTerm",
+        propTypes:
+        {
+        },
+        getInitialState:function()
+        {
+            return {
+                dependencies:
+                {
+                    StacklaNetworkSelect:stacklaWp.admin.metabox.components.StacklaNetworkSelect
+                },
+                count:1,
+                terms:[]
+            }
+        },
+        /**
+        *   Adds one to the count of StacklaNetworkSelect components to render;
+        *   @return void;
+        */
+        addTerm:function()
+        {
+            this.setState(
+            {
+                terms:[],
+                count:this.state.count + 1
+            });
+        },
+        /**
+        *   Subracts one to the count of StacklaNetworkSelect components to render;
+        *   @return void;
+        */
+        removeTerm:function()
+        {
+            if(this.state.count <= 1) return;
+            this.setState(
+            {
+                terms:[],
+                count:this.state.count - 1
+            });
+        },
+        /**
+        *   Loops through the count, pushes StacklaNetworkSelect components to the terms array;
+        *   Renders these components;
+        *   @return void;
+        */
+        render:function()
+        {
+            var i;
+
+            for(i = 0 ; i < this.state.count ; i++)
+            {
+                this.state.terms.push(
+                    React.createElement(this.state.dependencies.StacklaNetworkSelect, {
+                        twitter: stacklaWp.admin.metabox.config.network.twitter, 
+                        facebook: stacklaWp.admin.metabox.config.network.facebook, 
+                        instagram: stacklaWp.admin.metabox.config.network.instagram, 
+                        youtube: stacklaWp.admin.metabox.config.network.youtube, 
+                        key: i}
+                    )
+                );
+            }
+
+            return (
+                React.createElement("div", {className: "term"}, 
+                    this.state.terms
+                )
+            );
+        }
+    });
+}(window));
+(function(window)
+{
+    'use strict';
+
+    window.stacklaWp.admin.metabox.views.StacklaWP = function()
     {
         var View = React.createClass(
         {displayName: "View",
@@ -30078,24 +30324,62 @@ $(function()
                 return {
                     dependencies:
                     {
-                        StacklaWidgetTitle:app.admin.stackla.components.StacklaWidgetTitle,
-                        StacklaTerm:app.admin.stackla.components.StacklaTerm
+                        StacklaWidgetTitle:stacklaWp.admin.metabox.components.StacklaWidgetTitle,
+                        StacklaTerm:stacklaWp.admin.metabox.components.StacklaTerm,
+                        StacklaFilter:stacklaWp.admin.metabox.components.StacklaFilter
                     }
                 }
+            },
+            /**
+            *   Calls the StacklaTerm component's addTerm method;
+            *   @param {e} a JavaScript event object;
+            *   @return void;
+            */
+            handleAddTerm:function(e)
+            {
+                e.preventDefault();
+                this.refs.term.addTerm();
+            },
+            /**
+            *   Calls the StacklaTerm component's removeTerm method;
+            *   @param {e} a JavaScript event object;
+            *   @return void;
+            */
+            handleRemoveTerm:function(e)
+            {
+                e.preventDefault();
+                this.refs.term.removeTerm();
+            },
+            handleAddFilter:function(e)
+            {
+                e.preventDefault();
+            },
+            handleRemoveFilter:function(e)
+            {
+                e.preventDefault();
             },
             render:function()
             {
                 return (
                     React.createElement("div", {className: "react-template"}, 
                         React.createElement(this.state.dependencies.StacklaWidgetTitle, {
-                            data: app.admin.stackla.existingData}
+                            data: stacklaWp.admin.metabox.existingData}
                         ), 
-                        React.createElement("h2", null, "Create Terms"), 
-                        React.createElement(this.state.dependencies.StacklaTerm, {
-                            twitter: app.admin.stackla.config.network.twitter, 
-                            facebook: app.admin.stackla.config.network.facebook, 
-                            instagram: app.admin.stackla.config.network.instagram, 
-                            youtube: app.admin.stackla.config.network.youtube}
+                        React.createElement("section", {className: "terms"}, 
+                            React.createElement("header", null, 
+                                React.createElement("h2", null, "Create Terms"), 
+                                React.createElement("a", {href: "#", className: "button", onClick: this.handleAddTerm}, "Add Term"), 
+                                React.createElement("a", {href: "#", className: "button", onClick: this.handleRemoveTerm}, "Remove Term")
+                            ), 
+                            React.createElement(this.state.dependencies.StacklaTerm, {ref: "term"})
+                        ), 
+                        React.createElement("section", {className: "filters"}, 
+                            React.createElement("header", null, 
+                                React.createElement("h2", null, "Create Filters"), 
+                                React.createElement("a", {href: "#", className: "button", onClick: this.handleAddFilter}, "Add Filter"), 
+                                React.createElement("a", {href: "#", className: "button", onClick: this.handleRemoveFilter}, "Remove Filter")
+                            ), 
+                            React.createElement(this.state.dependencies.StacklaFilter, {ref: "filter"})
                         )
                     )
                 );
@@ -30104,12 +30388,12 @@ $(function()
 
         React.render(React.createElement(View, null) , document.getElementById('stackla-metabox'));
     };
-}());
+}(window));
 (function(window)
 {
     'use strict';
 
-    window.app.public =
+    window.stacklaWp.public =
     {
 
     };
