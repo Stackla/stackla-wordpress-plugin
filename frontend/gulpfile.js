@@ -56,11 +56,6 @@ var paths =
 gulp.task('reactComponents' , function()
 {
     return gulp.src(paths.reactComponents.src)
-    .pipe(order([
-        'StacklaWidgetTitle.jsx',
-        'StacklaNetworkSelect.jsx',
-        'StacklaTerm.jsx'
-    ]))
     .pipe(concat('components.js'))
     .pipe(react())
     .pipe(gulp.dest(paths.reactComponents.dest));
@@ -99,9 +94,12 @@ gulp.task('adminJs' , function()
         'lib/jquery-1.11.1.js',
         'lib/react.js',
         'app.js',
-        'admin/*.js',
+        'admin/config.js',
         'compiled/components.js',
         'compiled/views.js',
+        'admin/metabox.js',
+        'admin/settings.js',
+        'admin/ready.js'
     ]))
     .pipe(concat(pluginName + '-admin.js'))
     //.pipe(uglify())

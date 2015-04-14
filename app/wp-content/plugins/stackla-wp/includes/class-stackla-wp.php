@@ -114,6 +114,12 @@ class Stackla_WP {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-settings.php';
 
 		/**
+		 * The class responsible for handling the widget layer
+		 * of the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-widget.php';
+
+		/**
 		 * The class responsible for handling the custom metaboxes
 		 * of the plugin.
 		 */

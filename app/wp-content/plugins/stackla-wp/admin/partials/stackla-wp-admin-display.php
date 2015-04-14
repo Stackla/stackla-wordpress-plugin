@@ -36,7 +36,7 @@
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
         <div class='wrap'>
             <h2>Stackla For WordPress</h2>
-            <form id='stackla-settings-form' method='POST' action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler.php">
+            <form id='stackla-settings-form' method='POST' action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php">
                 <fieldset>
                     <label>
                         Your API Key

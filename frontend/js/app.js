@@ -3,7 +3,11 @@
     'use strict';
     window.stacklaWp =
     {
-        admin:{},
+        admin:
+        {
+            components:{},
+            views:{}
+        },
         public:{}
     };
 }(window));

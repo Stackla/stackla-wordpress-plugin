@@ -5,7 +5,7 @@
     window.stacklaWp.admin.views.stacklaMetabox = function()
     {
         var View = React.createClass(
-        {displayName: "View",
+        {
             propTypes:
             {
             
@@ -22,13 +22,13 @@
             render:function()
             {
                 return (
-                    React.createElement("div", {className: "jsx-view"}, 
-                        React.createElement(this.state.dependencies.Metabox, null)
-                    )
+                    <div className='jsx-view'>
+                        <this.state.dependencies.Metabox />
+                    </div>
                 );
             }
         });
 
-        React.render(React.createElement(View, null) , document.getElementById(stacklaWp.admin.config.wpMetaboxId));
+        React.render(<View /> , document.getElementById(stacklaWp.admin.config.wpMetaboxId));
     };
 }(window));

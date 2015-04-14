@@ -4,27 +4,26 @@
 
     window.stacklaWp.admin.metabox =
     {
-        components:{},
-        views:{},
-        config:
+        data:false,
+        handler:false,
+        run:function(callback)
         {
-            viewContainer:'#stackla-metabox',
-            network:
+            /**
+            *   Runs code required for rendering the metabox;
+            *   @param {callback} a callback function to render the view;
+            *   @return void;
+            */
+
+            if(!$(stacklaWp.admin.config.wpMetabox).length) return;
+
+            var $wpMetabox = $(stacklaWp.admin.config.wpMetabox);
+            this.data = $wpMetabox.data('stackla');
+            this.handler = $wpMetabox.data('handler');
+
+            if(typeof callback == 'function')
             {
-                twitter:['username' , 'hashtag'],
-                facebook:['page' , 'search'],
-                instagram:['user' , 'hashtag'],
-                youtube:['user' , 'search']
-            },
-            sorting:['latest' , 'greatest' , 'votes'],
-            media:['text-only' , 'images' , 'video']
-        },
-        existingData:false,
-        run:function()
-        {
-            if(!$(this.config.viewContainer).length) return;
-            this.existingData = $(this.config.viewContainer).data('stackla');
-            this.views.StacklaWP();
+                callback();
+            }
         }
     };
 }());
