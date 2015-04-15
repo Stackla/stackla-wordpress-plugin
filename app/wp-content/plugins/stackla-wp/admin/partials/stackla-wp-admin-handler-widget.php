@@ -6,5 +6,5 @@
 
     $widget = new Stackla_WP_Widget(false);
     $widget->validate($_POST);
-    echo json_encode($widget->errors);
+    echo json_encode(array('errors' => $widget->errors));
 ?>

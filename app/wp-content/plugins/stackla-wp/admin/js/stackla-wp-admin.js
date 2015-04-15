@@ -29864,7 +29864,6 @@ module.exports = warning;
 (function(window)
 {
     'use strict';
-
     window.stacklaWp.admin.config =
     {
         wpMetabox:'#stackla-metabox',
@@ -29880,6 +29879,35 @@ module.exports = warning;
         media:['text-only' , 'images' , 'video']
     };
 }(window));
+
+/*
+    Polyfills
+*/
+
+(function(){
+
+  if ("performance" in window === false) {
+      window.performance = {};
+  }
+  
+  Date.now = (Date.now || function () {  // thanks IE8
+      return new Date().getTime();
+  });
+ 
+  if ("now" in window.performance === false){
+    
+    var nowOffset = Date.now();
+    
+    if (performance.timing && performance.timing.navigationStart){
+      nowOffset = performance.timing.navigationStart;
+    }
+ 
+    window.performance.now = function now(){
+      return Date.now() - nowOffset;
+    };
+  }
+ 
+})();
 (function()
 {
     'use strict';
@@ -29888,25 +29916,55 @@ module.exports = warning;
     {displayName: "Filter",
         propTypes:
         {
-            key:React.PropTypes.number
+            key:React.PropTypes.number,
+            id:React.PropTypes.number,
         },
         getInitialState:function()
         {
             return {
                 id:this.props.id,
                 name:'',
-                network:'',
+                network:[],
                 media:[],
-                sorting:''
+                sorting:'latest',
+                errors:false
             }
         },
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value});
         },
-        handleNetworkChange:function(e)
+        handleNetworkCheck:function(e)
         {
-            this.setState({network:e.target.value});
+            var copy = this.state.network.slice();
+            var index = copy.indexOf(e.target.value);
+
+            if(e.target.checked === true)
+            {
+                if(index <= -1)
+                {
+                    copy.push(e.target.value);
+
+                    this.setState(
+                    {
+                        network:copy
+                    });
+                }
+            }
+            else
+            {
+                if(index > -1)
+                {
+                    copy.splice(index , 1);
+
+                    this.setState(
+                    {
+                        network:copy
+                    });
+                }
+            }
+
+
         },
         handleMediaCheck:function(e)
         {
@@ -29944,63 +30002,98 @@ module.exports = warning;
         },
         render:function()
         {
+            console.log(this.state.network);
             return (
-                React.createElement("div", {className: "stackla-widget-filter", key: this.props.key}, 
-                    React.createElement("fieldset", {className: "term-name"}, 
-                        React.createElement("label", null, 
-                            "Filter name"
-                        ), 
-                        React.createElement("input", {type: "text", className: "widefat", onChange: this.handleNameChange})
-                    ), 
-                    React.createElement("fieldset", null, 
-                        React.createElement("label", null, 
-                            "Network"
-                        ), 
-                        React.createElement("select", {onChange: this.handleNetworkChange}, 
-                            React.createElement("option", null), 
-                            React.createElement("option", {value: "twitter"}, "Twitter"), 
-                            React.createElement("option", {value: "facebook"}, "Facebook"), 
-                            React.createElement("option", {value: "instagram"}, "Instagram"), 
-                            React.createElement("option", {value: "youtube"}, "YouTube")
-                        )
-                    ), 
-                     React.createElement("fieldset", null, 
-                        React.createElement("label", null, 
-                            "Media"
+                React.createElement("div", {className: "stackla-block"}, 
+                    React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
+                        React.createElement("fieldset", {className: "term-name"}, 
+                            React.createElement("label", null, 
+                                "Filter name"
+                            ), 
+                            React.createElement("input", {type: "text", className: "widefat", onChange: this.handleNameChange})
                         ), 
                         React.createElement("fieldset", null, 
-                            React.createElement("input", {type: "checkbox", value: "text-only", onChange: this.handleMediaCheck}), 
-                            React.createElement("label", {className: "checkbox"}, 
-                                "Text-only"
+                            React.createElement("label", null, 
+                                "Network"
+                            ), 
+                            React.createElement("fieldset", null, 
+                                React.createElement("input", {type: "checkbox", value: "twitter", onChange: this.handleNetworkCheck}), 
+                                React.createElement("label", {className: "checkbox"}, 
+                                    "Twitter"
+                                )
+                            ), 
+                            React.createElement("fieldset", null, 
+                                React.createElement("input", {type: "checkbox", value: "facebook", onChange: this.handleNetworkCheck}), 
+                                React.createElement("label", {className: "checkbox"}, 
+                                    "Facebook"
+                                )
+                            ), 
+                            React.createElement("fieldset", null, 
+                                React.createElement("input", {type: "checkbox", value: "instagram", onChange: this.handleNetworkCheck}), 
+                                React.createElement("label", {className: "checkbox"}, 
+                                    "Instagram"
+                                )
+                            ), 
+                            React.createElement("fieldset", null, 
+                                React.createElement("input", {type: "checkbox", value: "youtube", onChange: this.handleNetworkCheck}), 
+                                React.createElement("label", {className: "checkbox"}, 
+                                    "YouTube"
+                                )
                             )
                         ), 
-                        React.createElement("fieldset", null, 
-                            React.createElement("input", {type: "checkbox", value: "images", onChange: this.handleMediaCheck}), 
-                            React.createElement("label", {className: "checkbox"}, 
-                                "Images"
+                         React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                "Media"
+                            ), 
+                            React.createElement("fieldset", null, 
+                                React.createElement("input", {type: "checkbox", value: "text-only", onChange: this.handleMediaCheck}), 
+                                React.createElement("label", {className: "checkbox"}, 
+                                    "Text-only"
+                                )
+                            ), 
+                            React.createElement("fieldset", null, 
+                                React.createElement("input", {type: "checkbox", value: "images", onChange: this.handleMediaCheck}), 
+                                React.createElement("label", {className: "checkbox"}, 
+                                    "Images"
+                                )
+                            ), 
+                            React.createElement("fieldset", null, 
+                                React.createElement("input", {type: "checkbox", value: "video", onChange: this.handleMediaCheck}), 
+                                React.createElement("label", {className: "checkbox"}, 
+                                    "Video"
+                                )
                             )
-                        ), 
-                        React.createElement("fieldset", null, 
-                            React.createElement("input", {type: "checkbox", value: "video", onChange: this.handleMediaCheck}), 
-                            React.createElement("label", {className: "checkbox"}, 
-                                "Video"
+                         ), 
+                         React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                "Sorting"
+                            ), 
+                            React.createElement("select", {value: this.state.sorting, onChange: this.handleSortingChange}, 
+                                React.createElement("option", {value: "latest"}, 
+                                    "Latest"
+                                ), 
+                                React.createElement("option", {value: "greatest"}, 
+                                    "Greatest"
+                                ), 
+                                React.createElement("option", {value: "votes"}, 
+                                    "Votes"
+                                )
                             )
-                        )
+                         )
                      ), 
-                     React.createElement("fieldset", null, 
-                        React.createElement("label", null, 
-                            "Sorting"
-                        ), 
-                        React.createElement("select", {onChange: this.handleSortingChange}, 
-                            React.createElement("option", null), 
-                            React.createElement("option", {value: "latest"}, 
-                                "Latest"
+                     React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
+                        React.createElement("ul", null, 
+                            React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
+                                (this.state.errors.name) ? this.state.errors.name : ''
                             ), 
-                            React.createElement("option", {value: "greatest"}, 
-                                "Greatest"
+                            React.createElement("li", {className: (this.state.errors.media) ? '' : 'hide'}, 
+                                (this.state.errors.media) ? this.state.errors.media : ''
                             ), 
-                            React.createElement("option", {value: "votes"}, 
-                                "Votes"
+                            React.createElement("li", {className: (this.state.errors.network) ? '' : 'hide'}, 
+                                (this.state.errors.network) ? this.state.errors.network : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.sorting) ? '' : 'hide'}, 
+                                (this.state.errors.sorting) ? this.state.errors.sorting : ''
                             )
                         )
                      )
@@ -30008,6 +30101,27 @@ module.exports = warning;
             );
         }
     });
+}());
+(function()
+{
+    'use strict';
+
+    window.stacklaWp.admin.components.InputError = React.createClass(
+    {displayName: "InputError",
+        propTypes:
+        {
+            errorMessage:React.PropTypes.oneOfType([React.PropTypes.string , React.PropTypes.bool])
+        },
+        render:function()
+        {
+            return (
+                React.createElement("div", {className: this.props.errorMessage ? '' : 'hide'}, 
+                    this.props.errorMessage
+                )
+            );
+        }
+    });
+
 }());
 (function()
 {
@@ -30028,6 +30142,12 @@ module.exports = warning;
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
                     WidgetFilters:stacklaWp.admin.components.WidgetFilters
+                },
+                errors:
+                {
+                    title:false,
+                    terms:[],
+                    filters:[]
                 }
             }
         },
@@ -30046,7 +30166,7 @@ module.exports = warning;
             e.preventDefault();
             this.refs.filter.removeFilter();
         },
-        save:function(e)
+        compileData:function(e)
         {
             e.preventDefault();
 
@@ -30078,8 +30198,13 @@ module.exports = warning;
                 'terms':terms,
                 'filters':filters
             };
-
+            console.log('raw data:');
             console.log(data);
+            this.validate(data);
+        },
+        validate:function(data)
+        {
+            var self = this;
 
             $.ajax(
             {
@@ -30089,14 +30214,49 @@ module.exports = warning;
                 data:data
             }).done(function(response)
             {
-                console.log('done!');
+                console.log('raw response:');
                 console.log(response);
+                if(typeof response == 'object')
+                {
+                   self.handleErrors(response.errors);
+                }
             }).fail(function(xhr , status , error)
             {
                 console.log('fail!');
                 console.log(error);
             });
-    
+        },
+        handleErrors:function(errors)
+        {
+            var termsErrors = errors.terms;
+            var filtersErrors = errors.filters;
+            var termsErrorsLength = termsErrors.length;
+            var filtersErrorsLength = filtersErrors.length;
+            var termsRefs = this.refs.terms.refs;
+            var filtersRefs = this.refs.filters.refs;
+            var f , t;
+
+            for(f = 0 ; f < filtersErrorsLength ; f ++)
+            {
+                filtersRefs[f].setState(
+                {
+                    errors:filtersErrors[f]
+                });
+            }
+
+            for(t = 0 ; t < termsErrorsLength ; t ++)
+            {
+                termsRefs[t].setState(
+                {
+                    errors:termsErrors[t]
+                });
+            }
+
+            this.refs.title.setState({error:errors.title});
+
+        },
+        post:function(e)
+        {
         },
         render:function()
         {
@@ -30112,7 +30272,7 @@ module.exports = warning;
                     React.createElement("section", {className: "filters"}, 
                         React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters"})
                     ), 
-                    React.createElement("a", {href: "#", onClick: this.save}, "Save")
+                    React.createElement("a", {href: "#", onClick: this.compileData}, "Save")
                 )
             );
         }
@@ -30129,6 +30289,7 @@ module.exports = warning;
     {displayName: "Term",
         propTypes:
         {
+            errors:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
             twitter:React.PropTypes.array,
             facebook:React.PropTypes.array,
             instagram:React.PropTypes.array,
@@ -30142,7 +30303,8 @@ module.exports = warning;
                 name:'',
                 network:'',
                 term:'',
-                termValue:''
+                termValue:'',
+                errors:false
             }
         },
         handleNameChange:function(e)
@@ -30175,8 +30337,8 @@ module.exports = warning;
             this.setState(
             {
                 network:value,
-                term:false,
-                termValue:false
+                term:'',
+                termValue:''
             });
         },
         /**
@@ -30196,7 +30358,7 @@ module.exports = warning;
             this.setState(
             {
                 term:split[1],
-                termValue:false
+                termValue:''
             });
         },
         handleTermValueChange:function(e)
@@ -30206,128 +30368,146 @@ module.exports = warning;
         render:function()
         {
             return (
-                React.createElement("div", {className: "stackla-widget-term", key: this.props.key}, 
-                    React.createElement("fieldset", {className: "term-name"}, 
-                        React.createElement("label", null, 
-                            "Term name"
+                React.createElement("div", {className: "stackla-block"}, 
+                    React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
+                        React.createElement("fieldset", {className: "term-name"}, 
+                            React.createElement("label", null, 
+                                "Term name"
+                            ), 
+                            React.createElement("input", {type: "text", className: "widefat", onChange: this.handleNameChange})
                         ), 
-                        React.createElement("input", {type: "text", className: "widefat", onChange: this.handleNameChange})
-                    ), 
-                    React.createElement("fieldset", null, 
-                        React.createElement("label", null, 
-                            "Choose a network"
+                        React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                "Choose a network"
+                            ), 
+                            React.createElement("select", {onChange: this.handleNetworkChange}, 
+                                React.createElement("option", null), 
+                                React.createElement("option", {value: "twitter"}, "Twitter"), 
+                                React.createElement("option", {value: "facebook"}, "Facebook"), 
+                                React.createElement("option", {value: "instagram"}, "Instagram"), 
+                                React.createElement("option", {value: "youtube"}, "YouTube")
+                            )
                         ), 
-                        React.createElement("select", {onChange: this.handleNetworkChange}, 
-                            React.createElement("option", null), 
-                            React.createElement("option", {value: "twitter"}, "Twitter"), 
-                            React.createElement("option", {value: "facebook"}, "Facebook"), 
-                            React.createElement("option", {value: "instagram"}, "Instagram"), 
-                            React.createElement("option", {value: "youtube"}, "YouTube")
+                        React.createElement("fieldset", {ref: "termRules"}, 
+                            React.createElement("label", {className: "hide", ref: "termRulesLabel"}, 
+                                "Choose a term"
+                            ), 
+                            React.createElement("select", {className: "hide", ref: "twitter", onChange: this.handleTermChange}, 
+                                React.createElement("option", null), 
+                                
+                                    this.props.twitter.map(function(option , i)
+                                    {
+                                        return React.createElement("option", {key: i, value: 'twitter-' + option}, option)
+                                    })
+                                
+                            ), 
+                            React.createElement("select", {className: "hide", ref: "facebook", onChange: this.handleTermChange}, 
+                                React.createElement("option", null), 
+                                
+                                    this.props.facebook.map(function(option , i)
+                                    {
+                                        return React.createElement("option", {key: i, value: 'facebook-' + option}, option)
+                                    })
+                                
+                            ), 
+                            React.createElement("select", {className: "hide", ref: "instagram", onChange: this.handleTermChange}, 
+                                React.createElement("option", null), 
+                                
+                                    this.props.instagram.map(function(option , i)
+                                    {
+                                        return React.createElement("option", {key: i, value: 'instagram-' + option}, option)
+                                    })
+                                
+                            ), 
+                            React.createElement("select", {className: "hide", ref: "youtube", onChange: this.handleTermChange}, 
+                                React.createElement("option", null), 
+                                
+                                    this.props.youtube.map(function(option , i)
+                                    {
+                                        return React.createElement("option", {key: i, value: 'youtube-' + option}, option)
+                                    })
+                                
+                            )
+                        ), 
+                        React.createElement("fieldset", {ref: "termValue", className: "term-values"}, 
+                            React.createElement("fieldset", {ref: "twitter-username", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "Twitter Username"
+                                ), 
+                                React.createElement("span", {className: "decorator"}, 
+                                    "@"
+                                ), 
+                                React.createElement("input", {type: "text", maxLength: "15", ref: "twitterUsernameInput", onChange: this.handleTermValueChange})
+                            ), 
+                            React.createElement("fieldset", {ref: "twitter-hashtag", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "Twitter Hashtag"
+                                ), 
+                                React.createElement("span", {className: "decorator"}, 
+                                    "#"
+                                ), 
+                                React.createElement("input", {type: "text", maxLength: "129", ref: "twitterHashtagInput", onChange: this.handleTermValueChange})
+                            ), 
+                            React.createElement("fieldset", {ref: "facebook-page", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "Facebook Page URL or Facebook Page Name"
+                                ), 
+                                React.createElement("input", {type: "text", ref: "facebookPageInput", onChange: this.handleTermValueChange})
+                            ), 
+                            React.createElement("fieldset", {ref: "facebook-search", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "Facebook Search (Search for all these words)"
+                                ), 
+                                React.createElement("input", {type: "text", ref: "facebookSearchInput", onChange: this.handleTermValueChange})
+                            ), 
+                            React.createElement("fieldset", {ref: "instagram-user", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "Instagram User"
+                                ), 
+                                React.createElement("span", {className: "decorator"}, 
+                                    "@"
+                                ), 
+                                React.createElement("input", {type: "text", ref: "instagramUserInput", onChange: this.handleTermValueChange})
+                            ), 
+                            React.createElement("fieldset", {ref: "instagram-hashtag", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "Instagram Hashtag"
+                                ), 
+                                React.createElement("span", {className: "decorator"}, 
+                                    "#"
+                                ), 
+                                React.createElement("input", {type: "text", ref: "instagramHashtagInput", onChange: this.handleTermValueChange})
+                            ), 
+                            React.createElement("fieldset", {ref: "youtube-user", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "YouTube Username"
+                                ), 
+                                React.createElement("input", {type: "text", ref: "youtubeUserInput", onChange: this.handleTermValueChange})
+                            ), 
+                            React.createElement("fieldset", {ref: "youtube-search", className: "hide"}, 
+                                React.createElement("label", null, 
+                                    "YouTube Search"
+                                ), 
+                                React.createElement("input", {type: "text", ref: "youtubeSearchInput", onChange: this.handleTermValueChange})
+                            )
                         )
                     ), 
-                    React.createElement("fieldset", {ref: "termRules"}, 
-                        React.createElement("label", {className: "hide", ref: "termRulesLabel"}, 
-                            "Choose a term"
-                        ), 
-                        React.createElement("select", {className: "hide", ref: "twitter", onChange: this.handleTermChange}, 
-                            React.createElement("option", null), 
-                            
-                                this.props.twitter.map(function(option , i)
-                                {
-                                    return React.createElement("option", {key: i, value: 'twitter-' + option}, option)
-                                })
-                            
-                        ), 
-                        React.createElement("select", {className: "hide", ref: "facebook", onChange: this.handleTermChange}, 
-                            React.createElement("option", null), 
-                            
-                                this.props.facebook.map(function(option , i)
-                                {
-                                    return React.createElement("option", {key: i, value: 'facebook-' + option}, option)
-                                })
-                            
-                        ), 
-                        React.createElement("select", {className: "hide", ref: "instagram", onChange: this.handleTermChange}, 
-                            React.createElement("option", null), 
-                            
-                                this.props.instagram.map(function(option , i)
-                                {
-                                    return React.createElement("option", {key: i, value: 'instagram-' + option}, option)
-                                })
-                            
-                        ), 
-                        React.createElement("select", {className: "hide", ref: "youtube", onChange: this.handleTermChange}, 
-                            React.createElement("option", null), 
-                            
-                                this.props.youtube.map(function(option , i)
-                                {
-                                    return React.createElement("option", {key: i, value: 'youtube-' + option}, option)
-                                })
-                            
+                    React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
+                        React.createElement("ul", null, 
+                            React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
+                                (this.state.errors.name) ? this.state.errors.name : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.network) ? '' : 'hide'}, 
+                                (this.state.errors.network) ? this.state.errors.network : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.term) ? '' : 'hide'}, 
+                                (this.state.errors.term) ? this.state.errors.term : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.termValue) ? '' : 'hide'}, 
+                                (this.state.errors.termValue) ? this.state.errors.termValue : ''
+                            )
                         )
-                    ), 
-                    React.createElement("fieldset", {ref: "termValue", className: "term-values"}, 
-                        React.createElement("fieldset", {ref: "twitter-username", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "Twitter Username"
-                            ), 
-                            React.createElement("span", {className: "decorator"}, 
-                                "@"
-                            ), 
-                            React.createElement("input", {type: "text", maxLength: "15", ref: "twitterUsernameInput", onChange: this.handleTermValueChange})
-                        ), 
-                        React.createElement("fieldset", {ref: "twitter-hashtag", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "Twitter Hashtag"
-                            ), 
-                            React.createElement("span", {className: "decorator"}, 
-                                "#"
-                            ), 
-                            React.createElement("input", {type: "text", maxLength: "129", ref: "twitterHashtagInput", onChange: this.handleTermValueChange})
-                        ), 
-                        React.createElement("fieldset", {ref: "facebook-page", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "Facebook Page URL or Facebook Page Name"
-                            ), 
-                            React.createElement("input", {type: "text", ref: "facebookPageInput", onChange: this.handleTermValueChange})
-                        ), 
-                        React.createElement("fieldset", {ref: "facebook-search", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "Facebook Search (Search for all these words)"
-                            ), 
-                            React.createElement("input", {type: "text", ref: "facebookSearchInput", onChange: this.handleTermValueChange})
-                        ), 
-                        React.createElement("fieldset", {ref: "instagram-user", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "Instagram User"
-                            ), 
-                            React.createElement("span", {className: "decorator"}, 
-                                "@"
-                            ), 
-                            React.createElement("input", {type: "text", ref: "instagramUserInput", onChange: this.handleTermValueChange})
-                        ), 
-                        React.createElement("fieldset", {ref: "instagram-hashtag", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "Instagram Hashtag"
-                            ), 
-                            React.createElement("span", {className: "decorator"}, 
-                                "#"
-                            ), 
-                            React.createElement("input", {type: "text", ref: "instagramHashtagInput", onChange: this.handleTermValueChange})
-                        ), 
-                        React.createElement("fieldset", {ref: "youtube-user", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "YouTube Username"
-                            ), 
-                            React.createElement("input", {type: "text", ref: "youtubeUserInput", onChange: this.handleTermValueChange})
-                        ), 
-                        React.createElement("fieldset", {ref: "youtube-search", className: "hide"}, 
-                            React.createElement("label", null, 
-                                "YouTube Search"
-                            ), 
-                            React.createElement("input", {type: "text", ref: "youtubeSearchInput", onChange: this.handleTermValueChange})
-                        )
-                    )
+                     )
                 )
             );
         }
@@ -30341,7 +30521,6 @@ module.exports = warning;
     {displayName: "WidgetFilters",
         propTypes:
         {
-            
         },
         getInitialState:function()
         {
@@ -30376,7 +30555,7 @@ module.exports = warning;
             });
         },
         render:function()
-        {
+        {            
             var i;
 
             for(i = 0 ; i < this.state.count ; i ++)
@@ -30503,7 +30682,12 @@ module.exports = warning;
         getInitialState:function()
         {
             return {
-                value:this.props.initialTitle
+                dependencies:
+                {
+                    InputError:stacklaWp.admin.components.InputError
+                },
+                value:this.props.initialTitle,
+                error:false
             }
         },
         handleChange:function(e)
@@ -30513,15 +30697,24 @@ module.exports = warning;
         render:function()
         {
             return (
-                React.createElement("fieldset", null, 
-                    React.createElement("label", null, 
-                        "The title for your stackla widget"
+                React.createElement("div", {className: "stackla-block"}, 
+                    React.createElement("header", null, 
+                        React.createElement("h2", null, 
+                            "The title for your stackla widget"
+                        )
                     ), 
-                    React.createElement("input", {
-                        type: "text", 
-                        className: "widefat", 
-                        defaultValue: this.state.value, 
-                        onChange: this.handleChange}
+                    React.createElement("div", {className: (this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}, 
+                        React.createElement("fieldset", {className: "widget-title"}, 
+                            React.createElement("input", {
+                                type: "text", 
+                                className: "widefat", 
+                                defaultValue: this.state.value, 
+                                onChange: this.handleChange}
+                            )
+                        )
+                    ), 
+                    React.createElement("div", {className: (this.state.error) ? 'stackla-error-message' : 'hide'}, 
+                        React.createElement(this.state.dependencies.InputError, {errorMessage: this.state.error})
                     )
                 )
             );

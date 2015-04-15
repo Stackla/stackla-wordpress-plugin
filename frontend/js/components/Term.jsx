@@ -9,6 +9,7 @@
     {
         propTypes:
         {
+            errors:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
             twitter:React.PropTypes.array,
             facebook:React.PropTypes.array,
             instagram:React.PropTypes.array,
@@ -22,7 +23,8 @@
                 name:'',
                 network:'',
                 term:'',
-                termValue:''
+                termValue:'',
+                errors:false
             }
         },
         handleNameChange:function(e)
@@ -55,8 +57,8 @@
             this.setState(
             {
                 network:value,
-                term:false,
-                termValue:false
+                term:'',
+                termValue:''
             });
         },
         /**
@@ -76,7 +78,7 @@
             this.setState(
             {
                 term:split[1],
-                termValue:false
+                termValue:''
             });
         },
         handleTermValueChange:function(e)
@@ -86,128 +88,146 @@
         render:function()
         {
             return (
-                <div className='stackla-widget-term' key={this.props.key}>
-                    <fieldset className='term-name'>
-                        <label>
-                            Term name
-                        </label>
-                        <input type='text' className='widefat' onChange={this.handleNameChange}/>
-                    </fieldset>
-                    <fieldset>
-                        <label>
-                            Choose a network
-                        </label>
-                        <select onChange={this.handleNetworkChange}>
-                            <option></option>
-                            <option value='twitter'>Twitter</option>
-                            <option value='facebook'>Facebook</option>
-                            <option value='instagram'>Instagram</option>
-                            <option value='youtube'>YouTube</option>
-                        </select>
-                    </fieldset>
-                    <fieldset ref='termRules'>
-                        <label className='hide' ref='termRulesLabel'>
-                            Choose a term
-                        </label>
-                        <select className='hide' ref='twitter' onChange={this.handleTermChange}>
-                            <option></option>
-                            {
-                                this.props.twitter.map(function(option , i)
+                <div className='stackla-block'>
+                    <div className={(this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}>
+                        <fieldset className='term-name'>
+                            <label>
+                                Term name
+                            </label>
+                            <input type='text' className='widefat' onChange={this.handleNameChange}/>
+                        </fieldset>
+                        <fieldset>
+                            <label>
+                                Choose a network
+                            </label>
+                            <select onChange={this.handleNetworkChange}>
+                                <option></option>
+                                <option value='twitter'>Twitter</option>
+                                <option value='facebook'>Facebook</option>
+                                <option value='instagram'>Instagram</option>
+                                <option value='youtube'>YouTube</option>
+                            </select>
+                        </fieldset>
+                        <fieldset ref='termRules'>
+                            <label className='hide' ref='termRulesLabel'>
+                                Choose a term
+                            </label>
+                            <select className='hide' ref='twitter' onChange={this.handleTermChange}>
+                                <option></option>
                                 {
-                                    return <option key={i} value={'twitter-' + option}>{option}</option>
-                                })
-                            }
-                        </select>
-                        <select className='hide' ref='facebook' onChange={this.handleTermChange}>
-                            <option></option>
-                            {
-                                this.props.facebook.map(function(option , i)
+                                    this.props.twitter.map(function(option , i)
+                                    {
+                                        return <option key={i} value={'twitter-' + option}>{option}</option>
+                                    })
+                                }
+                            </select>
+                            <select className='hide' ref='facebook' onChange={this.handleTermChange}>
+                                <option></option>
                                 {
-                                    return <option key={i} value={'facebook-' + option}>{option}</option>
-                                })
-                            }
-                        </select>
-                        <select className='hide' ref='instagram' onChange={this.handleTermChange}>
-                            <option></option>
-                            {
-                                this.props.instagram.map(function(option , i)
+                                    this.props.facebook.map(function(option , i)
+                                    {
+                                        return <option key={i} value={'facebook-' + option}>{option}</option>
+                                    })
+                                }
+                            </select>
+                            <select className='hide' ref='instagram' onChange={this.handleTermChange}>
+                                <option></option>
                                 {
-                                    return <option key={i} value={'instagram-' + option}>{option}</option>
-                                })
-                            }
-                        </select>
-                        <select className='hide' ref='youtube' onChange={this.handleTermChange}>
-                            <option></option>
-                            {
-                                this.props.youtube.map(function(option , i)
+                                    this.props.instagram.map(function(option , i)
+                                    {
+                                        return <option key={i} value={'instagram-' + option}>{option}</option>
+                                    })
+                                }
+                            </select>
+                            <select className='hide' ref='youtube' onChange={this.handleTermChange}>
+                                <option></option>
                                 {
-                                    return <option key={i} value={'youtube-' + option}>{option}</option>
-                                })
-                            }
-                        </select>
-                    </fieldset>
-                    <fieldset ref='termValue' className='term-values'>
-                        <fieldset ref='twitter-username' className='hide'>
-                            <label>
-                                Twitter Username
-                            </label>
-                            <span className='decorator'>
-                                @
-                            </span>
-                            <input type='text' maxLength='15' ref='twitterUsernameInput' onChange={this.handleTermValueChange}/>
+                                    this.props.youtube.map(function(option , i)
+                                    {
+                                        return <option key={i} value={'youtube-' + option}>{option}</option>
+                                    })
+                                }
+                            </select>
                         </fieldset>
-                        <fieldset ref='twitter-hashtag' className='hide'>
-                            <label>
-                                Twitter Hashtag
-                            </label>
-                            <span className='decorator'>
-                                #
-                            </span>
-                            <input type='text' maxLength='129' ref='twitterHashtagInput' onChange={this.handleTermValueChange}/>
+                        <fieldset ref='termValue' className='term-values'>
+                            <fieldset ref='twitter-username' className='hide'>
+                                <label>
+                                    Twitter Username
+                                </label>
+                                <span className='decorator'>
+                                    @
+                                </span>
+                                <input type='text' maxLength='15' ref='twitterUsernameInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
+                            <fieldset ref='twitter-hashtag' className='hide'>
+                                <label>
+                                    Twitter Hashtag
+                                </label>
+                                <span className='decorator'>
+                                    #
+                                </span>
+                                <input type='text' maxLength='129' ref='twitterHashtagInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
+                            <fieldset ref='facebook-page' className='hide'>
+                                <label>
+                                    Facebook Page URL or Facebook Page Name
+                                </label>
+                                <input type='text' ref='facebookPageInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
+                            <fieldset ref='facebook-search' className='hide'>
+                                <label>
+                                    Facebook Search (Search for all these words)
+                                </label>
+                                <input type='text' ref='facebookSearchInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
+                            <fieldset ref='instagram-user' className='hide'>
+                                <label>
+                                    Instagram User
+                                </label>
+                                <span className='decorator'>
+                                    @
+                                </span>
+                                <input type='text' ref='instagramUserInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
+                            <fieldset ref='instagram-hashtag' className='hide'>
+                                <label>
+                                    Instagram Hashtag
+                                </label>
+                                <span className='decorator'>
+                                    #
+                                </span>
+                                <input type='text' ref='instagramHashtagInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
+                            <fieldset ref='youtube-user' className='hide'>
+                                <label>
+                                    YouTube Username
+                                </label>
+                                <input type='text' ref='youtubeUserInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
+                            <fieldset ref='youtube-search' className='hide'>
+                                <label>
+                                    YouTube Search
+                                </label>
+                                <input type='text' ref='youtubeSearchInput' onChange={this.handleTermValueChange}/>
+                            </fieldset>
                         </fieldset>
-                        <fieldset ref='facebook-page' className='hide'>
-                            <label>
-                                Facebook Page URL or Facebook Page Name
-                            </label>
-                            <input type='text' ref='facebookPageInput' onChange={this.handleTermValueChange}/>
-                        </fieldset>
-                        <fieldset ref='facebook-search' className='hide'>
-                            <label>
-                                Facebook Search (Search for all these words)
-                            </label>
-                            <input type='text' ref='facebookSearchInput' onChange={this.handleTermValueChange}/>
-                        </fieldset>
-                        <fieldset ref='instagram-user' className='hide'>
-                            <label>
-                                Instagram User
-                            </label>
-                            <span className='decorator'>
-                                @
-                            </span>
-                            <input type='text' ref='instagramUserInput' onChange={this.handleTermValueChange}/>
-                        </fieldset>
-                        <fieldset ref='instagram-hashtag' className='hide'>
-                            <label>
-                                Instagram Hashtag
-                            </label>
-                            <span className='decorator'>
-                                #
-                            </span>
-                            <input type='text' ref='instagramHashtagInput' onChange={this.handleTermValueChange}/>
-                        </fieldset>
-                        <fieldset ref='youtube-user' className='hide'>
-                            <label>
-                                YouTube Username
-                            </label>
-                            <input type='text' ref='youtubeUserInput' onChange={this.handleTermValueChange}/>
-                        </fieldset>
-                        <fieldset ref='youtube-search' className='hide'>
-                            <label>
-                                YouTube Search
-                            </label>
-                            <input type='text' ref='youtubeSearchInput' onChange={this.handleTermValueChange}/>
-                        </fieldset>
-                    </fieldset>
+                    </div>
+                    <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
+                        <ul>
+                            <li className={(this.state.errors.name) ? '' : 'hide'}>
+                                {(this.state.errors.name) ? this.state.errors.name : ''}
+                            </li>
+                            <li className={(this.state.errors.network) ? '' : 'hide'}>
+                                {(this.state.errors.network) ? this.state.errors.network : ''}
+                            </li>
+                            <li className={(this.state.errors.term) ? '' : 'hide'}>
+                                {(this.state.errors.term) ? this.state.errors.term : ''}
+                            </li>
+                            <li className={(this.state.errors.termValue) ? '' : 'hide'}>
+                                {(this.state.errors.termValue) ? this.state.errors.termValue : ''}
+                            </li>
+                        </ul>
+                     </div>
                 </div>
             );
         }

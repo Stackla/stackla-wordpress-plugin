@@ -6,7 +6,6 @@
     {
         propTypes:
         {
-            
         },
         getInitialState:function()
         {
@@ -41,7 +40,7 @@
             });
         },
         render:function()
-        {
+        {            
             var i;
 
             for(i = 0 ; i < this.state.count ; i ++)

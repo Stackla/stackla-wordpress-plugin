@@ -11,6 +11,7 @@
  * @package    Stackla_WP
  * @subpackage Stackla_WP/admin/partials
  */
+    $widget = new Stackla_WP_Widget;
     $settings = new Stackla_WP_Settings;
     $post_type_options = $settings->get_post_type_options();
     $user_settings = $settings->get_user_settings();
@@ -36,7 +37,7 @@
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
         <div class='wrap'>
             <h2>Stackla For WordPress</h2>
-            <form id='stackla-settings-form' method='POST' action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php">
+            <form id='stackla-settings-form' class='settings-form' method='POST' action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php">
                 <fieldset>
                     <label>
                         Your API Key

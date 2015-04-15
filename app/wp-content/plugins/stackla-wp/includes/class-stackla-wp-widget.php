@@ -36,7 +36,7 @@ class Stackla_WP_Widget {
     /**
     *   -- CONSTRUCTOR --
     *   Gets the existing widget data for a post;
-    *   @param {$id[optional]} a post id;
+    *   @param {$id:optional} a post id;
     *   @return void;
     */
 
@@ -63,47 +63,54 @@ class Stackla_WP_Widget {
         return $this->data;
     }
 
+    /**
+    *   Validates a string;
+    *   @param {$var} a string;
+    *   @return boolean;
+    */
+
     protected function validate_string($var)
     {
-        if(!$var || $var == '') return false;
-        return true;
+        return (!$var || $var == '' || strlen($var) <= 0) ? false : true;
     }
+
+    /**
+    *   Validates an array;
+    *   @param {$var} an array;
+    *   @return boolean;
+    */
 
     protected function validate_array($var)
     {
         return (!is_array($var) || empty($var)) ? false : true;
     }
 
-    public function validate($data)
+    /**
+    *   Validates the widget title field;
+    *   Pushes the result into the $this->errors array;
+    *   @param {$data} an array of data passed by the client;
+    *   @return void;
+    */
+
+    protected function validate_widget_title($data)
     {
-        /*
-            Validate higher level values...
-        */
+        $this->errors['title'] = false;
 
         if($this->validate_string($data['title']) === false)
         {
-            $this->errors[] = array('title' => $this->error_title);
+            $this->errors['title'] = $this->error_title;
         }
+    }
 
-        if(!isset($data['terms']) || $this->validate_array($data['terms']) === false)
-        {
-            $this->errors[] = array('terms' => $this->error_terms);
-        }
+    /**
+    *   Validates the widget's terms;
+    *   Pushes the result into the $this->errors array;
+    *   @param {$data} an array of data passed by the client;
+    *   @return void;
+    */
 
-        if(!isset($data['filters']) || $this->validate_array($data['filters']) === false)
-        {
-            $this->errors[] = array('filters' => $this->error_filters);
-        }
-
-        if(!empty($this->errors))
-        {
-            return false;
-        }
-
-        /*
-            Validate terms...
-        */
-
+    public function validate_widget_terms($data)
+    {
         $this->errors['terms'] = array();
 
         foreach($data['terms'] as $term)
@@ -139,12 +146,28 @@ class Stackla_WP_Widget {
             {
                 $this->errors['terms'][$term['id']]['termValue'] = $this->error_term_value;
             }
+
+            if(
+                $this->errors['terms'][$term['id']]['name'] === false &&
+                $this->errors['terms'][$term['id']]['network'] === false &&
+                $this->errors['terms'][$term['id']]['term'] === false &&
+                $this->errors['terms'][$term['id']]['termValue'] === false
+            )
+            {
+                $this->errors['terms'][$term['id']] = false;
+            }
         }
+    }
 
-        /*
-            Validate filters...
-        */
+    /**
+    *   Validates the widget's filters;
+    *   Pushes the result into the $this->errors array;
+    *   @param {$data} an array of data passed by the client;
+    *   @return void;
+    */
 
+    protected function validate_widget_filters($data)
+    {
         $this->errors['filters'] = array();
 
         foreach($data['filters'] as $filter)
@@ -161,16 +184,6 @@ class Stackla_WP_Widget {
                 $this->errors['filters'][$filter['id']]['name'] = $this->error_filter_name;
             }
 
-            if($this->validate_string($filter['network']) === false)
-            {
-                $this->errors['filters'][$filter['id']]['network'] = $this->error_network;
-            }
-
-            if(!in_array($filter['network'] , $this->allowed_networks))
-            {
-                $this->errors['filters'][$filter['id']]['network'] = $this->error_illegal_network;
-            }
-
             if(isset($filter['media']) && $this->validate_array($filter['media']))
             {
                 foreach($filter['media'] as $media)
@@ -178,6 +191,17 @@ class Stackla_WP_Widget {
                     if(!in_array($media , $this->allowed_media))
                     {
                         $this->errors['filters'][$filter['id']]['media'] = $this->error_illegal_media;
+                    }
+                }
+            }
+
+            if(isset($filter['network']) && $this->validate_array($filter['network']))
+            {
+                foreach($filter['network'] as $network)
+                {
+                    if(!in_array($network , $this->allowed_networks))
+                    {
+                        $this->errors['filters'][$filter['id']]['network'] = $this->error_illegal_network;
                     }
                 }
             }
@@ -191,6 +215,29 @@ class Stackla_WP_Widget {
             {
                 $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_illegal_sorting;
             }
+
+            if(
+                $this->errors['filters'][$filter['id']]['name'] === false &&
+                $this->errors['filters'][$filter['id']]['network'] === false &&
+                $this->errors['filters'][$filter['id']]['media'] === false &&
+                $this->errors['filters'][$filter['id']]['sorting'] === false
+            )
+            {
+                $this->errors['filters'][$filter['id']] = false;
+            }
         }
+    }
+
+    /**
+    *   Runs all validation methods;
+    *   @param {$data} an array of data passed by the client;
+    *   @return void;
+    */
+
+    public function validate($data)
+    {
+        $this->validate_widget_title($data);
+        $this->validate_widget_terms($data);
+        $this->validate_widget_filters($data);        
     }
 }

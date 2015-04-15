@@ -11,7 +11,12 @@
         getInitialState:function()
         {
             return {
-                value:this.props.initialTitle
+                dependencies:
+                {
+                    InputError:stacklaWp.admin.components.InputError
+                },
+                value:this.props.initialTitle,
+                error:false
             }
         },
         handleChange:function(e)
@@ -21,17 +26,26 @@
         render:function()
         {
             return (
-                <fieldset>
-                    <label>
-                        The title for your stackla widget
-                    </label>
-                    <input 
-                        type='text' 
-                        className='widefat' 
-                        defaultValue={this.state.value}
-                        onChange={this.handleChange}
-                    />
-                </fieldset>
+                <div className='stackla-block'>
+                    <header>
+                        <h2>
+                            The title for your stackla widget
+                        </h2>
+                    </header>
+                    <div className={(this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}>
+                        <fieldset className='widget-title'>
+                            <input 
+                                type='text' 
+                                className='widefat' 
+                                defaultValue={this.state.value}
+                                onChange={this.handleChange}
+                            />
+                        </fieldset>
+                    </div>
+                    <div className={(this.state.error) ? 'stackla-error-message' : 'hide'}>
+                        <this.state.dependencies.InputError errorMessage={this.state.error} />
+                    </div>
+                </div>
             );
         }
     });

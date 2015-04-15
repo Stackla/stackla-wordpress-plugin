@@ -17,6 +17,12 @@
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
                     WidgetFilters:stacklaWp.admin.components.WidgetFilters
+                },
+                errors:
+                {
+                    title:false,
+                    terms:[],
+                    filters:[]
                 }
             }
         },
@@ -35,7 +41,7 @@
             e.preventDefault();
             this.refs.filter.removeFilter();
         },
-        save:function(e)
+        compileData:function(e)
         {
             e.preventDefault();
 
@@ -67,8 +73,13 @@
                 'terms':terms,
                 'filters':filters
             };
-
+            console.log('raw data:');
             console.log(data);
+            this.validate(data);
+        },
+        validate:function(data)
+        {
+            var self = this;
 
             $.ajax(
             {
@@ -78,14 +89,49 @@
                 data:data
             }).done(function(response)
             {
-                console.log('done!');
+                console.log('raw response:');
                 console.log(response);
+                if(typeof response == 'object')
+                {
+                   self.handleErrors(response.errors);
+                }
             }).fail(function(xhr , status , error)
             {
                 console.log('fail!');
                 console.log(error);
             });
-    
+        },
+        handleErrors:function(errors)
+        {
+            var termsErrors = errors.terms;
+            var filtersErrors = errors.filters;
+            var termsErrorsLength = termsErrors.length;
+            var filtersErrorsLength = filtersErrors.length;
+            var termsRefs = this.refs.terms.refs;
+            var filtersRefs = this.refs.filters.refs;
+            var f , t;
+
+            for(f = 0 ; f < filtersErrorsLength ; f ++)
+            {
+                filtersRefs[f].setState(
+                {
+                    errors:filtersErrors[f]
+                });
+            }
+
+            for(t = 0 ; t < termsErrorsLength ; t ++)
+            {
+                termsRefs[t].setState(
+                {
+                    errors:termsErrors[t]
+                });
+            }
+
+            this.refs.title.setState({error:errors.title});
+
+        },
+        post:function(e)
+        {
         },
         render:function()
         {
@@ -96,12 +142,12 @@
                         ref='title'
                     />
                     <section className='terms'>
-                        <this.state.dependencies.WidgetTerms ref='terms' />
+                        <this.state.dependencies.WidgetTerms ref='terms'/>
                     </section>
                     <section className='filters'>
-                        <this.state.dependencies.WidgetFilters ref='filters' />
+                        <this.state.dependencies.WidgetFilters ref='filters'/>
                     </section>
-                    <a href='#' onClick={this.save}>Save</a>
+                    <a href='#' onClick={this.compileData}>Save</a>
                 </div>
             );
         }

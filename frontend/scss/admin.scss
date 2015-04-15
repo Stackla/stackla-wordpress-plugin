@@ -7,7 +7,7 @@
     padding:5px 0 0;
 }
 
-form 
+.settings-form 
 {
     p 
     {
@@ -47,10 +47,7 @@ form
 
 #stackla-metabox
 {
-    fieldset
-    {
-        margin-bottom:20px;
-    }
+
     label 
     {
         font-weight: bold;
@@ -92,13 +89,15 @@ form
             }
         }
     }
-    .stackla-widget-term , .stackla-widget-filter
+    .stackla-widget-section
     {
+        padding:10px;
+        border:1px solid white;
         fieldset
         {
             display: inline-block;
             margin-right:20px;
-            margin-bottom:10px;
+            
             label.hide 
             {
                 display:none;
@@ -109,14 +108,18 @@ form
             }
             label.checkbox
             {
+                vertical-align: top;
                 display: inline-block;
             }
         }
-        fieldset.term-name
+        fieldset.term-name , fieldset.widget-title
         {
             display:block;
         }
-
+        fieldset.term-name
+        {
+            margin-bottom:10px;
+        }
         .term-values
         {
             fieldset.hide
@@ -139,5 +142,26 @@ form
                 max-width:200px;
             }
         }
+    }
+    .stackla-block
+    {
+        margin-bottom:10px;
+    }
+    .stackla-block:last-child
+    {
+        margin:0;
+    }
+    .stackla-widget-error
+    {
+        border:1px solid lighten(red , 35%);
+        background-color:lighten(red , 40%)
+    }
+    .stackla-error-message
+    {
+        border:1px solid lighten(red , 35%);
+        border-top:0;
+        background-color:lighten(red , 35%);
+        padding:10px;
+        color:red;
     }
 }
