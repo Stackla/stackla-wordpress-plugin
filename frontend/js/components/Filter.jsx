@@ -8,15 +8,16 @@
         {
             key:React.PropTypes.number,
             id:React.PropTypes.number,
+            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
         getInitialState:function()
         {
             return {
                 id:this.props.id,
-                name:'',
-                network:[],
-                media:[],
-                sorting:'latest',
+                name:(this.props.data) ? this.props.data.name : '',
+                network:(this.props.data) ? this.props.data.network : stacklaWp.admin.config.networks,
+                media:(this.props.data) ? this.props.data.media : stacklaWp.admin.config.media,
+                sorting:(this.props.data) ? this.props.data.sorting : 'latest',
                 errors:false
             }
         },
@@ -53,8 +54,6 @@
                     });
                 }
             }
-
-
         },
         handleMediaCheck:function(e)
         {
@@ -90,8 +89,34 @@
         {
             this.setState({sorting:e.target.value});
         },
+        checkArrayValue:function(key , value)
+        {
+            if(!this.state[key].length) return false;
+
+            if(this.state[key].indexOf(value) > -1)
+            {
+                return true;
+            }
+            return false;
+        },
+        compileData:function()
+        {
+            var data = $.extend({} , this.state); 
+
+            if(!data.network || !data.network.length)
+            {
+                data.network = stacklaWp.admin.config.networks;
+            }
+            if(!data.media || !data.network.length)
+            {
+                data.media = stacklaWp.admin.config.media;
+            }
+
+            return data;
+        },
         render:function()
         {
+            console.log(this.state.media);
             console.log(this.state.network);
             return (
                 <div className='stackla-block'>
@@ -100,32 +125,57 @@
                             <label>
                                 Filter name
                             </label>
-                            <input type='text' className='widefat' onChange={this.handleNameChange}/>
+                            <input 
+                                type='text' 
+                                className='widefat'
+                                value={this.state.name}
+                                onChange={this.handleNameChange}
+                            />
                         </fieldset>
                         <fieldset>
                             <label>
                                 Network
                             </label>
                             <fieldset>
-                                <input type='checkbox' value='twitter' onChange={this.handleNetworkCheck}/>
+                                <input 
+                                    type='checkbox' 
+                                    value='twitter' 
+                                    defaultChecked={this.checkArrayValue('network' , 'twitter')}
+                                    onChange={this.handleNetworkCheck}
+                                />
                                 <label className='checkbox'>
                                     Twitter
                                 </label>
                             </fieldset>
                             <fieldset>
-                                <input type='checkbox' value='facebook' onChange={this.handleNetworkCheck}/>
+                                <input 
+                                    type='checkbox'
+                                    value='facebook'
+                                    defaultChecked={this.checkArrayValue('network' , 'facebook')}
+                                    onChange={this.handleNetworkCheck}
+                                />
                                 <label className='checkbox'>
                                     Facebook
                                 </label>
                             </fieldset>
                             <fieldset>
-                                <input type='checkbox' value='instagram' onChange={this.handleNetworkCheck}/>
+                                <input 
+                                    type='checkbox'
+                                    value='instagram'
+                                    defaultChecked={this.checkArrayValue('network' , 'instagram')}
+                                    onChange={this.handleNetworkCheck}
+                                />
                                 <label className='checkbox'>
                                     Instagram
                                 </label>
                             </fieldset>
                             <fieldset>
-                                <input type='checkbox' value='youtube' onChange={this.handleNetworkCheck}/>
+                                <input
+                                    type='checkbox'
+                                    value='youtube' 
+                                    defaultChecked={this.checkArrayValue('network' , 'youtube')}
+                                    onChange={this.handleNetworkCheck}
+                                />
                                 <label className='checkbox'>
                                     YouTube
                                 </label>
@@ -136,19 +186,29 @@
                                 Media
                             </label>
                             <fieldset>
-                                <input type='checkbox' value='text-only' onChange={this.handleMediaCheck}/>
+                                <input 
+                                    type='checkbox' 
+                                    value='text-only' 
+                                    onChange={this.handleMediaCheck}/>
                                 <label className='checkbox'>
                                     Text-only
                                 </label>
                             </fieldset>
                             <fieldset>
-                                <input type='checkbox' value='images' onChange={this.handleMediaCheck}/>
+                                <input 
+                                    type='checkbox' 
+                                    value='images' 
+                                    onChange={this.handleMediaCheck}/>
                                 <label className='checkbox'>
                                     Images
                                 </label>
                             </fieldset>
                             <fieldset>
-                                <input type='checkbox' value='video' onChange={this.handleMediaCheck}/>
+                                <input 
+                                    type='checkbox'
+                                    value='video'
+                                    onChange={this.handleMediaCheck}
+                                />
                                 <label className='checkbox'>
                                     Video
                                 </label>

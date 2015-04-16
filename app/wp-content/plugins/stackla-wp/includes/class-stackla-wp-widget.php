@@ -1,12 +1,15 @@
 <?php
 
 /**
- * Fetch, validate and save widget data;
+ * Fetch and save widget data;
  *
  *
- * @package    Stackla_WP
- * @subpackage Stackla_WP/includes
- * @author     Rohan Deshpande <rohan.deshpande@stackla.com>
+ *  @package    Stackla_WP
+ *  @subpackage Stackla_WP/includes
+ *  @author     Rohan Deshpande <rohan.deshpande@stackla.com>
+ *  @see        https://codex.wordpress.org/Function_Reference/get_post_meta
+ *  @see        https://codex.wordpress.org/Function_Reference/add_post_meta
+ *  @see        https://codex.wordpress.org/Function_Reference/update_post_meta
  */
 
 require_once('class-stackla-wp-activator.php');
@@ -14,47 +17,38 @@ require_once('class-stackla-wp-activator.php');
 class Stackla_WP_Widget {
 
     protected $data;
-    protected $allowed_networks = ['twitter' , 'facebook' , 'instagram' , 'youtube'];
-    protected $allowed_media = ['text-only' , 'images' , 'video'];
-    protected $allowed_sorting = ['latest' , 'greatest' , 'votes'];
-    protected $error_title = "You must set a widget title";
-    protected $error_terms = "You must define at least one term";
-    protected $error_filters = "You must define at least one filter";
-    protected $error_term_name = "You must set a valid term name";
-    protected $error_network = "You must set a valid network name";
-    protected $error_illegal_network = "The network you selected is not allowed";
-    protected $error_term_term = "You must enter a valid term";
-    protected $error_term_value = "You must enter a valid term value";
-    protected $error_filter_name = "You must set a valid filter name";
-    protected $error_filter_network = "You must set a valid network name";
-    protected $error_illegal_media = "The media type you've selected is not allowed";
-    protected $error_filter_sorting = "You must enter a valid sorting method";
-    protected $error_filter_illegal_sorting = "The sorting method you've selected is not allowed";
-
-    public $errors = array();
+    protected $id;
+    protected $title_meta_key = "stackla_wp_title";
+    protected $terms_meta_key = "stackla_wp_terms";
+    protected $filters_meta_key = "stackla_wp_filters";
+    protected $tag_meta_key = "stackla_wp_tag";
+    protected $tag_id_meta_key = "stackla_wp_tag_id";
+    protected $terms_id_meta_key = "stackla_wp_terms_id";
+    protected $filters_id_meta_key = "stackla_wp_filters_id";
 
     /**
     *   -- CONSTRUCTOR --
-    *   Gets the existing widget data for a post;
-    *   @param {$id:optional} a post id;
+    *   Sets the existing widget data for a post;
+    *   @param {$id} a post id;
     *   @return void;
     */
 
-    public function __construct($id = false)
+    public function __construct($id)
     {
-        if($id)
-        {
-            $this->data = array(
-                "title" => get_post_meta($id , 'stackla_wp_title' , true),
-                "terms" => get_post_meta($id , 'stackla_wp_terms' , true),
-                "filters" => get_post_meta($id , 'stackla_wp_filters' , true),
-                "tag" => get_post_meta($id , 'stackla_wp_tag' , true)
-            );
-        }
+        $this->id = $id;
+        $this->data = array(
+            "title" => get_post_meta($this->id , $this->title_meta_key , true),
+            "terms" => get_post_meta($this->id , $this->terms_meta_key , true),
+            "filters" => get_post_meta($this->id , $this->filters_meta_key , true),
+            "tag" => get_post_meta($this->id , $this->tag_meta_key , true),
+            "tag_id" => get_post_meta($this->id , $this->tag_id_meta_key , true),
+            "terms_id" => get_post_meta($this->id , $this->terms_id_meta_key , true),
+            "filters_id" => get_post_meta($this->id , $this->filters_id_meta_key , true)
+        );
     }
 
     /**
-    *   Returns the widget object data;
+    *   Returns the widget object data as an array;
     *   @return {$this->data} an associative array containing all the widget data;
     */
 
@@ -64,180 +58,66 @@ class Stackla_WP_Widget {
     }
 
     /**
-    *   Validates a string;
-    *   @param {$var} a string;
-    *   @return boolean;
+    *   Returns the widget object data as a json string;
+    *   @return {$this->data} a json string which has special characters turned into their hex values;
     */
 
-    protected function validate_string($var)
+    public function get_json()
     {
-        return (!$var || $var == '' || strlen($var) <= 0) ? false : true;
+        return json_encode($this->data , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-    *   Validates an array;
-    *   @param {$var} an array;
-    *   @return boolean;
-    */
-
-    protected function validate_array($var)
+    public function set_data($new)
     {
-        return (!is_array($var) || empty($var)) ? false : true;
-    }
+        $results = array();
 
-    /**
-    *   Validates the widget title field;
-    *   Pushes the result into the $this->errors array;
-    *   @param {$data} an array of data passed by the client;
-    *   @return void;
-    */
-
-    protected function validate_widget_title($data)
-    {
-        $this->errors['title'] = false;
-
-        if($this->validate_string($data['title']) === false)
+        foreach($this->data as $k => $v)
         {
-            $this->errors['title'] = $this->error_title;
-        }
-    }
-
-    /**
-    *   Validates the widget's terms;
-    *   Pushes the result into the $this->errors array;
-    *   @param {$data} an array of data passed by the client;
-    *   @return void;
-    */
-
-    public function validate_widget_terms($data)
-    {
-        $this->errors['terms'] = array();
-
-        foreach($data['terms'] as $term)
-        {
-            $this->errors['terms'][$term['id']] = array(
-                'name' => false,
-                'network' => false,
-                'term' => false,
-                'termValue' => false
-            );
-
-            if($this->validate_string($term['name']) === false)
+            switch($k)
             {
-                $this->errors['terms'][$term['id']]['name'] = $this->error_term_name;
-            }
-
-            if($this->validate_string($term['network']) === false)
-            {
-                $this->errors['terms'][$term['id']]['network'] = $this->error_network;
-            }
-
-            if(!in_array($term['network'] , $this->allowed_networks))
-            {
-                $this->errors['terms'][$term['id']]['network'] = $this->error_illegal_network;
-            }
-
-            if($this->validate_string($term['term']) === false)
-            {
-                $this->errors['terms'][$term['id']]['term'] = $this->error_term_term;
-            }
-
-            if($this->validate_string($term['termValue']) === false)
-            {
-                $this->errors['terms'][$term['id']]['termValue'] = $this->error_term_value;
-            }
-
-            if(
-                $this->errors['terms'][$term['id']]['name'] === false &&
-                $this->errors['terms'][$term['id']]['network'] === false &&
-                $this->errors['terms'][$term['id']]['term'] === false &&
-                $this->errors['terms'][$term['id']]['termValue'] === false
-            )
-            {
-                $this->errors['terms'][$term['id']] = false;
-            }
-        }
-    }
-
-    /**
-    *   Validates the widget's filters;
-    *   Pushes the result into the $this->errors array;
-    *   @param {$data} an array of data passed by the client;
-    *   @return void;
-    */
-
-    protected function validate_widget_filters($data)
-    {
-        $this->errors['filters'] = array();
-
-        foreach($data['filters'] as $filter)
-        {
-            $this->errors['filters'][$filter['id']] = array(
-                'name' => false,
-                'network' => false,
-                'media' => false,
-                'sorting' => false
-            );
-
-            if($this->validate_string($filter['name']) === false)
-            {
-                $this->errors['filters'][$filter['id']]['name'] = $this->error_filter_name;
-            }
-
-            if(isset($filter['media']) && $this->validate_array($filter['media']))
-            {
-                foreach($filter['media'] as $media)
-                {
-                    if(!in_array($media , $this->allowed_media))
+                case "title":
+                    if($v === '')
                     {
-                        $this->errors['filters'][$filter['id']]['media'] = $this->error_illegal_media;
+                        $results['title'] = add_post_meta($this->id , $this->title_meta_key , $new['title']);
                     }
-                }
-            }
-
-            if(isset($filter['network']) && $this->validate_array($filter['network']))
-            {
-                foreach($filter['network'] as $network)
-                {
-                    if(!in_array($network , $this->allowed_networks))
+                    else
                     {
-                        $this->errors['filters'][$filter['id']]['network'] = $this->error_illegal_network;
+                        $results['title'] = update_post_meta($this->id , $this->title_meta_key , $new['title']);
                     }
-                }
-            }
-
-            if($this->validate_string($filter['sorting']) === false)
-            {
-                $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_sorting;
-            }
-
-            if(!in_array($filter['sorting'] , $this->allowed_sorting))
-            {
-                $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_illegal_sorting;
-            }
-
-            if(
-                $this->errors['filters'][$filter['id']]['name'] === false &&
-                $this->errors['filters'][$filter['id']]['network'] === false &&
-                $this->errors['filters'][$filter['id']]['media'] === false &&
-                $this->errors['filters'][$filter['id']]['sorting'] === false
-            )
-            {
-                $this->errors['filters'][$filter['id']] = false;
+                break;
+                case "terms":
+                    if($v === '')
+                    {
+                        $results['terms'] = add_post_meta($this->id , $this->terms_meta_key , json_encode($new['terms']));
+                    }
+                    else
+                    {
+                        $results['terms'] = update_post_meta($this->id , $this->terms_meta_key , json_encode($new['terms']));
+                    }
+                break;
+                case "filters":
+                    if($v === '')
+                    {
+                        $results['filters'] = add_post_meta($this->id , $this->filters_meta_key , json_encode($new['filters']));
+                    }
+                    else
+                    {
+                        $results['filters'] = update_post_meta($this->id , $this->filters_meta_key , json_encode($new['filters']));
+                    }
+                break;
+                case "tag":
+                    if($v === '')
+                    {
+                        $results['tag'] = add_post_meta($this->id , $this->tag_meta_key , $new['title'].'-'.$this->id);
+                    }
+                    else
+                    {
+                        $results['tag'] = update_post_meta($this->id , $this->tag_meta_key , $new['title'].'-'.$this->id);
+                    }
+                break;
             }
         }
-    }
 
-    /**
-    *   Runs all validation methods;
-    *   @param {$data} an array of data passed by the client;
-    *   @return void;
-    */
-
-    public function validate($data)
-    {
-        $this->validate_widget_title($data);
-        $this->validate_widget_terms($data);
-        $this->validate_widget_filters($data);        
+        return $results;
     }
 }

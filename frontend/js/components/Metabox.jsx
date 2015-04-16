@@ -69,6 +69,7 @@
 
             data =
             {
+                'postId':stacklaWp.admin.metabox.postId,
                 'title':this.refs.title.state.value,
                 'terms':terms,
                 'filters':filters
@@ -83,7 +84,7 @@
 
             $.ajax(
             {
-                url:stacklaWp.admin.metabox.handler,
+                url:stacklaWp.admin.metabox.validator,
                 type:'POST',
                 dataType:'json',
                 data:data
@@ -93,7 +94,12 @@
                 console.log(response);
                 if(typeof response == 'object')
                 {
-                   self.handleErrors(response.errors);
+                    self.handleErrors(response.errors);
+
+                    if(response.result == '1')
+                    {
+                        self.save(data);
+                    }
                 }
             }).fail(function(xhr , status , error)
             {
@@ -130,8 +136,23 @@
             this.refs.title.setState({error:errors.title});
 
         },
-        post:function(e)
+        save:function(data)
         {
+            $.ajax(
+            {
+                url:stacklaWp.admin.metabox.handler,
+                type:'POST',
+                //dataType:'json',
+                data:data
+            }).done(function(response)
+            {
+                console.log('raw post response:');
+                console.log(response);
+            }).fail(function(xhr , status , error)
+            {
+                console.log('post fail!');
+                console.log(error);
+            });
         },
         render:function()
         {
@@ -142,10 +163,10 @@
                         ref='title'
                     />
                     <section className='terms'>
-                        <this.state.dependencies.WidgetTerms ref='terms'/>
+                        <this.state.dependencies.WidgetTerms ref='terms' initialData={stacklaWp.admin.metabox.data.terms}/>
                     </section>
                     <section className='filters'>
-                        <this.state.dependencies.WidgetFilters ref='filters'/>
+                        <this.state.dependencies.WidgetFilters ref='filters' initialData={stacklaWp.admin.metabox.data.filters}/>
                     </section>
                     <a href='#' onClick={this.compileData}>Save</a>
                 </div>

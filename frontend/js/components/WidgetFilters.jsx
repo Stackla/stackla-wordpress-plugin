@@ -6,6 +6,7 @@
     {
         propTypes:
         {
+            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
         },
         getInitialState:function()
         {
@@ -14,10 +15,16 @@
                 {
                     Filter:stacklaWp.admin.components.Filter
                 },
-                count:1,
+                count:(this.props.initialData) ? this.props.initialData.length : 1,
+                data:(this.props.initialData) ? this.props.initialData : [],
                 items:[]
             }
         },
+        /**
+        *   Adds a filter fieldset, forces re-render;
+        *   @param {e} event object;
+        *   @return void;
+        */
         add:function(e)
         {
             e.preventDefault();
@@ -28,6 +35,11 @@
                 count:this.state.count + 1
             });
         },
+        /**
+        *   Removes a filter fieldset, forces re-render;
+        *   @param {e} event object;
+        *   @return void;
+        */
         remove:function(e)
         {
             e.preventDefault();
@@ -39,17 +51,30 @@
                 count:this.state.count - 1
             });
         },
+        /**
+        *   Renders the component;
+        *   @return {html};
+        */
         render:function()
         {            
             var i;
+            var fieldsetData = false;
 
             for(i = 0 ; i < this.state.count ; i ++)
             {
+                if(this.state.data.length)
+                {
+                    if(typeof this.state.data[i] !== 'undefined')
+                    {
+                        fieldsetData = this.state.data[i];
+                    }
+                }
                 this.state.items.push(
                     <this.state.dependencies.Filter 
                         key={i}
                         id={i}
                         ref={i}
+                        data={fieldsetData}
                     />
                 );
             }

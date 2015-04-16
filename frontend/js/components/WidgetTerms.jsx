@@ -6,6 +6,7 @@
     {
         propTypes:
         {
+            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
         },
         getInitialState:function()
         {
@@ -14,9 +15,9 @@
                 {
                     Term:stacklaWp.admin.components.Term
                 },
-                count:1,
+                count:(this.props.initialData) ? this.props.initialData.length : 1,
+                data:(this.props.initialData) ? this.props.initialData : [],
                 items:[],
-                data:[]
             }
         },
         /**

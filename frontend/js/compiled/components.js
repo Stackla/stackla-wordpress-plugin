@@ -8,15 +8,16 @@
         {
             key:React.PropTypes.number,
             id:React.PropTypes.number,
+            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
         getInitialState:function()
         {
             return {
                 id:this.props.id,
-                name:'',
-                network:[],
-                media:[],
-                sorting:'latest',
+                name:(this.props.data) ? this.props.data.name : '',
+                network:(this.props.data) ? this.props.data.network : stacklaWp.admin.config.networks,
+                media:(this.props.data) ? this.props.data.media : stacklaWp.admin.config.media,
+                sorting:(this.props.data) ? this.props.data.sorting : 'latest',
                 errors:false
             }
         },
@@ -53,8 +54,6 @@
                     });
                 }
             }
-
-
         },
         handleMediaCheck:function(e)
         {
@@ -90,8 +89,34 @@
         {
             this.setState({sorting:e.target.value});
         },
+        checkArrayValue:function(key , value)
+        {
+            if(!this.state[key].length) return false;
+
+            if(this.state[key].indexOf(value) > -1)
+            {
+                return true;
+            }
+            return false;
+        },
+        compileData:function()
+        {
+            var data = $.extend({} , this.state); 
+
+            if(!data.network || !data.network.length)
+            {
+                data.network = stacklaWp.admin.config.networks;
+            }
+            if(!data.media || !data.network.length)
+            {
+                data.media = stacklaWp.admin.config.media;
+            }
+
+            return data;
+        },
         render:function()
         {
+            console.log(this.state.media);
             console.log(this.state.network);
             return (
                 React.createElement("div", {className: "stackla-block"}, 
@@ -100,32 +125,57 @@
                             React.createElement("label", null, 
                                 "Filter name"
                             ), 
-                            React.createElement("input", {type: "text", className: "widefat", onChange: this.handleNameChange})
+                            React.createElement("input", {
+                                type: "text", 
+                                className: "widefat", 
+                                value: this.state.name, 
+                                onChange: this.handleNameChange}
+                            )
                         ), 
                         React.createElement("fieldset", null, 
                             React.createElement("label", null, 
                                 "Network"
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "twitter", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "twitter", 
+                                    defaultChecked: this.checkArrayValue('network' , 'twitter'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Twitter"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "facebook", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "facebook", 
+                                    defaultChecked: this.checkArrayValue('network' , 'facebook'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Facebook"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "instagram", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "instagram", 
+                                    defaultChecked: this.checkArrayValue('network' , 'instagram'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Instagram"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "youtube", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "youtube", 
+                                    defaultChecked: this.checkArrayValue('network' , 'youtube'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "YouTube"
                                 )
@@ -136,19 +186,29 @@
                                 "Media"
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "text-only", onChange: this.handleMediaCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "text-only", 
+                                    onChange: this.handleMediaCheck}), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Text-only"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "images", onChange: this.handleMediaCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "images", 
+                                    onChange: this.handleMediaCheck}), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Images"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "video", onChange: this.handleMediaCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "video", 
+                                    onChange: this.handleMediaCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Video"
                                 )
@@ -284,6 +344,7 @@
 
             data =
             {
+                'postId':stacklaWp.admin.metabox.postId,
                 'title':this.refs.title.state.value,
                 'terms':terms,
                 'filters':filters
@@ -298,7 +359,7 @@
 
             $.ajax(
             {
-                url:stacklaWp.admin.metabox.handler,
+                url:stacklaWp.admin.metabox.validator,
                 type:'POST',
                 dataType:'json',
                 data:data
@@ -308,7 +369,12 @@
                 console.log(response);
                 if(typeof response == 'object')
                 {
-                   self.handleErrors(response.errors);
+                    self.handleErrors(response.errors);
+
+                    if(response.result == '1')
+                    {
+                        self.save(data);
+                    }
                 }
             }).fail(function(xhr , status , error)
             {
@@ -345,8 +411,23 @@
             this.refs.title.setState({error:errors.title});
 
         },
-        post:function(e)
+        save:function(data)
         {
+            $.ajax(
+            {
+                url:stacklaWp.admin.metabox.handler,
+                type:'POST',
+                //dataType:'json',
+                data:data
+            }).done(function(response)
+            {
+                console.log('raw post response:');
+                console.log(response);
+            }).fail(function(xhr , status , error)
+            {
+                console.log('post fail!');
+                console.log(error);
+            });
         },
         render:function()
         {
@@ -357,10 +438,10 @@
                         ref: "title"}
                     ), 
                     React.createElement("section", {className: "terms"}, 
-                        React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms"})
+                        React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms", initialData: stacklaWp.admin.metabox.data.terms})
                     ), 
                     React.createElement("section", {className: "filters"}, 
-                        React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters"})
+                        React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters", initialData: stacklaWp.admin.metabox.data.filters})
                     ), 
                     React.createElement("a", {href: "#", onClick: this.compileData}, "Save")
                 )
@@ -611,6 +692,7 @@
     {displayName: "WidgetFilters",
         propTypes:
         {
+            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
         },
         getInitialState:function()
         {
@@ -619,10 +701,16 @@
                 {
                     Filter:stacklaWp.admin.components.Filter
                 },
-                count:1,
+                count:(this.props.initialData) ? this.props.initialData.length : 1,
+                data:(this.props.initialData) ? this.props.initialData : [],
                 items:[]
             }
         },
+        /**
+        *   Adds a filter fieldset, forces re-render;
+        *   @param {e} event object;
+        *   @return void;
+        */
         add:function(e)
         {
             e.preventDefault();
@@ -633,6 +721,11 @@
                 count:this.state.count + 1
             });
         },
+        /**
+        *   Removes a filter fieldset, forces re-render;
+        *   @param {e} event object;
+        *   @return void;
+        */
         remove:function(e)
         {
             e.preventDefault();
@@ -644,17 +737,30 @@
                 count:this.state.count - 1
             });
         },
+        /**
+        *   Renders the component;
+        *   @return {html};
+        */
         render:function()
         {            
             var i;
+            var fieldsetData = false;
 
             for(i = 0 ; i < this.state.count ; i ++)
             {
+                if(this.state.data.length)
+                {
+                    if(typeof this.state.data[i] !== 'undefined')
+                    {
+                        fieldsetData = this.state.data[i];
+                    }
+                }
                 this.state.items.push(
                     React.createElement(this.state.dependencies.Filter, {
                         key: i, 
                         id: i, 
-                        ref: i}
+                        ref: i, 
+                        data: fieldsetData}
                     )
                 );
             }
@@ -680,6 +786,7 @@
     {displayName: "WidgetTerms",
         propTypes:
         {
+            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
         },
         getInitialState:function()
         {
@@ -688,9 +795,9 @@
                 {
                     Term:stacklaWp.admin.components.Term
                 },
-                count:1,
+                count:(this.props.initialData) ? this.props.initialData.length : 1,
+                data:(this.props.initialData) ? this.props.initialData : [],
                 items:[],
-                data:[]
             }
         },
         /**

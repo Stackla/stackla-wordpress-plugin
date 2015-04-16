@@ -4,7 +4,7 @@
     require_once('../../../../../wp-load.php');
     require_once('../../includes/class-stackla-wp-widget.php');
 
-    $widget = new Stackla_WP_Widget(false);
-    $widget->validate($_POST);
-    echo json_encode(array('errors' => $widget->errors));
+    $widget = new Stackla_WP_Widget($_POST['postId']);
+    $results = $widget->set_data($_POST);
+    echo json_encode($results);
 ?>

@@ -11,7 +11,24 @@
  * @package    Stackla_WP
  * @subpackage Stackla_WP/admin/partials
  */
-    $widget = new Stackla_WP_Widget;
+    $widget = new Stackla_WP_Widget(66);
+    // $test = array(
+    //             "title" => 'test',
+    //             "terms" =>  array(
+    //                 'name' => 'test',
+    //                 'network' => 'twitter',
+    //                 'term' => 'username',
+    //                 'termName' => 'test'
+    //             )
+    //             ,
+    //             "filters" => array(
+    //                 'name' => 'test',
+    //                 'network' => 'twitter',
+    //                 'media' => array('text-only'),
+    //                 'sorting' => 'latest'
+    //             )
+    //         );
+    // $widget->set_data($test);
     $settings = new Stackla_WP_Settings;
     $post_type_options = $settings->get_post_type_options();
     $user_settings = $settings->get_user_settings();

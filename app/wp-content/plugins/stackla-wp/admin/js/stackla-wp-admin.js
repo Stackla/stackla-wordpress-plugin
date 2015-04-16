@@ -29868,6 +29868,7 @@ module.exports = warning;
     {
         wpMetabox:'#stackla-metabox',
         wpMetaboxId:'stackla-metabox',
+        networks:['twitter' , 'facebook' , 'instagram' , 'youtube'],
         network:
         {
             twitter:['username' , 'hashtag'],
@@ -29908,6 +29909,72 @@ module.exports = warning;
   }
  
 })();
+
+// Production steps of ECMA-262, Edition 5, 15.4.4.14
+// Reference: http://es5.github.io/#x15.4.4.14
+if (!Array.prototype.indexOf) {
+  Array.prototype.indexOf = function(searchElement, fromIndex) {
+
+    var k;
+
+    // 1. Let O be the result of calling ToObject passing
+    //    the this value as the argument.
+    if (this === null) {
+      throw new TypeError('"this" is null or not defined');
+    }
+
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get
+    //    internal method of O with the argument "length".
+    // 3. Let len be ToUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If len is 0, return -1.
+    if (len === 0) {
+      return -1;
+    }
+
+    // 5. If argument fromIndex was passed let n be
+    //    ToInteger(fromIndex); else let n be 0.
+    var n = +fromIndex || 0;
+
+    if (Math.abs(n) === Infinity) {
+      n = 0;
+    }
+
+    // 6. If n >= len, return -1.
+    if (n >= len) {
+      return -1;
+    }
+
+    // 7. If n >= 0, then Let k be n.
+    // 8. Else, n<0, Let k be len - abs(n).
+    //    If k is less than 0, then let k be 0.
+    k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+
+    // 9. Repeat, while k < len
+    while (k < len) {
+      // a. Let Pk be ToString(k).
+      //   This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the
+      //    HasProperty internal method of O with argument Pk.
+      //   This step can be combined with c
+      // c. If kPresent is true, then
+      //    i.  Let elementK be the result of calling the Get
+      //        internal method of O with the argument ToString(k).
+      //   ii.  Let same be the result of applying the
+      //        Strict Equality Comparison Algorithm to
+      //        searchElement and elementK.
+      //  iii.  If same is true, return k.
+      if (k in O && O[k] === searchElement) {
+        return k;
+      }
+      k++;
+    }
+    return -1;
+  };
+}
 (function()
 {
     'use strict';
@@ -29918,15 +29985,16 @@ module.exports = warning;
         {
             key:React.PropTypes.number,
             id:React.PropTypes.number,
+            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
         getInitialState:function()
         {
             return {
                 id:this.props.id,
-                name:'',
-                network:[],
-                media:[],
-                sorting:'latest',
+                name:(this.props.data) ? this.props.data.name : '',
+                network:(this.props.data) ? this.props.data.network : stacklaWp.admin.config.networks,
+                media:(this.props.data) ? this.props.data.media : stacklaWp.admin.config.media,
+                sorting:(this.props.data) ? this.props.data.sorting : 'latest',
                 errors:false
             }
         },
@@ -29963,8 +30031,6 @@ module.exports = warning;
                     });
                 }
             }
-
-
         },
         handleMediaCheck:function(e)
         {
@@ -30000,8 +30066,34 @@ module.exports = warning;
         {
             this.setState({sorting:e.target.value});
         },
+        checkArrayValue:function(key , value)
+        {
+            if(!this.state[key].length) return false;
+
+            if(this.state[key].indexOf(value) > -1)
+            {
+                return true;
+            }
+            return false;
+        },
+        compileData:function()
+        {
+            var data = $.extend({} , this.state); 
+
+            if(!data.network || !data.network.length)
+            {
+                data.network = stacklaWp.admin.config.networks;
+            }
+            if(!data.media || !data.network.length)
+            {
+                data.media = stacklaWp.admin.config.media;
+            }
+
+            return data;
+        },
         render:function()
         {
+            console.log(this.state.media);
             console.log(this.state.network);
             return (
                 React.createElement("div", {className: "stackla-block"}, 
@@ -30010,32 +30102,57 @@ module.exports = warning;
                             React.createElement("label", null, 
                                 "Filter name"
                             ), 
-                            React.createElement("input", {type: "text", className: "widefat", onChange: this.handleNameChange})
+                            React.createElement("input", {
+                                type: "text", 
+                                className: "widefat", 
+                                value: this.state.name, 
+                                onChange: this.handleNameChange}
+                            )
                         ), 
                         React.createElement("fieldset", null, 
                             React.createElement("label", null, 
                                 "Network"
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "twitter", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "twitter", 
+                                    defaultChecked: this.checkArrayValue('network' , 'twitter'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Twitter"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "facebook", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "facebook", 
+                                    defaultChecked: this.checkArrayValue('network' , 'facebook'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Facebook"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "instagram", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "instagram", 
+                                    defaultChecked: this.checkArrayValue('network' , 'instagram'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Instagram"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "youtube", onChange: this.handleNetworkCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "youtube", 
+                                    defaultChecked: this.checkArrayValue('network' , 'youtube'), 
+                                    onChange: this.handleNetworkCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "YouTube"
                                 )
@@ -30046,19 +30163,29 @@ module.exports = warning;
                                 "Media"
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "text-only", onChange: this.handleMediaCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "text-only", 
+                                    onChange: this.handleMediaCheck}), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Text-only"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "images", onChange: this.handleMediaCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "images", 
+                                    onChange: this.handleMediaCheck}), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Images"
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {type: "checkbox", value: "video", onChange: this.handleMediaCheck}), 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: "video", 
+                                    onChange: this.handleMediaCheck}
+                                ), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Video"
                                 )
@@ -30194,6 +30321,7 @@ module.exports = warning;
 
             data =
             {
+                'postId':stacklaWp.admin.metabox.postId,
                 'title':this.refs.title.state.value,
                 'terms':terms,
                 'filters':filters
@@ -30208,7 +30336,7 @@ module.exports = warning;
 
             $.ajax(
             {
-                url:stacklaWp.admin.metabox.handler,
+                url:stacklaWp.admin.metabox.validator,
                 type:'POST',
                 dataType:'json',
                 data:data
@@ -30218,7 +30346,12 @@ module.exports = warning;
                 console.log(response);
                 if(typeof response == 'object')
                 {
-                   self.handleErrors(response.errors);
+                    self.handleErrors(response.errors);
+
+                    if(response.result == '1')
+                    {
+                        self.save(data);
+                    }
                 }
             }).fail(function(xhr , status , error)
             {
@@ -30255,8 +30388,23 @@ module.exports = warning;
             this.refs.title.setState({error:errors.title});
 
         },
-        post:function(e)
+        save:function(data)
         {
+            $.ajax(
+            {
+                url:stacklaWp.admin.metabox.handler,
+                type:'POST',
+                //dataType:'json',
+                data:data
+            }).done(function(response)
+            {
+                console.log('raw post response:');
+                console.log(response);
+            }).fail(function(xhr , status , error)
+            {
+                console.log('post fail!');
+                console.log(error);
+            });
         },
         render:function()
         {
@@ -30267,10 +30415,10 @@ module.exports = warning;
                         ref: "title"}
                     ), 
                     React.createElement("section", {className: "terms"}, 
-                        React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms"})
+                        React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms", initialData: stacklaWp.admin.metabox.data.terms})
                     ), 
                     React.createElement("section", {className: "filters"}, 
-                        React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters"})
+                        React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters", initialData: stacklaWp.admin.metabox.data.filters})
                     ), 
                     React.createElement("a", {href: "#", onClick: this.compileData}, "Save")
                 )
@@ -30521,6 +30669,7 @@ module.exports = warning;
     {displayName: "WidgetFilters",
         propTypes:
         {
+            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
         },
         getInitialState:function()
         {
@@ -30529,10 +30678,16 @@ module.exports = warning;
                 {
                     Filter:stacklaWp.admin.components.Filter
                 },
-                count:1,
+                count:(this.props.initialData) ? this.props.initialData.length : 1,
+                data:(this.props.initialData) ? this.props.initialData : [],
                 items:[]
             }
         },
+        /**
+        *   Adds a filter fieldset, forces re-render;
+        *   @param {e} event object;
+        *   @return void;
+        */
         add:function(e)
         {
             e.preventDefault();
@@ -30543,6 +30698,11 @@ module.exports = warning;
                 count:this.state.count + 1
             });
         },
+        /**
+        *   Removes a filter fieldset, forces re-render;
+        *   @param {e} event object;
+        *   @return void;
+        */
         remove:function(e)
         {
             e.preventDefault();
@@ -30554,17 +30714,30 @@ module.exports = warning;
                 count:this.state.count - 1
             });
         },
+        /**
+        *   Renders the component;
+        *   @return {html};
+        */
         render:function()
         {            
             var i;
+            var fieldsetData = false;
 
             for(i = 0 ; i < this.state.count ; i ++)
             {
+                if(this.state.data.length)
+                {
+                    if(typeof this.state.data[i] !== 'undefined')
+                    {
+                        fieldsetData = this.state.data[i];
+                    }
+                }
                 this.state.items.push(
                     React.createElement(this.state.dependencies.Filter, {
                         key: i, 
                         id: i, 
-                        ref: i}
+                        ref: i, 
+                        data: fieldsetData}
                     )
                 );
             }
@@ -30590,6 +30763,7 @@ module.exports = warning;
     {displayName: "WidgetTerms",
         propTypes:
         {
+            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
         },
         getInitialState:function()
         {
@@ -30598,9 +30772,9 @@ module.exports = warning;
                 {
                     Term:stacklaWp.admin.components.Term
                 },
-                count:1,
+                count:(this.props.initialData) ? this.props.initialData.length : 1,
+                data:(this.props.initialData) ? this.props.initialData : [],
                 items:[],
-                data:[]
             }
         },
         /**
@@ -30761,7 +30935,9 @@ module.exports = warning;
 
     window.stacklaWp.admin.metabox =
     {
+        postId:false,
         data:false,
+        validator:false,
         handler:false,
         run:function(callback)
         {
@@ -30774,13 +30950,33 @@ module.exports = warning;
             if(!$(stacklaWp.admin.config.wpMetabox).length) return;
 
             var $wpMetabox = $(stacklaWp.admin.config.wpMetabox);
+
+            this.postId = $wpMetabox.data('postid');
             this.data = $wpMetabox.data('stackla');
+            this.data.filters = this.tryJsonParse(this.data.filters);
+            this.data.terms = this.tryJsonParse(this.data.terms);
+            this.validator = $wpMetabox.data('validator');
             this.handler = $wpMetabox.data('handler');
 
             if(typeof callback == 'function')
             {
                 callback();
             }
+        },
+        tryJsonParse:function(string)
+        {
+            var result;
+
+            try
+            {
+                result = JSON.parse(string);
+            }
+            catch(e)
+            {
+                result = false;
+            }
+
+            return result;
         }
     };
 }());
