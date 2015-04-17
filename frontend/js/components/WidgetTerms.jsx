@@ -57,9 +57,18 @@
         render:function()
         {
             var i;
-
+            
             for(i = 0 ; i < this.state.count ; i++)
             {
+                var fieldsetData = false;
+
+                if(this.state.data.length)
+                {
+                    if(typeof this.state.data[i] !== 'undefined')
+                    {
+                        fieldsetData = this.state.data[i];
+                    }
+                }
                 this.state.items.push(
                     <this.state.dependencies.Term 
                         twitter={stacklaWp.admin.config.network.twitter}
@@ -69,6 +78,7 @@
                         key={i}
                         id={i}
                         ref={i}
+                        data={fieldsetData}
                     />
                 );
             }

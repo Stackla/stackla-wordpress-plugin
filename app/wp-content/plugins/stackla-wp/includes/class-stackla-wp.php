@@ -96,6 +96,11 @@ class Stackla_WP {
 	private function load_dependencies() {
 
 		/**
+		 * Autoload the Stackla PHP SDK dependencies;
+		 */
+		
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/vendor/autoload.php';
+		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
@@ -183,7 +188,6 @@ class Stackla_WP {
 
 		$this->loader->add_action('admin_menu' , $plugin_admin , 'add_settings_page');
 		$this->loader->add_action('add_meta_boxes' , $metaboxes , 'setup_metaboxes');
-		$this->loader->add_action('save_post' , $metaboxes , 'save_metabox');
 	}
 
 	/**

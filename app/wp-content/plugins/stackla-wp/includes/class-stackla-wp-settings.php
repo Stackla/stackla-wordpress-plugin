@@ -10,15 +10,19 @@
  */
 
 require_once('class-stackla-wp-activator.php');
+require_once('class-stackla-wp-widget-validator.php');
 
 class Stackla_WP_Settings {
-
     private $table;
     private $wpdb;
     private $user_id;
     private $user_has_settings = false;
-    private $stackla_api_key;
+    private $stackla_stack;
+    private $stackla_client_id;
+    private $stackla_client_secret;
+    private $stackla_callback_uri;
     private $stackla_post_types = false;
+    private $host = "https://my.stackla.com/api/";
     protected static $exclude_options = array(
         'attachment'
     );
@@ -91,17 +95,47 @@ class Stackla_WP_Settings {
 
     protected function validate_data($data)
     {
-        $stackla_api_key = $data['apiKey'];
         $wp_post_types = $this->get_wp_post_types();
 
-        if($stackla_api_key === false || $stackla_api_key == '')
+        if(!Stackla_WP_Widget_Validator::validate_string($data['stack']))
         {
-            $this->errors[] = 'You must submit a valid API key';
-            return false;
+            $this->errors[] = "You must submit a valid stack name";
         }
         else
         {
-            $this->stackla_api_key = $stackla_api_key;
+            $this->stackla_stack = $data['stack'];
+        }
+
+        if(!Stackla_WP_Widget_Validator::validate_string($data['client_id']))
+        {
+            $this->errors[] = 'You must submit a valid client id';
+        }
+        else
+        {
+            $this->stackla_client_id = $data['client_id'];
+        }
+
+        if(!Stackla_WP_Widget_Validator::validate_string($data['client_secret']))
+        {
+            $this->errors[] = 'You must submit a valid client secret';
+        }
+        else
+        {
+            $this->stackla_client_secret = $data['client_secret'];
+        }
+
+        if(!Stackla_WP_Widget_Validator::validate_string($data['callback']))
+        {
+            $this->errors[] = 'You must submit a valid callback URI';
+        }
+        else
+        {
+            $this->stackla_callback_uri = $data['callback'];
+        }
+
+        if(!empty($this->errors))
+        {
+            return false;
         }
 
         if(isset($data['types']))
@@ -163,7 +197,10 @@ class Stackla_WP_Settings {
                 $this->wpdb->update(
                     $this->table,
                     array(
-                        'stackla_api_key' => $this->stackla_api_key,
+                        'stackla_stack' => $this->stackla_stack,
+                        'stackla_client_id' => $this->stackla_client_id,
+                        'stackla_client_secret' => $this->stackla_client_secret,
+                        'stackla_callback_uri' => $this->stackla_callback_uri,
                         'stackla_post_types' => $this->stackla_post_types
                     ),
                     array(
@@ -190,7 +227,10 @@ class Stackla_WP_Settings {
                     $this->table,
                     array(
                         'wp_user_id' => $this->user_id,
-                        'stackla_api_key' => $this->stackla_api_key,
+                        'stackla_stack' => $this->stackla_stack,
+                        'stackla_client_id' => $this->stackla_client_id,
+                        'stackla_client_secret' => $this->stackla_client_secret,
+                        'stackla_callback_uri' => $this->stackla_callback_uri,
                         'stackla_post_types' => $this->stackla_post_types
                     ),
                     array(
@@ -218,7 +258,7 @@ class Stackla_WP_Settings {
     public function get_user_settings()
     {
         $statement = "SELECT * FROM $this->table WHERE `wp_user_id` = $this->user_id";
-        $results = $this->wpdb->get_row($statement);
+        $results = $this->wpdb->get_row($statement , ARRAY_A);
 
         if(empty($results))
         {
@@ -226,5 +266,10 @@ class Stackla_WP_Settings {
         }
 
         return $results;
+    }
+
+    public function get_access_uri()
+    {
+
     }
 }

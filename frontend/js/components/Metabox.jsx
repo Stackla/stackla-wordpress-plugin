@@ -64,6 +64,8 @@
             $.each(filtersRefs , function(key , value)
             {
                 var state = $.extend({} , value.state);
+                if(!state.network.length) state.network = stacklaWp.admin.config.networks;
+                if(!state.media.length) state.media = stacklaWp.admin.config.media;
                 filters.push(state);
             });
 

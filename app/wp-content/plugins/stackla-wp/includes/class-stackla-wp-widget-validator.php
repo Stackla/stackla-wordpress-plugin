@@ -51,7 +51,7 @@ class Stackla_WP_Widget_Validator {
     *   @return boolean;
     */
 
-    protected function validate_string($var)
+    public static function validate_string($var)
     {
         return (!$var || $var == '' || strlen($var) <= 0) ? false : true;
     }
@@ -62,7 +62,7 @@ class Stackla_WP_Widget_Validator {
     *   @return boolean;
     */
 
-    protected function validate_array($var)
+    public static function validate_array($var)
     {
         return (!is_array($var) || empty($var)) ? false : true;
     }
@@ -75,7 +75,7 @@ class Stackla_WP_Widget_Validator {
 
     protected function validate_widget_title()
     {
-        if($this->validate_string($this->data['title']) === false)
+        if(self::validate_string($this->data['title']) === false)
         {
             $this->errors['title'] = $this->error_title;
         }
@@ -98,12 +98,12 @@ class Stackla_WP_Widget_Validator {
                 'termValue' => false
             );
 
-            if($this->validate_string($term['name']) === false)
+            if(self::validate_string($term['name']) === false)
             {
                 $this->errors['terms'][$term['id']]['name'] = $this->error_term_name;
             }
 
-            if($this->validate_string($term['network']) === false)
+            if(self::validate_string($term['network']) === false)
             {
                 $this->errors['terms'][$term['id']]['network'] = $this->error_network;
             }
@@ -113,12 +113,12 @@ class Stackla_WP_Widget_Validator {
                 $this->errors['terms'][$term['id']]['network'] = $this->error_illegal_network;
             }
 
-            if($this->validate_string($term['term']) === false)
+            if(self::validate_string($term['term']) === false)
             {
                 $this->errors['terms'][$term['id']]['term'] = $this->error_term_term;
             }
 
-            if($this->validate_string($term['termValue']) === false)
+            if(self::validate_string($term['termValue']) === false)
             {
                 $this->errors['terms'][$term['id']]['termValue'] = $this->error_term_value;
             }
@@ -152,12 +152,12 @@ class Stackla_WP_Widget_Validator {
                 'sorting' => false
             );
 
-            if($this->validate_string($filter['name']) === false)
+            if(self::validate_string($filter['name']) === false)
             {
                 $this->errors['filters'][$filter['id']]['name'] = $this->error_filter_name;
             }
 
-            if(isset($filter['media']) && $this->validate_array($filter['media']))
+            if(isset($filter['media']) && self::validate_array($filter['media']))
             {
                 foreach($filter['media'] as $media)
                 {
@@ -168,7 +168,7 @@ class Stackla_WP_Widget_Validator {
                 }
             }
 
-            if(isset($filter['network']) && $this->validate_array($filter['network']))
+            if(isset($filter['network']) && self::validate_array($filter['network']))
             {
                 foreach($filter['network'] as $network)
                 {
@@ -179,7 +179,7 @@ class Stackla_WP_Widget_Validator {
                 }
             }
 
-            if($this->validate_string($filter['sorting']) === false)
+            if(self::validate_string($filter['sorting']) === false)
             {
                 $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_sorting;
             }

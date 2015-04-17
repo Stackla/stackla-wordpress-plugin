@@ -116,8 +116,6 @@
         },
         render:function()
         {
-            console.log(this.state.media);
-            console.log(this.state.network);
             return (
                 React.createElement("div", {className: "stackla-block"}, 
                     React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
@@ -189,6 +187,7 @@
                                 React.createElement("input", {
                                     type: "checkbox", 
                                     value: "text-only", 
+                                    defaultChecked: this.checkArrayValue('media' , 'text-only'), 
                                     onChange: this.handleMediaCheck}), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Text-only"
@@ -198,6 +197,7 @@
                                 React.createElement("input", {
                                     type: "checkbox", 
                                     value: "images", 
+                                    defaultChecked: this.checkArrayValue('media' , 'images'), 
                                     onChange: this.handleMediaCheck}), 
                                 React.createElement("label", {className: "checkbox"}, 
                                     "Images"
@@ -207,6 +207,7 @@
                                 React.createElement("input", {
                                     type: "checkbox", 
                                     value: "video", 
+                                    defaultChecked: this.checkArrayValue('media' , 'video'), 
                                     onChange: this.handleMediaCheck}
                                 ), 
                                 React.createElement("label", {className: "checkbox"}, 
@@ -339,6 +340,8 @@
             $.each(filtersRefs , function(key , value)
             {
                 var state = $.extend({} , value.state);
+                if(!state.network.length) state.network = stacklaWp.admin.config.networks;
+                if(!state.media.length) state.media = stacklaWp.admin.config.media;
                 filters.push(state);
             });
 
@@ -452,6 +455,9 @@
 /*
     Beware all ye who enter; there's a bunch of hardcoded stuff in here
 */
+/*
+    Beware all ye who enter; there's a bunch of hardcoded stuff in here
+*/
 (function(window)
 {
     'use strict';
@@ -465,16 +471,18 @@
             facebook:React.PropTypes.array,
             instagram:React.PropTypes.array,
             youtube:React.PropTypes.array,
-            id:React.PropTypes.number
+            id:React.PropTypes.number,
+            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
         getInitialState:function()
         {
             return {
                 id:this.props.id,
-                name:'',
-                network:'',
-                term:'',
-                termValue:'',
+                name:(this.props.data) ? this.props.data.name : '',
+                network:(this.props.data) ? this.props.data.network : '',
+                term:(this.props.data) ? this.props.data.term : '',
+                termValue:(this.props.data) ? this.props.data.termValue : '',
+                termDelimited:(this.props.data) ? this.props.data.network + '-' + this.props.data.term : '',
                 errors:false
             }
         },
@@ -536,8 +544,34 @@
         {
             this.setState({termValue:e.target.value});
         },
+        displayNetworkTermOptions:function(network)
+        {
+            if(this.state.network === '') return false;
+            if(this.state.network == network) return true;
+            return false;
+        },
+        checkTermSelected:function(termOptionsName , options)
+        {
+            if(this.state.term === '') return '';
+            if(options.indexOf(this.state.term) > -1) return termOptionsName + '-' + this.state.term;
+            return '';
+        },
+        checkTermValueOption:function(ref)
+        {
+            if(this.state.termDelimited === '') return false;
+            if(this.state.termDelimited == ref) return true;
+            return false;
+        },
+        getDefaultTermValue:function(delimited)
+        {
+            if(this.state.termDelimited === '') return '';
+            if(this.state.termDelimited == delimited) return this.state.termValue;
+            return '';
+        },
         render:function()
         {
+            var self = this;
+            console.log(this.state);
             return (
                 React.createElement("div", {className: "stackla-block"}, 
                     React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
@@ -545,121 +579,167 @@
                             React.createElement("label", null, 
                                 "Term name"
                             ), 
-                            React.createElement("input", {type: "text", className: "widefat", onChange: this.handleNameChange})
+                            React.createElement("input", {type: "text", className: "widefat", defaultValue: this.state.name, onChange: this.handleNameChange})
                         ), 
                         React.createElement("fieldset", null, 
                             React.createElement("label", null, 
                                 "Choose a network"
                             ), 
-                            React.createElement("select", {onChange: this.handleNetworkChange}, 
-                                React.createElement("option", null), 
-                                React.createElement("option", {value: "twitter"}, "Twitter"), 
-                                React.createElement("option", {value: "facebook"}, "Facebook"), 
-                                React.createElement("option", {value: "instagram"}, "Instagram"), 
-                                React.createElement("option", {value: "youtube"}, "YouTube")
+                            React.createElement("select", {onChange: this.handleNetworkChange, defaultValue: this.state.network}, 
+                                React.createElement("option", {value: ""}), 
+                                
+                                    stacklaWp.admin.config.networks.map(function(network , i)
+                                    {
+                                        return React.createElement("option", {value: network, key: i}, network)
+                                    })
+                                
                             )
                         ), 
                         React.createElement("fieldset", {ref: "termRules"}, 
-                            React.createElement("label", {className: "hide", ref: "termRulesLabel"}, 
+                            React.createElement("label", {className: (this.state.network === '') ? 'hide' : '', ref: "termRulesLabel"}, 
                                 "Choose a term"
                             ), 
-                            React.createElement("select", {className: "hide", ref: "twitter", onChange: this.handleTermChange}, 
-                                React.createElement("option", null), 
-                                
-                                    this.props.twitter.map(function(option , i)
-                                    {
-                                        return React.createElement("option", {key: i, value: 'twitter-' + option}, option)
-                                    })
-                                
-                            ), 
-                            React.createElement("select", {className: "hide", ref: "facebook", onChange: this.handleTermChange}, 
-                                React.createElement("option", null), 
-                                
-                                    this.props.facebook.map(function(option , i)
-                                    {
-                                        return React.createElement("option", {key: i, value: 'facebook-' + option}, option)
-                                    })
-                                
-                            ), 
-                            React.createElement("select", {className: "hide", ref: "instagram", onChange: this.handleTermChange}, 
-                                React.createElement("option", null), 
-                                
-                                    this.props.instagram.map(function(option , i)
-                                    {
-                                        return React.createElement("option", {key: i, value: 'instagram-' + option}, option)
-                                    })
-                                
-                            ), 
-                            React.createElement("select", {className: "hide", ref: "youtube", onChange: this.handleTermChange}, 
-                                React.createElement("option", null), 
-                                
-                                    this.props.youtube.map(function(option , i)
-                                    {
-                                        return React.createElement("option", {key: i, value: 'youtube-' + option}, option)
-                                    })
-                                
-                            )
+                            
+                                stacklaWp.admin.config.networks.map(function(network , i)
+                                {
+                                    return  React.createElement("select", {
+                                                className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
+                                                defaultValue: self.checkTermSelected(network , self.props[network]), 
+                                                ref: network, 
+                                                onChange: self.handleTermChange, 
+                                                key: network + i
+                                            }, 
+                                                React.createElement("option", {value: ""}), 
+                                                
+                                                    self.props[network].map(function(option , j)
+                                                    {
+                                                        return  React.createElement("option", {
+                                                                    key: option + j, 
+                                                                    value: network + '-' + option
+                                                                }, 
+                                                                    option
+                                                                )
+                                                    })
+                                                
+                                            )
+                                })
+                            
                         ), 
                         React.createElement("fieldset", {ref: "termValue", className: "term-values"}, 
-                            React.createElement("fieldset", {ref: "twitter-username", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "twitter-username", 
+                                className: (this.checkTermValueOption('twitter-username')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "Twitter Username"
                                 ), 
                                 React.createElement("span", {className: "decorator"}, 
                                     "@"
                                 ), 
-                                React.createElement("input", {type: "text", maxLength: "15", ref: "twitterUsernameInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    defaultValue: this.getDefaultTermValue('twitter-username'), 
+                                    maxLength: "15", 
+                                    onChange: this.handleTermValueChange})
                             ), 
-                            React.createElement("fieldset", {ref: "twitter-hashtag", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "twitter-hashtag", 
+                                className: (this.checkTermValueOption('twitter-hashtag')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "Twitter Hashtag"
                                 ), 
                                 React.createElement("span", {className: "decorator"}, 
                                     "#"
                                 ), 
-                                React.createElement("input", {type: "text", maxLength: "129", ref: "twitterHashtagInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    maxLength: "129", 
+                                    defaultValue: this.getDefaultTermValue('twitter-hastag'), 
+                                    onChange: this.handleTermValueChange}
+                                )
                             ), 
-                            React.createElement("fieldset", {ref: "facebook-page", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "facebook-page", 
+                                className: (this.checkTermValueOption('facebook-page')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "Facebook Page URL or Facebook Page Name"
                                 ), 
-                                React.createElement("input", {type: "text", ref: "facebookPageInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    defaultValue: this.getDefaultTermValue('facebook-page'), 
+                                    onChange: this.handleTermValueChange}
+                                )
                             ), 
-                            React.createElement("fieldset", {ref: "facebook-search", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "facebook-search", 
+                                className: (this.checkTermValueOption('facebook-search')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "Facebook Search (Search for all these words)"
                                 ), 
-                                React.createElement("input", {type: "text", ref: "facebookSearchInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    defaultValue: this.getDefaultTermValue('facebook-search'), 
+                                    onChange: this.handleTermValueChange})
                             ), 
-                            React.createElement("fieldset", {ref: "instagram-user", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "instagram-user", 
+                                className: (this.checkTermValueOption('instagram-user')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "Instagram User"
                                 ), 
                                 React.createElement("span", {className: "decorator"}, 
                                     "@"
                                 ), 
-                                React.createElement("input", {type: "text", ref: "instagramUserInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    defaultValue: this.getDefaultTermValue('instagram-user'), 
+                                    onChange: this.handleTermValueChange}
+                                )
                             ), 
-                            React.createElement("fieldset", {ref: "instagram-hashtag", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "instagram-hashtag", 
+                                className: (this.checkTermValueOption('instagram-hashtag')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "Instagram Hashtag"
                                 ), 
                                 React.createElement("span", {className: "decorator"}, 
                                     "#"
                                 ), 
-                                React.createElement("input", {type: "text", ref: "instagramHashtagInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    defaultValue: this.getDefaultTermValue('instagram-hashtag'), 
+                                    onChange: this.handleTermValueChange})
                             ), 
-                            React.createElement("fieldset", {ref: "youtube-user", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "youtube-user", 
+                                className: (this.checkTermValueOption('youtube-user')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "YouTube Username"
                                 ), 
-                                React.createElement("input", {type: "text", ref: "youtubeUserInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    defaultValue: this.getDefaultTermValue('youtube-user'), 
+                                    onChange: this.handleTermValueChange}
+                                )
                             ), 
-                            React.createElement("fieldset", {ref: "youtube-search", className: "hide"}, 
+                            React.createElement("fieldset", {
+                                ref: "youtube-search", 
+                                className: (this.checkTermValueOption('youtube-search')) ? 'hide display' : 'hide'
+                            }, 
                                 React.createElement("label", null, 
                                     "YouTube Search"
                                 ), 
-                                React.createElement("input", {type: "text", ref: "youtubeSearchInput", onChange: this.handleTermValueChange})
+                                React.createElement("input", {
+                                    type: "text", 
+                                    defaultValue: this.getDefaultTermValue('youtube-search'), 
+                                    onChange: this.handleTermValueChange}
+                                )
                             )
                         )
                     ), 
@@ -744,10 +824,11 @@
         render:function()
         {            
             var i;
-            var fieldsetData = false;
-
+            
             for(i = 0 ; i < this.state.count ; i ++)
             {
+                var fieldsetData = false;
+
                 if(this.state.data.length)
                 {
                     if(typeof this.state.data[i] !== 'undefined')
@@ -837,9 +918,18 @@
         render:function()
         {
             var i;
-
+            
             for(i = 0 ; i < this.state.count ; i++)
             {
+                var fieldsetData = false;
+
+                if(this.state.data.length)
+                {
+                    if(typeof this.state.data[i] !== 'undefined')
+                    {
+                        fieldsetData = this.state.data[i];
+                    }
+                }
                 this.state.items.push(
                     React.createElement(this.state.dependencies.Term, {
                         twitter: stacklaWp.admin.config.network.twitter, 
@@ -848,7 +938,8 @@
                         youtube: stacklaWp.admin.config.network.youtube, 
                         key: i, 
                         id: i, 
-                        ref: i}
+                        ref: i, 
+                        data: fieldsetData}
                     )
                 );
             }

@@ -4,24 +4,12 @@ class Stackla_WP_Metaboxes
 {
     private $config;
 
-    public function setup_metaboxes()
-    {
-        $this->config = new Stackla_WP_Settings;
-        $settings = $this->config->get_user_settings();
-
-        if($settings === false) return;
-
-        if(!$settings->stackla_post_types || $settings->stackla_post_types == '') return;
-
-        $post_types = explode(',' , $settings->stackla_post_types); 
-        
-        foreach($post_types as $post_type)
-        {
-            $this->add_metabox($post_type);
-        }
-    }
-
-    public function add_metabox($post_type)
+    /**
+    *   About;
+    *   @param {};
+    *   @return void;
+    */
+    protected function add_metabox($post_type)
     {
         add_meta_box(
             'stackla-meta-box',
@@ -31,6 +19,23 @@ class Stackla_WP_Metaboxes
             'normal',
             'high'
         );
+    }
+
+    public function setup_metaboxes()
+    {
+        $this->config = new Stackla_WP_Settings;
+        $settings = $this->config->get_user_settings();
+
+        if($settings === false) return;
+
+        if(!$settings['stackla_post_types'] || $settings['stackla_post_types'] == '') return;
+
+        $post_types = explode(',' , $settings['stackla_post_types']); 
+        
+        foreach($post_types as $post_type)
+        {
+            $this->add_metabox($post_type);
+        }
     }
 
     public function save_metabox($post_id)

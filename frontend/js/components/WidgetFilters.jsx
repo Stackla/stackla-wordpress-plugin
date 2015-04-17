@@ -58,10 +58,11 @@
         render:function()
         {            
             var i;
-            var fieldsetData = false;
-
+            
             for(i = 0 ; i < this.state.count ; i ++)
             {
+                var fieldsetData = false;
+
                 if(this.state.data.length)
                 {
                     if(typeof this.state.data[i] !== 'undefined')

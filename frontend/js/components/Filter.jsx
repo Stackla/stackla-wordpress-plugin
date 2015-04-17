@@ -116,8 +116,6 @@
         },
         render:function()
         {
-            console.log(this.state.media);
-            console.log(this.state.network);
             return (
                 <div className='stackla-block'>
                     <div className={(this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}>
@@ -189,6 +187,7 @@
                                 <input 
                                     type='checkbox' 
                                     value='text-only' 
+                                    defaultChecked={this.checkArrayValue('media' , 'text-only')}
                                     onChange={this.handleMediaCheck}/>
                                 <label className='checkbox'>
                                     Text-only
@@ -197,7 +196,8 @@
                             <fieldset>
                                 <input 
                                     type='checkbox' 
-                                    value='images' 
+                                    value='images'
+                                    defaultChecked={this.checkArrayValue('media' , 'images')}
                                     onChange={this.handleMediaCheck}/>
                                 <label className='checkbox'>
                                     Images
@@ -207,6 +207,7 @@
                                 <input 
                                     type='checkbox'
                                     value='video'
+                                    defaultChecked={this.checkArrayValue('media' , 'video')}
                                     onChange={this.handleMediaCheck}
                                 />
                                 <label className='checkbox'>

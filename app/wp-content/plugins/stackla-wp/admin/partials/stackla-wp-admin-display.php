@@ -11,45 +11,36 @@
  * @package    Stackla_WP
  * @subpackage Stackla_WP/admin/partials
  */
-    $widget = new Stackla_WP_Widget(66);
-    // $test = array(
-    //             "title" => 'test',
-    //             "terms" =>  array(
-    //                 'name' => 'test',
-    //                 'network' => 'twitter',
-    //                 'term' => 'username',
-    //                 'termName' => 'test'
-    //             )
-    //             ,
-    //             "filters" => array(
-    //                 'name' => 'test',
-    //                 'network' => 'twitter',
-    //                 'media' => array('text-only'),
-    //                 'sorting' => 'latest'
-    //             )
-    //         );
-    // $widget->set_data($test);
-    $settings = new Stackla_WP_Settings;
-    $post_type_options = $settings->get_post_type_options();
-    $user_settings = $settings->get_user_settings();
-    $set_post_types = false;
-    $set_api_key = false;
-    $checked;
+    $stackla_wp_settings = new Stackla_WP_Settings;
+    $settings = array(
+        "host" => "https://my.stackla.com/api/",
+        "post_type_options" => $stackla_wp_settings->get_post_type_options(),
+        "current" => $stackla_wp_settings->get_user_settings(),
+        "post_types" => false,
+        "stack" => false,
+        "client_id" => false,
+        "client_secret" => false
+    );
+    $stackla_stack = (isset($settings['current'])) ? $settings['current']['stackla_stack'] : '';
+    $stackla_client_id = (isset($settings['current'])) ? $settings['current']['stackla_client_id'] : '';
+    $stackla_client_secret = (isset($settings['current'])) ? $settings['current']['stackla_client_secret'] : '';
+    $stackla_callback_uri = (isset($settings['current'])) ? $settings['current']['stackla_callback_uri'] : '';
 
-    if($user_settings)
+    if(isset($settings['current']['stackla_post_types']))
     {
-        if($user_settings->stackla_post_types !== '')
-        {
-            $set_post_types = explode("," , $user_settings->stackla_post_types);
-        }
-
-        if($user_settings->stackla_api_key !== '')
-        {
-            $set_api_key = $user_settings->stackla_api_key;
-        }
+        $settings['post_types'] = explode("," , $settings['current']['stackla_post_types']);
     }
 ?>
-
+<?php  
+    $stack = "plugin-development";
+    $host  = "https://my.stackla.com/api/";
+    $client_id = '09bc6b0935f2eb4110bc97';
+    $client_secret = '9470d26ef3c1095add2ab16e0d713badd7912742ee';
+    $callback = 'http://localhost:8888/CL110-Stackla-WordpressPlugin/git/app/wp-admin/admin.php?page=stackla';
+    $credentials = new Stackla\Core\Credentials($host, null, $stack);
+    $access_uri = $credentials->getAccessUri($client_id, $client_secret, $callback);
+    echo $access_uri;
+?>
 <div id='wpbody'>
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
         <div class='wrap'>
@@ -57,19 +48,41 @@
             <form id='stackla-settings-form' class='settings-form' method='POST' action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php">
                 <fieldset>
                     <label>
-                        Your API Key
+                        Your stack
                     </label>
-                    <input type='text' name='apiKey' value="<?php echo $set_api_key ?>">
+                    <input type='text' class='widefat' name='stack' value="<?php echo $stackla_stack; ?>"
+                    >
+                </fieldset>
+                <fieldset>
+                    <label>
+                        Your client ID
+                    </label>
+                    <input type='text' class='widefat' name='client_id' value="<?php echo $stackla_client_id; ?>"
+                    >
+                </fieldset>
+                <fieldset>
+                    <label>
+                        Your client secret
+                    </label>
+                    <input type='text' class='widefat' name='client_secret' value="<?php echo $stackla_client_secret; ?>"
+                    >
+                </fieldset>
+                <fieldset>
+                    <label>
+                        Your callback URI
+                    </label>
+                    <input type='text' class='widefat' name='callback' value="<?php echo $stackla_callback_uri; ?>"
+                    >
                 </fieldset>
                 <p>
                     Display Stackla Custom Fields on
                 </p>
                 <?php 
-                    foreach($post_type_options as $option): 
+                    foreach($settings['post_type_options'] as $option): 
                 ?>
                     <fieldset>
                         <?php  
-                            ($set_post_types && in_array($option , $set_post_types)) ? $checked = 'checked' : $checked = '';
+                            ($settings['post_types'] && in_array($option , $settings['post_types'])) ? $checked = 'checked' : $checked = '';
                         ?>
                         <input type='checkbox' name='types[]' <?php echo $checked ?> value="<?php echo $option ?>">
                         <label>

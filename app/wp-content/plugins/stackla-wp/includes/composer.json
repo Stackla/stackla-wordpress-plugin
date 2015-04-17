@@ -1,0 +1,11 @@
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://rohan_creativelifeform@bitbucket.org/helmanbudianto/stackla-php-sdk.git"
+        }
+    ],
+    "require": {
+        "stackla/stackla-php-sdk": "dev-master"
+    }
+}
