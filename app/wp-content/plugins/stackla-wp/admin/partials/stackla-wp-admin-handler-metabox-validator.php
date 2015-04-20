@@ -1,9 +1,9 @@
 <?php  
     error_reporting(E_ALL);
     ini_set('error_reporting', E_ALL);
-    require_once('../../includes/class-stackla-wp-widget-validator.php');
+    require_once('../../includes/class-stackla-wp-metabox-validator.php');
 
-    $validator = new Stackla_WP_Widget_Validator($_POST);
+    $validator = new Stackla_WP_Metabox_Validator($_POST);
     $valid = $validator->validate();
 
     if($valid === false)

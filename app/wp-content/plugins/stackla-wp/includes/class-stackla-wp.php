@@ -119,16 +119,22 @@ class Stackla_WP {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-settings.php';
 
 		/**
-		 * The class responsible for validating the widget layer
+		 * The class responsible for validating the metabox data
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-widget-validator.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-metabox-validator.php';
 
 		/**
-		 * The class responsible for handling the widget layer
+		 * The class responsible for wrapping the Stackla PHP SDK
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-widget.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-sdk-wrapper.php';
+
+		/**
+		 * The class responsible for handling the metabox connection to the db
+		 * of the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-metabox.php';
 
 
 		/**

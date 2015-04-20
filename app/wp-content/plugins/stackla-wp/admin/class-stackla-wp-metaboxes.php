@@ -3,12 +3,8 @@
 class Stackla_WP_Metaboxes
 {
     private $config;
+    private $view = 'partials/stackla-wp-admin-metabox.php';
 
-    /**
-    *   About;
-    *   @param {};
-    *   @return void;
-    */
     protected function add_metabox($post_type)
     {
         add_meta_box(
@@ -64,6 +60,6 @@ class Stackla_WP_Metaboxes
 
     public function render_metabox($object , $box)
     {
-        include('partials/stackla-wp-metabox.php');
+        include($this->view);
     }
 }

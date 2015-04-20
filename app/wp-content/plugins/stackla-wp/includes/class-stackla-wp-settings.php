@@ -10,9 +10,10 @@
  */
 
 require_once('class-stackla-wp-activator.php');
-require_once('class-stackla-wp-widget-validator.php');
+require_once('class-stackla-wp-metabox-validator.php');
 
-class Stackla_WP_Settings {
+class Stackla_WP_Settings 
+{
     private $table;
     private $wpdb;
     private $user_id;
@@ -43,7 +44,7 @@ class Stackla_WP_Settings {
 
     /**
     *   Gets the public wordpress post types;
-    *   @return {$post_types} an array of public post types;
+    *   @return array   $post_types  public post types array;
     */
 
     protected function get_wp_post_types()
@@ -57,7 +58,7 @@ class Stackla_WP_Settings {
 
     /**
     *   Filters the wordpress public post types against the exclude_options array;
-    *   @return {$post_types} the filtered post_types array;
+    *   @return array   $post_types the filtered post_types array;
     */
 
     public function get_post_type_options()
@@ -89,7 +90,7 @@ class Stackla_WP_Settings {
 
     /**
     *   Validates the submitted options data;
-    *   @param {$data} an array of POST data;
+    *   @param  array    $data    an array of POST data;
     *   @return boolean based on a valid or invalid result;
     */
 
@@ -97,7 +98,7 @@ class Stackla_WP_Settings {
     {
         $wp_post_types = $this->get_wp_post_types();
 
-        if(!Stackla_WP_Widget_Validator::validate_array_item($data['stack']))
+        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['stack']))
         {
             $this->errors[] = "You must submit a valid stack name";
         }
@@ -106,7 +107,7 @@ class Stackla_WP_Settings {
             $this->stackla_stack = $data['stack'];
         }
 
-        if(!Stackla_WP_Widget_Validator::validate_array_item($data['client_id']))
+        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['client_id']))
         {
             $this->errors[] = 'You must submit a valid client id';
         }
@@ -115,7 +116,7 @@ class Stackla_WP_Settings {
             $this->stackla_client_id = $data['client_id'];
         }
 
-        if(!Stackla_WP_Widget_Validator::validate_array_item($data['client_secret']))
+        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['client_secret']))
         {
             $this->errors[] = 'You must submit a valid client secret';
         }
@@ -124,7 +125,7 @@ class Stackla_WP_Settings {
             $this->stackla_client_secret = $data['client_secret'];
         }
 
-        if(!Stackla_WP_Widget_Validator::validate_array_item($data['callback']))
+        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['callback']))
         {
             $this->errors[] = 'You must submit a valid callback URI';
         }
@@ -174,7 +175,7 @@ class Stackla_WP_Settings {
 
     /**
     *   Inserts the posted data into the db;
-    *   @param {$data} an array of validated POST data;
+    *   @param  array    $data   an array of validated POST data;
     *   @return void;
     */
 
@@ -275,7 +276,8 @@ class Stackla_WP_Settings {
 
     /**
     *   Gets the current user's settings if they exist;
-    *   @return {$results || false} an array containing the settings or false if none exist;
+    *   @return array   $results    an array containing the user settings if they exist;
+    *   @return boolean false   if no settings exist
     */
 
     public function get_user_settings()

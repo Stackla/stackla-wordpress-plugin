@@ -9,7 +9,7 @@
  * @author     Rohan Deshpande <rohan.deshpande@stackla.com>
  */
 
-class Stackla_WP_Widget_Validator {
+class Stackla_WP_Metabox_Validator {
 
     private $data;
     protected $allowed_networks = ['twitter' , 'facebook' , 'instagram' , 'youtube'];

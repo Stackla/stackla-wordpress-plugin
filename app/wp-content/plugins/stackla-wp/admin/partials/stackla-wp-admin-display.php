@@ -19,7 +19,7 @@
         "post_types" => false
     );
 
-    $stackla_host = "https://api.qa.stackla.com/api/";
+    $auth_host = "https://api.qa.stackla.com/api/";
     $stackla_stack = '';
     $stackla_client_id = '';
     $stackla_client_secret = '';
@@ -50,7 +50,7 @@
         }
     }
 
-    $credentials = new Stackla\Core\Credentials($stackla_host, null, $stackla_stack);
+    $credentials = new Stackla\Core\Credentials($auth_host, null, $stackla_stack);
     $access_uri = $credentials->getAccessUri($stackla_client_id, $stackla_client_secret, $stackla_callback_uri);
 
     if(isset($_GET['code']))

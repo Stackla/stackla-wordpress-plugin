@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Fetch and save widget data;
+ * Fetch and save metabox data;
  *
  *
  *  @package    Stackla_WP
@@ -14,8 +14,8 @@
 
 require_once('class-stackla-wp-activator.php');
 
-class Stackla_WP_Widget {
-
+class Stackla_WP_Metabox 
+{
     protected $data;
     protected $id;
     protected $title_meta_key = "stackla_wp_title";
@@ -28,8 +28,8 @@ class Stackla_WP_Widget {
 
     /**
     *   -- CONSTRUCTOR --
-    *   Sets the existing widget data for a post;
-    *   @param {$id} a post id;
+    *   Sets the existing metabox data for a post;
+    *   @param  int $id a post id;
     *   @return void;
     */
 
@@ -50,8 +50,8 @@ class Stackla_WP_Widget {
     }
 
     /**
-    *   Returns the widget object data as an array;
-    *   @return {$this->data} an associative array containing all the widget data;
+    *   Returns the metabox object data as an array;
+    *   @return array   $this->data an associative array containing all the metabox data;
     */
 
     public function get_data()
@@ -60,14 +60,20 @@ class Stackla_WP_Widget {
     }
 
     /**
-    *   Returns the widget object data as a json string;
-    *   @return {$this->data} a json string which has special characters turned into their hex values;
+    *   Returns the metabox object data as a json string;
+    *   @return string  $this->data a json string which has special characters turned into their hex values;
     */
 
     public function get_json()
     {
         return json_encode($this->data , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+    *   Sets the data of the metabox;
+    *   @param  array   $new        the new data to be saved;
+    *   @return array   $results    the results of the save;
+    */
 
     public function set_data($new)
     {

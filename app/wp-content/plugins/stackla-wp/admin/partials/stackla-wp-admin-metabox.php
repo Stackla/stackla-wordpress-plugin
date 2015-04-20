@@ -1,9 +1,9 @@
 <?php  
     wp_nonce_field( basename( __FILE__ ), 'stackla_for_wordpress_nonce' );
-    $widget = new Stackla_WP_Widget($object->ID);
+    $metabox = new Stackla_WP_Metabox($object->ID);
     $settings = new Stackla_WP_Settings;
     $access_token = $settings->get_user_access_token();
-    $widget_json = $widget->get_json();
+    $widget_json = $metabox->get_json();
 ?>
 <?php  
     if(!$access_token):
@@ -20,7 +20,7 @@
 <div id='stackla-metabox' 
     data-stackla='<?php echo $widget_json; ?>'
     data-postid="<?php echo $object->ID ?>"
-    data-validator="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-widget-validator.php"
-    data-handler="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-widget.php"
+    data-validator="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox-validator.php"
+    data-handler="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox.php"
     data-token="<?php echo ($access_token) ? $access_token : '' ?>"
 ></div>
