@@ -352,8 +352,7 @@
                 'terms':terms,
                 'filters':filters
             };
-            console.log('raw data:');
-            console.log(data);
+
             this.validate(data);
         },
         validate:function(data)
@@ -368,8 +367,6 @@
                 data:data
             }).done(function(response)
             {
-                console.log('raw response:');
-                console.log(response);
                 if(typeof response == 'object')
                 {
                     self.handleErrors(response.errors);
@@ -381,6 +378,7 @@
                 }
             }).fail(function(xhr , status , error)
             {
+                //todo; create RequestError component to render these errors
                 console.log('fail!');
                 console.log(error);
             });
@@ -420,14 +418,14 @@
             {
                 url:stacklaWp.admin.metabox.handler,
                 type:'POST',
-                //dataType:'json',
+                dataType:'json',
                 data:data
             }).done(function(response)
             {
-                console.log('raw post response:');
                 console.log(response);
             }).fail(function(xhr , status , error)
             {
+                //todo; create RequestError component to render these errors
                 console.log('post fail!');
                 console.log(error);
             });

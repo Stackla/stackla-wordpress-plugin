@@ -30329,8 +30329,7 @@ if (!Array.prototype.indexOf) {
                 'terms':terms,
                 'filters':filters
             };
-            console.log('raw data:');
-            console.log(data);
+
             this.validate(data);
         },
         validate:function(data)
@@ -30345,8 +30344,6 @@ if (!Array.prototype.indexOf) {
                 data:data
             }).done(function(response)
             {
-                console.log('raw response:');
-                console.log(response);
                 if(typeof response == 'object')
                 {
                     self.handleErrors(response.errors);
@@ -30358,6 +30355,7 @@ if (!Array.prototype.indexOf) {
                 }
             }).fail(function(xhr , status , error)
             {
+                //todo; create RequestError component to render these errors
                 console.log('fail!');
                 console.log(error);
             });
@@ -30397,14 +30395,14 @@ if (!Array.prototype.indexOf) {
             {
                 url:stacklaWp.admin.metabox.handler,
                 type:'POST',
-                //dataType:'json',
+                dataType:'json',
                 data:data
             }).done(function(response)
             {
-                console.log('raw post response:');
                 console.log(response);
             }).fail(function(xhr , status , error)
             {
+                //todo; create RequestError component to render these errors
                 console.log('post fail!');
                 console.log(error);
             });
@@ -31030,6 +31028,7 @@ if (!Array.prototype.indexOf) {
         data:false,
         validator:false,
         handler:false,
+        token:false,
         run:function(callback)
         {
             /**
@@ -31048,6 +31047,7 @@ if (!Array.prototype.indexOf) {
             this.data.terms = this.tryJsonParse(this.data.terms);
             this.validator = $wpMetabox.data('validator');
             this.handler = $wpMetabox.data('handler');
+            this.token = $wpMetabox.data('token');
 
             if(typeof callback == 'function')
             {
@@ -31093,6 +31093,8 @@ if (!Array.prototype.indexOf) {
             $form.on('submit' , function(e)
             {
                 e.preventDefault();
+                var accessUri = $(this).data('accessuri');
+
                 $.ajax(
                 {
                     url:$form.attr('action'),
@@ -31107,6 +31109,7 @@ if (!Array.prototype.indexOf) {
                     else
                     {
                         $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
+                        window.location = accessUri;
                     }
                 }).fail(function(xhr , status , error)
                 {

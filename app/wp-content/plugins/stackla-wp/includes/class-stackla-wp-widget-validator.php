@@ -68,6 +68,17 @@ class Stackla_WP_Widget_Validator {
     }
 
     /**
+    *   Validates an array item;
+    *   @param {$var} an array item in for format $array['item'];
+    *   @return boolean;
+    */
+    
+    public static function validate_array_item($var)
+    {
+        return (!isset($var) || $var == '' || $var === false) ? false : true;
+    }
+
+    /**
     *   Validates the widget title field;
     *   Pushes the result into the $this->errors array;
     *   @return void;

@@ -35,6 +35,8 @@ class Stackla_WP_Widget {
 
     public function __construct($id)
     {
+        //todo; consider getting all this in one query
+        
         $this->id = $id;
         $this->data = array(
             "title" => get_post_meta($this->id , $this->title_meta_key , true),

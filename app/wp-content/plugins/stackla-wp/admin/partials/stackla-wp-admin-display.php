@@ -12,40 +12,95 @@
  * @subpackage Stackla_WP/admin/partials
  */
     $stackla_wp_settings = new Stackla_WP_Settings;
-    $settings = array(
-        "host" => "https://my.stackla.com/api/",
-        "post_type_options" => $stackla_wp_settings->get_post_type_options(),
-        "current" => $stackla_wp_settings->get_user_settings(),
-        "post_types" => false,
-        "stack" => false,
-        "client_id" => false,
-        "client_secret" => false
-    );
-    $stackla_stack = (isset($settings['current'])) ? $settings['current']['stackla_stack'] : '';
-    $stackla_client_id = (isset($settings['current'])) ? $settings['current']['stackla_client_id'] : '';
-    $stackla_client_secret = (isset($settings['current'])) ? $settings['current']['stackla_client_secret'] : '';
-    $stackla_callback_uri = (isset($settings['current'])) ? $settings['current']['stackla_callback_uri'] : '';
 
-    if(isset($settings['current']['stackla_post_types']))
+    $settings = array(
+        "current" => $stackla_wp_settings->get_user_settings(),
+        "post_type_options" => $stackla_wp_settings->get_post_type_options(),
+        "post_types" => false
+    );
+
+    $stackla_host = "https://api.qa.stackla.com/api/";
+    $stackla_stack = '';
+    $stackla_client_id = '';
+    $stackla_client_secret = '';
+    $stackla_callback_uri = '';
+    $current = false;
+    $access_token = false;
+    $token_response = false;
+    $token_saved = false;
+
+    if(is_array($settings['current']))
     {
-        $settings['post_types'] = explode("," , $settings['current']['stackla_post_types']);
+        $current = $settings['current'];
+
+        $stackla_stack = $current['stackla_stack'];
+        $stackla_client_id = $current['stackla_client_id'];
+        $stackla_client_secret = $current['stackla_client_secret'];
+        $stackla_callback_uri = $current['stackla_callback_uri'];
+        $stackla_token = $current['stackla_token'];
+
+        if(isset($current['stackla_post_types']))
+        {
+            $settings['post_types'] = explode("," , $current['stackla_post_types']);
+        }
+
+        if(!is_null($stackla_token) && strlen($stackla_token) > 0)
+        {
+            $access_token = $stackla_token;
+        }
     }
-?>
-<?php  
-    $stack = "plugin-development";
-    $host  = "https://my.stackla.com/api/";
-    $client_id = '09bc6b0935f2eb4110bc97';
-    $client_secret = '9470d26ef3c1095add2ab16e0d713badd7912742ee';
-    $callback = 'http://localhost:8888/CL110-Stackla-WordpressPlugin/git/app/wp-admin/admin.php?page=stackla';
-    $credentials = new Stackla\Core\Credentials($host, null, $stack);
-    $access_uri = $credentials->getAccessUri($client_id, $client_secret, $callback);
-    echo $access_uri;
+
+    $credentials = new Stackla\Core\Credentials($stackla_host, null, $stackla_stack);
+    $access_uri = $credentials->getAccessUri($stackla_client_id, $stackla_client_secret, $stackla_callback_uri);
+
+    if(isset($_GET['code']))
+    {
+        try
+        {
+            $token_response = $credentials->generateToken(
+                $stackla_client_id,
+                $stackla_client_secret,
+                $_GET['code'],
+                $stackla_callback_uri
+            );
+            if($token_response)
+            {
+                $access_token = $credentials->token;
+                $token_saved = $stackla_wp_settings->save_access_token($access_token);
+            }
+        }
+        catch(Exception $e)
+        {
+            echo $e->getMessage();
+        }        
+    }
 ?>
 <div id='wpbody'>
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
         <div class='wrap'>
             <h2>Stackla For WordPress</h2>
-            <form id='stackla-settings-form' class='settings-form' method='POST' action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php">
+            <?php  
+                if($access_token):
+            ?>
+                <div class='auth-notification success'>
+                    This plugin instance has been authorized
+                </div>
+            <?php  
+                else:
+            ?>
+                <div class='auth-notification failure'>
+                     You have not authorized this plugin instance with Stackla, or your token has expired.
+                </div>
+            <?php  
+                endif;
+            ?>
+            <form 
+                id='stackla-settings-form' 
+                class='settings-form' 
+                method='POST' 
+                action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php"
+                data-accessuri="<?php echo $access_uri; ?>"
+            >
                 <fieldset>
                     <label>
                         Your stack
@@ -92,7 +147,17 @@
                 <?php 
                     endforeach; 
                 ?>
-                <input type='submit' value='Save Settings' class='button'>
+                <?php  
+                    if($access_token):
+                ?>
+                        <input type='submit' value='Save' class='button'>
+                <?php   
+                    else: 
+                ?>
+                        <input type='submit' value='Authorize' class='button'>
+                <?php 
+                    endif; 
+                ?>
             </form>
             <div id='feedback'></div>
         </div>

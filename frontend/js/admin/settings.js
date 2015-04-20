@@ -20,6 +20,8 @@
             $form.on('submit' , function(e)
             {
                 e.preventDefault();
+                var accessUri = $(this).data('accessuri');
+
                 $.ajax(
                 {
                     url:$form.attr('action'),
@@ -34,6 +36,7 @@
                     else
                     {
                         $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
+                        window.location = accessUri;
                     }
                 }).fail(function(xhr , status , error)
                 {

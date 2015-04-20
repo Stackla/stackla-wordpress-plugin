@@ -8,6 +8,7 @@
         data:false,
         validator:false,
         handler:false,
+        token:false,
         run:function(callback)
         {
             /**
@@ -26,6 +27,7 @@
             this.data.terms = this.tryJsonParse(this.data.terms);
             this.validator = $wpMetabox.data('validator');
             this.handler = $wpMetabox.data('handler');
+            this.token = $wpMetabox.data('token');
 
             if(typeof callback == 'function')
             {
