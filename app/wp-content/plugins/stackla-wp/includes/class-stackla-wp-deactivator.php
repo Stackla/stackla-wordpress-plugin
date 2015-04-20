@@ -39,10 +39,7 @@ class Stackla_WP_Deactivator {
         global $wpdb;
         
         $tables = array(
-            Stackla_WP_Activator::$settings_table,
-            Stackla_WP_Activator::$terms_table,
-            Stackla_WP_Activator::$tags_table,
-            Stackla_WP_Activator::$filters_table,
+            Stackla_WP_Activator::$settings_table
         );
 
         foreach($tables as $table)
