@@ -16,14 +16,16 @@
                 id:this.props.id,
                 name:(this.props.data) ? this.props.data.name : '',
                 network:(this.props.data) ? this.props.data.network : stacklaWp.admin.config.networks,
+                filterId:(typeof this.props.data.filterId !== 'undefined') ? this.props.data.filterId : '',
                 media:(this.props.data) ? this.props.data.media : stacklaWp.admin.config.media,
                 sorting:(this.props.data) ? this.props.data.sorting : 'latest',
-                errors:false
+                errors:false,
+                edited:false
             }
         },
         handleNameChange:function(e)
         {
-            this.setState({name:e.target.value});
+            this.setState({name:e.target.value , edited:true});
         },
         handleNetworkCheck:function(e)
         {
@@ -38,7 +40,8 @@
 
                     this.setState(
                     {
-                        network:copy
+                        network:copy,
+                        edited:true
                     });
                 }
             }
@@ -50,7 +53,8 @@
 
                     this.setState(
                     {
-                        network:copy
+                        network:copy,
+                        edited:true
                     });
                 }
             }
@@ -68,7 +72,8 @@
 
                     this.setState(
                     {
-                        media:copy
+                        media:copy,
+                        edited:true
                     });
                 }
             }
@@ -80,14 +85,15 @@
 
                     this.setState(
                     {
-                        media:copy
+                        media:copy,
+                        edited:true
                     });
                 }
             }
         },
         handleSortingChange:function(e)
         {
-            this.setState({sorting:e.target.value});
+            this.setState({sorting:e.target.value , edited:true});
         },
         checkArrayValue:function(key , value)
         {
@@ -352,7 +358,7 @@
                 'terms':terms,
                 'filters':filters
             };
-
+            console.log(data);
             this.validate(data);
         },
         validate:function(data)
@@ -373,7 +379,7 @@
 
                     if(response.result == '1')
                     {
-                        self.save(data);
+                        //self.save(data);
                     }
                 }
             }).fail(function(xhr , status , error)
@@ -418,7 +424,7 @@
             {
                 url:stacklaWp.admin.metabox.handler,
                 type:'POST',
-                dataType:'json',
+                //dataType:'json',
                 data:data
             }).done(function(response)
             {
@@ -444,7 +450,7 @@
                     React.createElement("section", {className: "filters"}, 
                         React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters", initialData: stacklaWp.admin.metabox.data.filters})
                     ), 
-                    React.createElement("a", {href: "#", onClick: this.compileData}, "Save")
+                    React.createElement("a", {href: "#", ref: "saveMetabox", onClick: this.compileData}, "Save")
                 )
             );
         }
@@ -453,9 +459,7 @@
 /*
     Beware all ye who enter; there's a bunch of hardcoded stuff in here
 */
-/*
-    Beware all ye who enter; there's a bunch of hardcoded stuff in here
-*/
+
 (function(window)
 {
     'use strict';
@@ -464,6 +468,7 @@
     {displayName: "Term",
         propTypes:
         {
+            editWidgetTermsData:React.PropTypes.func,
             errors:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
             twitter:React.PropTypes.array,
             facebook:React.PropTypes.array,
@@ -478,15 +483,29 @@
                 id:this.props.id,
                 name:(this.props.data) ? this.props.data.name : '',
                 network:(this.props.data) ? this.props.data.network : '',
+                termId:(typeof this.props.data.termId !== 'undefined') ? this.props.data.termId : '',
                 term:(this.props.data) ? this.props.data.term : '',
                 termValue:(this.props.data) ? this.props.data.termValue : '',
                 termDelimited:(this.props.data) ? this.props.data.network + '-' + this.props.data.term : '',
-                errors:false
+                errors:false,
+                edited:false,
+                removed:false
             }
+        },
+        /**
+        *   Resets the default values of all fields to what is defined in the state;
+        *   @return void;
+        */
+        forceDefaultValueUpdates:function()
+        {
+            $(React.findDOMNode(this.refs.termName)).val(this.state.name);
+            $(React.findDOMNode(this.refs.termNetwork)).val(this.state.network);
+            $(React.findDOMNode(this.refs.termTerm)).val(this.state.termDelimited);
+            $(React.findDOMNode(this.refs[this.state.termDelimited + '-value'])).val(this.state.termValue);
         },
         handleNameChange:function(e)
         {
-            this.setState({name:e.target.value});
+            this.setState({name:e.target.value , edited:true});
         },
         /**
         *   Handles the user changed the network option;
@@ -515,12 +534,13 @@
             {
                 network:value,
                 term:'',
-                termValue:''
+                termValue:'',
+                edited:true
             });
         },
         /**
         *   Handles the user changed the network's term option;
-        *   @param {e} a JavaScript event object;
+        *   @param {e} event object;
         *   @return void;
         */
         handleTermChange:function(e)
@@ -535,18 +555,77 @@
             this.setState(
             {
                 term:split[1],
-                termValue:''
+                termValue:'',
+                edited:true
             });
         },
+        /**
+        *   Handles what happens when a term value is changed by the user;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleTermValueChange:function(e)
         {
-            this.setState({termValue:e.target.value});
+            this.setState({termValue:e.target.value , edited:true});
         },
+        handleRemoveTerm(e)
+        {
+            e.preventDefault();
+            this.setState({removed:true});
+            // var self = this;
+            // var data = 
+            // {
+            //     index:this.state.id,
+            //     termId:this.state.termId
+            // };
+
+            // if(typeof data.termId == 'undefined' || data.termId === '')
+            // {
+            //     this.props.editWidgetTermsData(data.index);
+            // }
+            // else
+            // {
+            //     $.ajax(
+            //     {
+            //         url:stacklaWp.admin.metabox.handler,
+            //         type:'POST',
+            //         data:{removeStacklaTerm:true , termId:data.termId}
+            //     }).done(function(response)
+            //     {
+            //         console.log(response);
+            //         self.props.editWidgetTermsData(data.index);
+            //     }).fail(function(xhr , status , error)
+            //     {
+            //         console.log(error);
+            //     });
+            // }
+        },
+        /**
+        *   Matches the current network being rendered against what is in the state;
+        *   @param {network} the current network in the render loop;
+        *   @return boolean;
+        */
         displayNetworkTermOptions:function(network)
         {
             if(this.state.network === '') return false;
             if(this.state.network == network) return true;
             return false;
+        },
+        /**
+        *   Sets the termTerm reference on the network term options select;
+        *   @param {network} the current network in the render loop;
+        *   @return {string} sets the reference to termTerm if the network matches what is in the state;
+        */
+        setTermRef:function(network)
+        {
+            if(this.displayNetworkTermOptions(network))
+            {
+                return 'termTerm';
+            }
+            else
+            {
+                return '';
+            }
         },
         checkTermSelected:function(termOptionsName , options)
         {
@@ -569,7 +648,14 @@
         render:function()
         {
             var self = this;
-            console.log(this.state);
+
+            if(this.state.removed === true)
+            {
+                return (
+                    React.createElement("div", null)
+                );
+            }
+
             return (
                 React.createElement("div", {className: "stackla-block"}, 
                     React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
@@ -577,13 +663,13 @@
                             React.createElement("label", null, 
                                 "Term name"
                             ), 
-                            React.createElement("input", {type: "text", className: "widefat", defaultValue: this.state.name, onChange: this.handleNameChange})
+                            React.createElement("input", {type: "text", className: "widefat", ref: "termName", defaultValue: this.state.name, onChange: this.handleNameChange})
                         ), 
                         React.createElement("fieldset", null, 
                             React.createElement("label", null, 
                                 "Choose a network"
                             ), 
-                            React.createElement("select", {onChange: this.handleNetworkChange, defaultValue: this.state.network}, 
+                            React.createElement("select", {ref: "termNetwork", onChange: this.handleNetworkChange, defaultValue: this.state.network}, 
                                 React.createElement("option", {value: ""}), 
                                 
                                     stacklaWp.admin.config.networks.map(function(network , i)
@@ -603,7 +689,7 @@
                                     return  React.createElement("select", {
                                                 className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
                                                 defaultValue: self.checkTermSelected(network , self.props[network]), 
-                                                ref: network, 
+                                                ref: self.setTermRef(network), 
                                                 onChange: self.handleTermChange, 
                                                 key: network + i
                                             }, 
@@ -625,8 +711,8 @@
                         ), 
                         React.createElement("fieldset", {ref: "termValue", className: "term-values"}, 
                             React.createElement("fieldset", {
-                                ref: "twitter-username", 
-                                className: (this.checkTermValueOption('twitter-username')) ? 'hide display' : 'hide'
+                                ref: "twitter-user", 
+                                className: (this.checkTermValueOption('twitter-user')) ? 'hide display' : 'hide'
                             }, 
                                 React.createElement("label", null, 
                                     "Twitter Username"
@@ -636,7 +722,8 @@
                                 ), 
                                 React.createElement("input", {
                                     type: "text", 
-                                    defaultValue: this.getDefaultTermValue('twitter-username'), 
+                                    defaultValue: this.getDefaultTermValue('twitter-user'), 
+                                    ref: "twitter-user-value", 
                                     maxLength: "15", 
                                     onChange: this.handleTermValueChange})
                             ), 
@@ -654,6 +741,7 @@
                                     type: "text", 
                                     maxLength: "129", 
                                     defaultValue: this.getDefaultTermValue('twitter-hastag'), 
+                                    ref: "twitter-hashtag-value", 
                                     onChange: this.handleTermValueChange}
                                 )
                             ), 
@@ -667,6 +755,7 @@
                                 React.createElement("input", {
                                     type: "text", 
                                     defaultValue: this.getDefaultTermValue('facebook-page'), 
+                                    ref: "facebook-page-value", 
                                     onChange: this.handleTermValueChange}
                                 )
                             ), 
@@ -680,6 +769,7 @@
                                 React.createElement("input", {
                                     type: "text", 
                                     defaultValue: this.getDefaultTermValue('facebook-search'), 
+                                    ref: "facebook-search-value", 
                                     onChange: this.handleTermValueChange})
                             ), 
                             React.createElement("fieldset", {
@@ -695,6 +785,7 @@
                                 React.createElement("input", {
                                     type: "text", 
                                     defaultValue: this.getDefaultTermValue('instagram-user'), 
+                                    ref: "instagram-user-value", 
                                     onChange: this.handleTermValueChange}
                                 )
                             ), 
@@ -711,6 +802,7 @@
                                 React.createElement("input", {
                                     type: "text", 
                                     defaultValue: this.getDefaultTermValue('instagram-hashtag'), 
+                                    ref: "instagram-hashtag-value", 
                                     onChange: this.handleTermValueChange})
                             ), 
                             React.createElement("fieldset", {
@@ -723,6 +815,7 @@
                                 React.createElement("input", {
                                     type: "text", 
                                     defaultValue: this.getDefaultTermValue('youtube-user'), 
+                                    ref: "youtube-user-value", 
                                     onChange: this.handleTermValueChange}
                                 )
                             ), 
@@ -736,11 +829,21 @@
                                 React.createElement("input", {
                                     type: "text", 
                                     defaultValue: this.getDefaultTermValue('youtube-search'), 
+                                    ref: "youtube-search-value", 
                                     onChange: this.handleTermValueChange}
                                 )
                             )
+                        ), 
+                        React.createElement("div", null, 
+                            React.createElement("a", {
+                                className: "button remove-term", 
+                                onClick: this.handleRemoveTerm
+                            }, 
+                                "Remove ", React.createElement("b", null, this.state.name)
+                            )
                         )
                     ), 
+
                     React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
                         React.createElement("ul", null, 
                             React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
@@ -756,7 +859,8 @@
                                 (this.state.errors.termValue) ? this.state.errors.termValue : ''
                             )
                         )
-                     )
+                    )
+                    
                 )
             );
         }
@@ -908,6 +1012,58 @@
                 count:this.state.count - 1
             });
         },
+        editTermsData:function(index)
+        {
+            if(!this.state.data.length) return;
+
+            var self = this;
+
+            if(this.state.data.length === 1)
+            {
+                this.setState(
+                {
+                    items:[],
+                    data:[],
+                    count:1
+                },
+                function()
+                {
+                    $.each(self.refs , function(key , child)
+                    {
+                        var c = child;
+
+                        child.setState(child.getInitialState() , function()
+                        {
+                            c.forceDefaultValueUpdates();
+                        });
+                    });
+                });
+
+                return;
+            }
+
+            var copy = this.state.data.slice();
+            var removed = copy.splice(index , 1);
+
+            this.setState(
+            {
+                items:[],
+                data:copy,
+                count:copy.length
+            },
+            function()
+            {
+                $.each(self.refs , function(key , child)
+                {
+                    var c = child;
+
+                    child.setState(child.getInitialState() , function()
+                    {
+                        c.forceDefaultValueUpdates();
+                    });
+                });
+            });
+        },
         /**
         *   Loops through the count, pushes Term components to the items array;
         *   Renders these components;
@@ -916,7 +1072,7 @@
         render:function()
         {
             var i;
-            
+
             for(i = 0 ; i < this.state.count ; i++)
             {
                 var fieldsetData = false;
@@ -928,8 +1084,10 @@
                         fieldsetData = this.state.data[i];
                     }
                 }
+
                 this.state.items.push(
                     React.createElement(this.state.dependencies.Term, {
+                        editWidgetTermsData: this.editTermsData, 
                         twitter: stacklaWp.admin.config.network.twitter, 
                         facebook: stacklaWp.admin.config.network.facebook, 
                         instagram: stacklaWp.admin.config.network.instagram, 
@@ -946,8 +1104,7 @@
                 React.createElement("div", {className: "stackla-widget-terms"}, 
                     React.createElement("header", null, 
                         React.createElement("h2", null, "Create Terms"), 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Term"), 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.removeTerm}, "Remove Term")
+                        React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Term")
                     ), 
                     this.state.items
                 )

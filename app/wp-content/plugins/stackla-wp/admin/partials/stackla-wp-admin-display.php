@@ -11,6 +11,8 @@
  * @package    Stackla_WP
  * @subpackage Stackla_WP/admin/partials
  */
+    $sdk = new Stackla_WP_SDK_Wrapper(66);
+    
     $stackla_wp_settings = new Stackla_WP_Settings;
 
     $settings = array(

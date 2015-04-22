@@ -2,7 +2,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://rohan_creativelifeform@bitbucket.org/helmanbudianto/stackla-php-sdk.git"
+            "url": "https://github.com/stackla/stackla-php-sdk.git"
         }
     ],
     "require": {

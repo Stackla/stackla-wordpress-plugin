@@ -16,14 +16,16 @@
                 id:this.props.id,
                 name:(this.props.data) ? this.props.data.name : '',
                 network:(this.props.data) ? this.props.data.network : stacklaWp.admin.config.networks,
+                filterId:(typeof this.props.data.filterId !== 'undefined') ? this.props.data.filterId : '',
                 media:(this.props.data) ? this.props.data.media : stacklaWp.admin.config.media,
                 sorting:(this.props.data) ? this.props.data.sorting : 'latest',
-                errors:false
+                errors:false,
+                edited:false
             }
         },
         handleNameChange:function(e)
         {
-            this.setState({name:e.target.value});
+            this.setState({name:e.target.value , edited:true});
         },
         handleNetworkCheck:function(e)
         {
@@ -38,7 +40,8 @@
 
                     this.setState(
                     {
-                        network:copy
+                        network:copy,
+                        edited:true
                     });
                 }
             }
@@ -50,7 +53,8 @@
 
                     this.setState(
                     {
-                        network:copy
+                        network:copy,
+                        edited:true
                     });
                 }
             }
@@ -68,7 +72,8 @@
 
                     this.setState(
                     {
-                        media:copy
+                        media:copy,
+                        edited:true
                     });
                 }
             }
@@ -80,14 +85,15 @@
 
                     this.setState(
                     {
-                        media:copy
+                        media:copy,
+                        edited:true
                     });
                 }
             }
         },
         handleSortingChange:function(e)
         {
-            this.setState({sorting:e.target.value});
+            this.setState({sorting:e.target.value , edited:true});
         },
         checkArrayValue:function(key , value)
         {

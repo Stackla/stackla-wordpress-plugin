@@ -98,7 +98,7 @@ class Stackla_WP_Settings
     {
         $wp_post_types = $this->get_wp_post_types();
 
-        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['stack']))
+        if(!Stackla_WP_Metabox_Validator::validate_string($data['stack']))
         {
             $this->errors[] = "You must submit a valid stack name";
         }
@@ -107,7 +107,7 @@ class Stackla_WP_Settings
             $this->stackla_stack = $data['stack'];
         }
 
-        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['client_id']))
+        if(!Stackla_WP_Metabox_Validator::validate_string($data['client_id']))
         {
             $this->errors[] = 'You must submit a valid client id';
         }
@@ -116,7 +116,7 @@ class Stackla_WP_Settings
             $this->stackla_client_id = $data['client_id'];
         }
 
-        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['client_secret']))
+        if(!Stackla_WP_Metabox_Validator::validate_string($data['client_secret']))
         {
             $this->errors[] = 'You must submit a valid client secret';
         }
@@ -125,7 +125,7 @@ class Stackla_WP_Settings
             $this->stackla_client_secret = $data['client_secret'];
         }
 
-        if(!Stackla_WP_Metabox_Validator::validate_array_item($data['callback']))
+        if(!Stackla_WP_Metabox_Validator::validate_string($data['callback']))
         {
             $this->errors[] = 'You must submit a valid callback URI';
         }

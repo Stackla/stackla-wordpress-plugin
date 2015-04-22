@@ -16,15 +16,14 @@ require_once('class-stackla-wp-activator.php');
 
 class Stackla_WP_Metabox 
 {
-    protected $data;
+    protected static $data;
     protected $id;
-    protected $title_meta_key = "stackla_wp_title";
-    protected $terms_meta_key = "stackla_wp_terms";
-    protected $filters_meta_key = "stackla_wp_filters";
-    protected $tag_meta_key = "stackla_wp_tag";
-    protected $tag_id_meta_key = "stackla_wp_tag_id";
-    protected $terms_id_meta_key = "stackla_wp_terms_id";
-    protected $filters_id_meta_key = "stackla_wp_filters_id";
+
+    public static $title_meta_key = "stackla_wp_title";
+    public static $terms_meta_key = "stackla_wp_terms";
+    public static $filters_meta_key = "stackla_wp_filters";
+    public static $tag_meta_key = "stackla_wp_tag";
+    public static $tag_id_meta_key = "stackla_wp_tag_id";
 
     /**
     *   -- CONSTRUCTOR --
@@ -38,35 +37,38 @@ class Stackla_WP_Metabox
         //todo; consider getting all this in one query
         
         $this->id = $id;
-        $this->data = array(
-            "title" => get_post_meta($this->id , $this->title_meta_key , true),
-            "terms" => get_post_meta($this->id , $this->terms_meta_key , true),
-            "filters" => get_post_meta($this->id , $this->filters_meta_key , true),
-            "tag" => get_post_meta($this->id , $this->tag_meta_key , true),
-            "tag_id" => get_post_meta($this->id , $this->tag_id_meta_key , true),
-            "terms_id" => get_post_meta($this->id , $this->terms_id_meta_key , true),
-            "filters_id" => get_post_meta($this->id , $this->filters_id_meta_key , true)
+        self::$data = array(
+            "title" => get_post_meta($this->id , self::$title_meta_key , true),
+            "terms" => get_post_meta($this->id , self::$terms_meta_key , true),
+            "filters" => get_post_meta($this->id , self::$filters_meta_key , true),
+            "tag" => get_post_meta($this->id , self::$tag_meta_key , true),
+            "tag_id" => get_post_meta($this->id , self::$tag_id_meta_key , true),
         );
     }
 
     /**
     *   Returns the metabox object data as an array;
-    *   @return array   $this->data an associative array containing all the metabox data;
+    *   @return array   self::$data an associative array containing all the metabox data;
     */
 
     public function get_data()
     {
-        return $this->data;
+        return self::$data;
     }
 
     /**
     *   Returns the metabox object data as a json string;
-    *   @return string  $this->data a json string which has special characters turned into their hex values;
+    *   @return string  self::$data a json string which has special characters turned into their hex values;
     */
 
     public function get_json()
     {
-        return json_encode($this->data , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+        return json_encode(self::$data , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+    }
+
+    public function set_json($data)
+    {
+        return json_encode($data , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -79,53 +81,79 @@ class Stackla_WP_Metabox
     {
         $results = array();
 
-        foreach($this->data as $k => $v)
+        foreach(self::$data as $k => $v)
         {
             switch($k)
             {
                 case "title":
-                    if($v === '')
-                    {
-                        $results['title'] = add_post_meta($this->id , $this->title_meta_key , $new['title']);
-                    }
-                    else
-                    {
-                        $results['title'] = update_post_meta($this->id , $this->title_meta_key , $new['title']);
-                    }
+                    $this->set_stackla_wp_title($new['title']);
                 break;
                 case "terms":
-                    if($v === '')
-                    {
-                        $results['terms'] = add_post_meta($this->id , $this->terms_meta_key , json_encode($new['terms']));
-                    }
-                    else
-                    {
-                        $results['terms'] = update_post_meta($this->id , $this->terms_meta_key , json_encode($new['terms']));
-                    }
+                    $this->set_stackla_wp_terms($new['terms']);
                 break;
                 case "filters":
-                    if($v === '')
-                    {
-                        $results['filters'] = add_post_meta($this->id , $this->filters_meta_key , json_encode($new['filters']));
-                    }
-                    else
-                    {
-                        $results['filters'] = update_post_meta($this->id , $this->filters_meta_key , json_encode($new['filters']));
-                    }
-                break;
-                case "tag":
-                    if($v === '')
-                    {
-                        $results['tag'] = add_post_meta($this->id , $this->tag_meta_key , $new['title'].'-'.$this->id);
-                    }
-                    else
-                    {
-                        $results['tag'] = update_post_meta($this->id , $this->tag_meta_key , $new['title'].'-'.$this->id);
-                    }
+                    $this->set_stackla_wp_filters($new['filters']);
                 break;
             }
         }
 
         return $results;
+    }
+
+    public function set_stackla_wp_tag(Stackla\Api\Tag $tag)
+    {
+        if(self::$data['tag'] === '')
+        {
+            add_post_meta($this->id , self::$tag_meta_key , $tag->tag);
+        }
+        else
+        {
+            update_post_meta($this->id , self::$tag_meta_key , $tag->tag);
+        }
+
+        if(self::$data['tag_id'] === '')
+        {
+            add_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
+        }
+        else
+        {
+            update_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
+        }
+    }
+
+    public function set_stackla_wp_title($title)
+    {
+        if(self::$data['title'] === '')
+        {
+            add_post_meta($this->id , self::$title_meta_key , $title);
+        }
+        else
+        {
+            update_post_meta($this->id , self::$title_meta_key , $title);
+        }
+    }
+
+    public function set_stackla_wp_terms($terms)
+    {
+        if(self::$data['terms'] === '')
+        {
+            add_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
+        }
+        else
+        {
+            update_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
+        }
+    }
+
+    public function set_stackla_wp_filters($filters)
+    {
+        if(self::$data['filters'] === '')
+        {
+            add_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
+        }
+        else
+        {
+            update_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
+        }
     }
 }

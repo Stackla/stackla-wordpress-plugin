@@ -1,9 +1,7 @@
 /*
     Beware all ye who enter; there's a bunch of hardcoded stuff in here
 */
-/*
-    Beware all ye who enter; there's a bunch of hardcoded stuff in here
-*/
+
 (function(window)
 {
     'use strict';
@@ -12,6 +10,7 @@
     {
         propTypes:
         {
+            editWidgetTermsData:React.PropTypes.func,
             errors:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
             twitter:React.PropTypes.array,
             facebook:React.PropTypes.array,
@@ -26,15 +25,29 @@
                 id:this.props.id,
                 name:(this.props.data) ? this.props.data.name : '',
                 network:(this.props.data) ? this.props.data.network : '',
+                termId:(typeof this.props.data.termId !== 'undefined') ? this.props.data.termId : '',
                 term:(this.props.data) ? this.props.data.term : '',
                 termValue:(this.props.data) ? this.props.data.termValue : '',
                 termDelimited:(this.props.data) ? this.props.data.network + '-' + this.props.data.term : '',
-                errors:false
+                errors:false,
+                edited:false,
+                removed:false
             }
+        },
+        /**
+        *   Resets the default values of all fields to what is defined in the state;
+        *   @return void;
+        */
+        forceDefaultValueUpdates:function()
+        {
+            $(React.findDOMNode(this.refs.termName)).val(this.state.name);
+            $(React.findDOMNode(this.refs.termNetwork)).val(this.state.network);
+            $(React.findDOMNode(this.refs.termTerm)).val(this.state.termDelimited);
+            $(React.findDOMNode(this.refs[this.state.termDelimited + '-value'])).val(this.state.termValue);
         },
         handleNameChange:function(e)
         {
-            this.setState({name:e.target.value});
+            this.setState({name:e.target.value , edited:true});
         },
         /**
         *   Handles the user changed the network option;
@@ -63,12 +76,13 @@
             {
                 network:value,
                 term:'',
-                termValue:''
+                termValue:'',
+                edited:true
             });
         },
         /**
         *   Handles the user changed the network's term option;
-        *   @param {e} a JavaScript event object;
+        *   @param {e} event object;
         *   @return void;
         */
         handleTermChange:function(e)
@@ -83,18 +97,77 @@
             this.setState(
             {
                 term:split[1],
-                termValue:''
+                termValue:'',
+                edited:true
             });
         },
+        /**
+        *   Handles what happens when a term value is changed by the user;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleTermValueChange:function(e)
         {
-            this.setState({termValue:e.target.value});
+            this.setState({termValue:e.target.value , edited:true});
         },
+        handleRemoveTerm(e)
+        {
+            e.preventDefault();
+            this.setState({removed:true});
+            // var self = this;
+            // var data = 
+            // {
+            //     index:this.state.id,
+            //     termId:this.state.termId
+            // };
+
+            // if(typeof data.termId == 'undefined' || data.termId === '')
+            // {
+            //     this.props.editWidgetTermsData(data.index);
+            // }
+            // else
+            // {
+            //     $.ajax(
+            //     {
+            //         url:stacklaWp.admin.metabox.handler,
+            //         type:'POST',
+            //         data:{removeStacklaTerm:true , termId:data.termId}
+            //     }).done(function(response)
+            //     {
+            //         console.log(response);
+            //         self.props.editWidgetTermsData(data.index);
+            //     }).fail(function(xhr , status , error)
+            //     {
+            //         console.log(error);
+            //     });
+            // }
+        },
+        /**
+        *   Matches the current network being rendered against what is in the state;
+        *   @param {network} the current network in the render loop;
+        *   @return boolean;
+        */
         displayNetworkTermOptions:function(network)
         {
             if(this.state.network === '') return false;
             if(this.state.network == network) return true;
             return false;
+        },
+        /**
+        *   Sets the termTerm reference on the network term options select;
+        *   @param {network} the current network in the render loop;
+        *   @return {string} sets the reference to termTerm if the network matches what is in the state;
+        */
+        setTermRef:function(network)
+        {
+            if(this.displayNetworkTermOptions(network))
+            {
+                return 'termTerm';
+            }
+            else
+            {
+                return '';
+            }
         },
         checkTermSelected:function(termOptionsName , options)
         {
@@ -117,7 +190,14 @@
         render:function()
         {
             var self = this;
-            console.log(this.state);
+
+            if(this.state.removed === true)
+            {
+                return (
+                    <div></div>
+                );
+            }
+
             return (
                 <div className='stackla-block'>
                     <div className={(this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}>
@@ -125,13 +205,13 @@
                             <label>
                                 Term name
                             </label>
-                            <input type='text' className='widefat' defaultValue={this.state.name} onChange={this.handleNameChange}/>
+                            <input type='text' className='widefat' ref='termName' defaultValue={this.state.name} onChange={this.handleNameChange}/>
                         </fieldset>
                         <fieldset>
                             <label>
                                 Choose a network
                             </label>
-                            <select onChange={this.handleNetworkChange} defaultValue={this.state.network}>
+                            <select ref='termNetwork' onChange={this.handleNetworkChange} defaultValue={this.state.network}>
                                 <option value=''></option>
                                 {
                                     stacklaWp.admin.config.networks.map(function(network , i)
@@ -151,7 +231,7 @@
                                     return  <select 
                                                 className={(self.displayNetworkTermOptions(network)) ? '' : 'hide'} 
                                                 defaultValue={self.checkTermSelected(network , self.props[network])} 
-                                                ref={network} 
+                                                ref={self.setTermRef(network)} 
                                                 onChange={self.handleTermChange}
                                                 key={network + i}
                                             >
@@ -173,8 +253,8 @@
                         </fieldset>
                         <fieldset ref='termValue' className='term-values'>
                             <fieldset 
-                                ref='twitter-username' 
-                                className={(this.checkTermValueOption('twitter-username')) ? 'hide display' : 'hide'}
+                                ref='twitter-user' 
+                                className={(this.checkTermValueOption('twitter-user')) ? 'hide display' : 'hide'}
                             >
                                 <label>
                                     Twitter Username
@@ -183,8 +263,9 @@
                                     @
                                 </span>
                                 <input 
-                                    type='text' 
-                                    defaultValue={this.getDefaultTermValue('twitter-username')}
+                                    type='text'
+                                    defaultValue={this.getDefaultTermValue('twitter-user')}
+                                    ref='twitter-user-value'
                                     maxLength='15' 
                                     onChange={this.handleTermValueChange}/>
                             </fieldset>
@@ -202,6 +283,7 @@
                                     type='text'
                                     maxLength='129'
                                     defaultValue={this.getDefaultTermValue('twitter-hastag')}
+                                    ref='twitter-hashtag-value'
                                     onChange={this.handleTermValueChange}
                                 />
                             </fieldset>
@@ -215,6 +297,7 @@
                                 <input 
                                     type='text'
                                     defaultValue={this.getDefaultTermValue('facebook-page')}
+                                    ref='facebook-page-value'
                                     onChange={this.handleTermValueChange}
                                 />
                             </fieldset>
@@ -228,6 +311,7 @@
                                 <input 
                                     type='text'
                                     defaultValue={this.getDefaultTermValue('facebook-search')}
+                                    ref='facebook-search-value'
                                     onChange={this.handleTermValueChange}/>
                             </fieldset>
                             <fieldset 
@@ -243,6 +327,7 @@
                                 <input 
                                     type='text'
                                     defaultValue={this.getDefaultTermValue('instagram-user')}
+                                    ref='instagram-user-value'
                                     onChange={this.handleTermValueChange}
                                 />
                             </fieldset>
@@ -259,6 +344,7 @@
                                 <input 
                                     type='text'
                                     defaultValue={this.getDefaultTermValue('instagram-hashtag')}
+                                    ref='instagram-hashtag-value'
                                     onChange={this.handleTermValueChange}/>
                             </fieldset>
                             <fieldset 
@@ -271,6 +357,7 @@
                                 <input 
                                     type='text'
                                     defaultValue={this.getDefaultTermValue('youtube-user')}
+                                    ref='youtube-user-value'
                                     onChange={this.handleTermValueChange}
                                 />
                             </fieldset>
@@ -283,12 +370,22 @@
                                 </label>
                                 <input 
                                     type='text'
-                                    defaultValue={this.getDefaultTermValue('youtube-search')} 
+                                    defaultValue={this.getDefaultTermValue('youtube-search')}
+                                    ref='youtube-search-value' 
                                     onChange={this.handleTermValueChange}
                                 />
                             </fieldset>
                         </fieldset>
+                        <div>
+                            <a 
+                                className='button remove-term'
+                                onClick={this.handleRemoveTerm}
+                            >
+                                Remove <b>{this.state.name}</b>
+                            </a>
+                        </div>
                     </div>
+
                     <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
                         <ul>
                             <li className={(this.state.errors.name) ? '' : 'hide'}>
@@ -304,7 +401,8 @@
                                 {(this.state.errors.termValue) ? this.state.errors.termValue : ''}
                             </li>
                         </ul>
-                     </div>
+                    </div>
+                    
                 </div>
             );
         }

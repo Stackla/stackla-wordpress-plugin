@@ -23,6 +23,7 @@
 
             this.postId = $wpMetabox.data('postid');
             this.data = $wpMetabox.data('stackla');
+
             this.data.filters = this.tryJsonParse(this.data.filters);
             this.data.terms = this.tryJsonParse(this.data.terms);
             this.validator = $wpMetabox.data('validator');

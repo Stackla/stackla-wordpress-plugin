@@ -53,7 +53,7 @@ class Stackla_WP_Metabox_Validator {
 
     public static function validate_string($var)
     {
-        return (!$var || $var == '' || strlen($var) <= 0) ? false : true;
+        return (!$var || $var === '' || strlen($var) <= 0 || !isset($var)) ? false : true;
     }
 
     /**
@@ -65,17 +65,6 @@ class Stackla_WP_Metabox_Validator {
     public static function validate_array($var)
     {
         return (!is_array($var) || empty($var)) ? false : true;
-    }
-
-    /**
-    *   Validates an array item;
-    *   @param {$var} an array item in for format $array['item'];
-    *   @return boolean;
-    */
-    
-    public static function validate_array_item($var)
-    {
-        return (!isset($var) || $var == '' || $var === false) ? false : true;
     }
 
     /**

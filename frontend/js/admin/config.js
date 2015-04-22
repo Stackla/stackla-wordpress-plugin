@@ -8,7 +8,7 @@
         networks:['twitter' , 'facebook' , 'instagram' , 'youtube'],
         network:
         {
-            twitter:['username' , 'hashtag'],
+            twitter:['user' , 'hashtag'],
             facebook:['page' , 'search'],
             instagram:['user' , 'hashtag'],
             youtube:['user' , 'search']

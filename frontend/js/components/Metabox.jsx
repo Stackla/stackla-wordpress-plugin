@@ -76,7 +76,7 @@
                 'terms':terms,
                 'filters':filters
             };
-
+            console.log(data);
             this.validate(data);
         },
         validate:function(data)
@@ -97,7 +97,7 @@
 
                     if(response.result == '1')
                     {
-                        self.save(data);
+                        //self.save(data);
                     }
                 }
             }).fail(function(xhr , status , error)
@@ -142,7 +142,7 @@
             {
                 url:stacklaWp.admin.metabox.handler,
                 type:'POST',
-                dataType:'json',
+                //dataType:'json',
                 data:data
             }).done(function(response)
             {
@@ -168,7 +168,7 @@
                     <section className='filters'>
                         <this.state.dependencies.WidgetFilters ref='filters' initialData={stacklaWp.admin.metabox.data.filters}/>
                     </section>
-                    <a href='#' onClick={this.compileData}>Save</a>
+                    <a href='#' ref='saveMetabox' onClick={this.compileData}>Save</a>
                 </div>
             );
         }

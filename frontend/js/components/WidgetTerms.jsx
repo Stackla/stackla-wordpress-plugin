@@ -49,6 +49,58 @@
                 count:this.state.count - 1
             });
         },
+        editTermsData:function(index)
+        {
+            if(!this.state.data.length) return;
+
+            var self = this;
+
+            if(this.state.data.length === 1)
+            {
+                this.setState(
+                {
+                    items:[],
+                    data:[],
+                    count:1
+                },
+                function()
+                {
+                    $.each(self.refs , function(key , child)
+                    {
+                        var c = child;
+
+                        child.setState(child.getInitialState() , function()
+                        {
+                            c.forceDefaultValueUpdates();
+                        });
+                    });
+                });
+
+                return;
+            }
+
+            var copy = this.state.data.slice();
+            var removed = copy.splice(index , 1);
+
+            this.setState(
+            {
+                items:[],
+                data:copy,
+                count:copy.length
+            },
+            function()
+            {
+                $.each(self.refs , function(key , child)
+                {
+                    var c = child;
+
+                    child.setState(child.getInitialState() , function()
+                    {
+                        c.forceDefaultValueUpdates();
+                    });
+                });
+            });
+        },
         /**
         *   Loops through the count, pushes Term components to the items array;
         *   Renders these components;
@@ -57,7 +109,7 @@
         render:function()
         {
             var i;
-            
+
             for(i = 0 ; i < this.state.count ; i++)
             {
                 var fieldsetData = false;
@@ -69,8 +121,10 @@
                         fieldsetData = this.state.data[i];
                     }
                 }
+
                 this.state.items.push(
                     <this.state.dependencies.Term 
+                        editWidgetTermsData={this.editTermsData}
                         twitter={stacklaWp.admin.config.network.twitter}
                         facebook={stacklaWp.admin.config.network.facebook}
                         instagram={stacklaWp.admin.config.network.instagram}
@@ -88,7 +142,6 @@
                     <header>
                         <h2>Create Terms</h2>
                         <a href='#' className='button' onClick={this.addTerm}>Add Term</a>
-                        <a href='#' className='button' onClick={this.removeTerm}>Remove Term</a>
                     </header>
                     {this.state.items}
                 </div>

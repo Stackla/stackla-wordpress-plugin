@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "2109cb9b565f359e4d8b3a81d02d1e5d",
+    "hash": "e5c6e455cbc0f0a1d0635c97b8007c6f",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -103,8 +103,14 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://rohan_creativelifeform@bitbucket.org/helmanbudianto/stackla-php-sdk.git",
-                "reference": "a2ca7a932dc55bfafec1b92a608b2c4e11b59023"
+                "url": "git@github.com:Stackla/stackla-php-sdk.git",
+                "reference": "d87c85aa9ac94fc2e6d06f85d06eb224d0d356fb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Stackla/stackla-php-sdk/zipball/d87c85aa9ac94fc2e6d06f85d06eb224d0d356fb",
+                "reference": "d87c85aa9ac94fc2e6d06f85d06eb224d0d356fb",
+                "shasum": ""
             },
             "require": {
                 "guzzle/guzzle": "3.9",
@@ -128,7 +134,11 @@
                 }
             ],
             "description": "Stackla SDK API",
-            "time": "2015-04-16 06:24:36"
+            "support": {
+                "source": "https://github.com/Stackla/stackla-php-sdk/tree/master",
+                "issues": "https://github.com/Stackla/stackla-php-sdk/issues"
+            },
+            "time": "2015-04-21 08:33:17"
         },
         {
             "name": "symfony/event-dispatcher",
