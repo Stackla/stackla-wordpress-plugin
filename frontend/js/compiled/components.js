@@ -379,7 +379,7 @@
 
                     if(response.result == '1')
                     {
-                        //self.save(data);
+                        self.save(data);
                     }
                 }
             }).fail(function(xhr , status , error)
@@ -572,33 +572,6 @@
         {
             e.preventDefault();
             this.setState({removed:true});
-            // var self = this;
-            // var data = 
-            // {
-            //     index:this.state.id,
-            //     termId:this.state.termId
-            // };
-
-            // if(typeof data.termId == 'undefined' || data.termId === '')
-            // {
-            //     this.props.editWidgetTermsData(data.index);
-            // }
-            // else
-            // {
-            //     $.ajax(
-            //     {
-            //         url:stacklaWp.admin.metabox.handler,
-            //         type:'POST',
-            //         data:{removeStacklaTerm:true , termId:data.termId}
-            //     }).done(function(response)
-            //     {
-            //         console.log(response);
-            //         self.props.editWidgetTermsData(data.index);
-            //     }).fail(function(xhr , status , error)
-            //     {
-            //         console.log(error);
-            //     });
-            // }
         },
         /**
         *   Matches the current network being rendered against what is in the state;
@@ -669,7 +642,15 @@
                             React.createElement("label", null, 
                                 "Choose a network"
                             ), 
-                            React.createElement("select", {ref: "termNetwork", onChange: this.handleNetworkChange, defaultValue: this.state.network}, 
+                            React.createElement("div", {className: (this.state.network !== '') ? 'term-network-set' : 'hide'}, 
+                                this.state.network
+                            ), 
+                            React.createElement("select", {
+                                ref: "termNetwork", 
+                                onChange: this.handleNetworkChange, 
+                                className: (this.state.network !== '') ? 'hide' : '', 
+                                defaultValue: this.state.network
+                            }, 
                                 React.createElement("option", {value: ""}), 
                                 
                                     stacklaWp.admin.config.networks.map(function(network , i)

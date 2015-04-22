@@ -6,16 +6,17 @@
     require_once('../../includes/class-stackla-wp-metabox.php');
     require_once('../../includes/class-stackla-wp-sdk-wrapper.php');
 
-    $testing = true;
+    $testing = false;
     $test_data = [
         'postId' => 66,
-        'title' => 'Testing SDK v3',
+        'title' => 'Rohan Test v9',
         'terms' => [
             [
+                'removed' => false,
                 'edited'=> true,
                 'errors'=> false,
                 'id'=> 0,
-                'name'=> "term v5",
+                'name'=> "Rohan term 1 v9",
                 'network'=> "instagram",
                 'term'=> "user",
                 'termDelimited'=> "instagram-user",
@@ -23,14 +24,15 @@
                 'termValue'=> "rohandeshpande"
             ],
             [
+                'removed' => false,
                 'edited'=> true,
                 'errors'=> false,
                 'id'=> 1,
-                'name'=> "term 2 v5",
+                'name'=> "Rohan term 2 v9",
                 'network'=> "twitter",
                 'term'=> "user",
                 'termDelimited'=> "twitter-username",
-                'termId'=> "531",
+                'termId'=> "",
                 'termValue'=> "rohandeshpande_"
             ]
         ],
@@ -40,7 +42,7 @@
                 'errors'=> false,
                 'id'=> 0,
                 'media'=> [],
-                'name'=> "filter v5",
+                'name'=> "Rohan filter 1 v9",
                 'network'=> ["twitter" , "facebook"],
                 'sorting'=> "latest",
                 'filterId'=> '8371'
@@ -56,20 +58,6 @@
     $metabox = new Stackla_WP_Metabox($post_id);
     $sdk = new Stackla_WP_SDK_Wrapper($post_id);
 
-    if(isset($_POST['removeStacklaTerm']) && $_POST['removeStacklaTerm'] === true)
-    {
-        $result = $sdk->remove_term($_POST['termId']);
-        if($result)
-        {
-            echo 'term removed';
-        }
-        else
-        {
-            echo 'term not removed';
-        }
-        return;
-    }
-    
     $metabox_results = $metabox->set_data(($testing) ? $test_data : $_POST);
 
     $stackla_tag = $sdk->push_tag($title.'-'.$post_id);

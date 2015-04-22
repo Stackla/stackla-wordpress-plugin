@@ -121,13 +121,21 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         {
             $i++;
 
-            if($t['edited'] === false) continue;
+            if($t['edited'] === false || $t['edited'] === 'false') continue;
 
             $term;
 
             if(Stackla_WP_Metabox_Validator::validate_string($t['termId']))
             {
                 $term = $this->stack->instance('Term' , $t['termId']);
+
+                if($t['removed'] === 'true' || $t['removed'] === true)
+                {
+                    $term->delete();
+                    unset($terms[$i]);
+                    $terms = array_values($terms);
+                    continue;
+                }
             }
             else
             {
@@ -149,7 +157,6 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             else
             {
                 $term->create();
-                print_r($t);
                 $term->addTag($this->tag);
                 $terms[$i]['termId'] = $term->id;
             }
@@ -171,7 +178,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         {
             $i++;
 
-            if($f['edited'] === false) continue;
+            if($f['edited'] === false || $f['edited'] === 'false') continue;
 
             $filter;
 
@@ -211,23 +218,4 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
         return $filters;
     }
-
-    public function remove_term($id)
-    {
-        $term = $this->stack->instance('Term' , $id);
-        $result;
-
-        try
-        {
-            $term->delete();
-            $result = true;
-        }
-        catch(Exception $e)
-        {
-            $result = false;
-        }
-
-        return $result;
-    }
-
 }

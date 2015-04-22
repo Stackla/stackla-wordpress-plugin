@@ -97,7 +97,7 @@
 
                     if(response.result == '1')
                     {
-                        //self.save(data);
+                        self.save(data);
                     }
                 }
             }).fail(function(xhr , status , error)

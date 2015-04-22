@@ -149,12 +149,13 @@
             .decorator 
             {
                 display: inline-block;
-                padding:2px 5px 1px 5px;
+                padding:7px 10px 6px 10px;
                 background-color:#eee;
             }
             input[type='text']
             {
                 display: inline-block;
+                padding:5px;
                 max-width:200px;
             }
         }
@@ -179,6 +180,16 @@
         background-color:lighten(red , 35%);
         padding:10px;
         color:red;
+    }
+    .term-network-set
+    {
+        padding:5px;
+        display: inline-block;
+        font-weight: bold;
+        text-transform: capitalize;
+        border-radius:5px;
+        width:100%;
+        background:#eee;
     }
     .remove-term
     {
