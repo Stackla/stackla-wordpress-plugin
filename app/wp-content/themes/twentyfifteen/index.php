@@ -15,7 +15,13 @@
  */
 
 get_header(); ?>
-
+	<?php  
+		$test = get_post(310);
+		echo '<pre>';
+		print_r($test);
+		echo '</pre>';
+		echo $test->post_status;
+	?>
 	<div id="primary" class="content-area">
 		<main id="main" class="site-main" role="main">
 

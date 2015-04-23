@@ -19,6 +19,10 @@
             id:React.PropTypes.number,
             data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
+        /**
+        *   Sets the initial state of the component;
+        *   @return {this.state} the component's state object;
+        */
         getInitialState:function()
         {
             return {
@@ -35,16 +39,20 @@
             }
         },
         /**
-        *   Resets the default values of all fields to what is defined in the state;
+        *   Removes the term from the view and sets the removed flag on this.state;
+        *   @param {e} event object;
         *   @return void;
         */
-        forceDefaultValueUpdates:function()
+        handleRemoveTerm(e)
         {
-            $(React.findDOMNode(this.refs.termName)).val(this.state.name);
-            $(React.findDOMNode(this.refs.termNetwork)).val(this.state.network);
-            $(React.findDOMNode(this.refs.termTerm)).val(this.state.termDelimited);
-            $(React.findDOMNode(this.refs[this.state.termDelimited + '-value'])).val(this.state.termValue);
+            e.preventDefault();
+            this.setState({removed:true , edited:true});
         },
+        /**
+        *   Handles the onChange event for the term name input field;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value , edited:true});
@@ -110,11 +118,6 @@
         {
             this.setState({termValue:e.target.value , edited:true});
         },
-        handleRemoveTerm(e)
-        {
-            e.preventDefault();
-            this.setState({removed:true});
-        },
         /**
         *   Matches the current network being rendered against what is in the state;
         *   @param {network} the current network in the render loop;
@@ -125,22 +128,6 @@
             if(this.state.network === '') return false;
             if(this.state.network == network) return true;
             return false;
-        },
-        /**
-        *   Sets the termTerm reference on the network term options select;
-        *   @param {network} the current network in the render loop;
-        *   @return {string} sets the reference to termTerm if the network matches what is in the state;
-        */
-        setTermRef:function(network)
-        {
-            if(this.displayNetworkTermOptions(network))
-            {
-                return 'termTerm';
-            }
-            else
-            {
-                return '';
-            }
         },
         checkTermSelected:function(termOptionsName , options)
         {
@@ -212,7 +199,7 @@
                                     return  <select 
                                                 className={(self.displayNetworkTermOptions(network)) ? '' : 'hide'} 
                                                 defaultValue={self.checkTermSelected(network , self.props[network])} 
-                                                ref={self.setTermRef(network)} 
+                                                ref={network + i} 
                                                 onChange={self.handleTermChange}
                                                 key={network + i}
                                             >
@@ -366,7 +353,6 @@
                             </a>
                         </div>
                     </div>
-
                     <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
                         <ul>
                             <li className={(this.state.errors.name) ? '' : 'hide'}>
@@ -383,7 +369,6 @@
                             </li>
                         </ul>
                     </div>
-                    
                 </div>
             );
         }

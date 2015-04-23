@@ -8,8 +8,14 @@
         {
             key:React.PropTypes.number,
             id:React.PropTypes.number,
-            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
+            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
+            onRemove:React.PropTypes.func,
+            showRemove:React.PropTypes.bool
         },
+        /**
+        *   Sets the initial state of the component;
+        *   @return {this.state} the component's state object;
+        */
         getInitialState:function()
         {
             return {
@@ -20,9 +26,20 @@
                 media:(this.props.data) ? this.props.data.media : stacklaWp.admin.config.media,
                 sorting:(this.props.data) ? this.props.data.sorting : 'latest',
                 errors:false,
-                edited:false
+                edited:false,
+                removed:false
             }
         },
+        handleRemoveFilter:function(e)
+        {
+            e.preventDefault();
+            this.setState({removed:true , edited:true} , this.props.onRemove);
+        },
+        /**
+        *   Handles the onChange event for the filter name input field;
+        *   @param {e} an event object;
+        *   @return void;
+        */
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value , edited:true});
@@ -122,6 +139,13 @@
         },
         render:function()
         {
+            if(this.state.removed === true)
+            {
+                return (
+                    <div></div>
+                );
+            }
+
             return (
                 <div className='stackla-block'>
                     <div className={(this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}>
@@ -237,6 +261,14 @@
                                 </option>
                             </select>
                          </fieldset>
+                         <div className={(this.props.showRemove) ? '' : 'hide'}>
+                            <a 
+                                className='button remove-filter'
+                                onClick={this.handleRemoveFilter}
+                            >
+                                Remove <b>{this.state.name}</b>
+                            </a>
+                        </div>
                      </div>
                      <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
                         <ul>

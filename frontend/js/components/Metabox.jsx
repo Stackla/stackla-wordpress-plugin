@@ -11,20 +11,41 @@
         getInitialState:function()
         {
             return {
+                wpPublishSelector:"#publish",
+                wpFormSelector:'#post',
+                wpFormTitleSelector:'#post #title',
                 data:{},
                 dependencies:
                 {
+                    RequestError:stacklaWp.admin.components.RequestError,
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
                     WidgetFilters:stacklaWp.admin.components.WidgetFilters
                 },
                 errors:
                 {
+                    request:false,
                     title:false,
                     terms:[],
                     filters:[]
                 }
             }
+        },
+        componentDidMount:function()
+        {
+            var self = this;
+            var $metabox = $(stacklaWp.admin.config.wpMetabox);
+            var $body = $('html, body');
+
+            $(this.state.wpPublishSelector).on('click' , function(e)
+            {
+                e.preventDefault();
+                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
+                { 
+                   self.compileData();
+                });
+                
+            });
         },
         handleAddFilter:function(e)
         {
@@ -41,10 +62,10 @@
             e.preventDefault();
             this.refs.filter.removeFilter();
         },
-        compileData:function(e)
+        //compileData:function(e)
+        compileData:function()
         {
-            e.preventDefault();
-
+            //e.preventDefault();
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
             var terms = [];
@@ -82,6 +103,10 @@
         validate:function(data)
         {
             var self = this;
+            var $node = $(React.findDOMNode(this.refs.metabox));
+
+            if($node.hasClass('validating')) return;
+            $node.addClass('validating');       
 
             $.ajax(
             {
@@ -91,10 +116,12 @@
                 data:data
             }).done(function(response)
             {
+                $node.removeClass('validating');
+
                 if(typeof response == 'object')
                 {
+                    console.log(response);
                     self.handleErrors(response.errors);
-
                     if(response.result == '1')
                     {
                         self.save(data);
@@ -102,6 +129,8 @@
                 }
             }).fail(function(xhr , status , error)
             {
+                $node.removeClass('validating');
+
                 //todo; create RequestError component to render these errors
                 console.log('fail!');
                 console.log(error);
@@ -138,6 +167,13 @@
         },
         save:function(data)
         {
+            var self = this;
+            var $node = $(React.findDOMNode(this.refs.metabox));
+
+            if($node.hasClass('saving')) return;
+
+            $node.addClass('saving');
+
             $.ajax(
             {
                 url:stacklaWp.admin.metabox.handler,
@@ -146,9 +182,20 @@
                 data:data
             }).done(function(response)
             {
-                console.log(response);
+                $node.removeClass('saving');
+
+                if(response == 'success')
+                {
+                    if($(self.state.wpFormTitleSelector).val() == '')
+                    {
+                        $(self.state.wpFormTitleSelector).val(data.title)
+                    }
+
+                    $(self.state.wpFormSelector).submit();
+                }
             }).fail(function(xhr , status , error)
             {
+                $node.removeClass('saving');
                 //todo; create RequestError component to render these errors
                 console.log('post fail!');
                 console.log(error);
@@ -157,7 +204,7 @@
         render:function()
         {
             return (
-                <div className='jsx-metabox'>
+                <div className='jsx-metabox' ref='metabox'>
                     <this.state.dependencies.WidgetTitle 
                         initialTitle={stacklaWp.admin.metabox.data.title}
                         ref='title'
@@ -168,9 +215,11 @@
                     <section className='filters'>
                         <this.state.dependencies.WidgetFilters ref='filters' initialData={stacklaWp.admin.metabox.data.filters}/>
                     </section>
-                    <a href='#' ref='saveMetabox' onClick={this.compileData}>Save</a>
+                    <span className='spinner'>{'Stacking...'}</span>
                 </div>
             );
         }
     });
 }());
+
+//<a href='#' className='wp-core-ui button button-primary' ref='saveMetabox' onClick={this.compileData}>Save</a>

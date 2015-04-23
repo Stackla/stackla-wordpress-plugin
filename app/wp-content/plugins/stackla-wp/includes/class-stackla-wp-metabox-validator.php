@@ -98,6 +98,14 @@ class Stackla_WP_Metabox_Validator {
                 'termValue' => false
             );
 
+            //don't validate removed terms
+
+            if($term['removed'] === true || $term['removed'] === 'true')
+            {
+                $this->errors['terms'][$term['id']] = false;
+                continue;
+            }
+
             if(self::validate_string($term['name']) === false)
             {
                 $this->errors['terms'][$term['id']]['name'] = $this->error_term_name;
@@ -151,6 +159,14 @@ class Stackla_WP_Metabox_Validator {
                 'media' => false,
                 'sorting' => false
             );
+
+            //don't validate removed filters
+
+            if($filter['removed'] === true || $filter['removed'] === 'true')
+            {
+                $this->errors['filters'][$filter['id']] = false;
+                continue;
+            }
 
             if(self::validate_string($filter['name']) === false)
             {

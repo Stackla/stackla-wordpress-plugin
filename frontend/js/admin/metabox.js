@@ -16,11 +16,10 @@
             *   @param {callback} a callback function to render the view;
             *   @return void;
             */
-
             if(!$(stacklaWp.admin.config.wpMetabox).length) return;
 
             var $wpMetabox = $(stacklaWp.admin.config.wpMetabox);
-
+            
             this.postId = $wpMetabox.data('postid');
             this.data = $wpMetabox.data('stackla');
 
@@ -34,6 +33,21 @@
             {
                 callback();
             }
+        },
+        getData:function(promises)
+        {
+            $.ajax(
+            {
+                url:$wpMetabox.data('json') + '?postId=' + $wpMetabox.data('postid'),
+                type:"GET",
+                dataType:'json'
+            }).done(function(response)
+            {
+                promises.onDone(response);
+            }).fail(function(xhr , status , error)
+            {
+                promises.onFail(xhr , status , error);
+            });
         },
         tryJsonParse:function(string)
         {

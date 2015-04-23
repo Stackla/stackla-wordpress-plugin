@@ -102,58 +102,28 @@ class Stackla_WP_Metabox
 
     public function set_stackla_wp_tag(Stackla\Api\Tag $tag)
     {
-        if(self::$data['tag'] === '')
-        {
-            add_post_meta($this->id , self::$tag_meta_key , $tag->tag);
-        }
-        else
-        {
-            update_post_meta($this->id , self::$tag_meta_key , $tag->tag);
-        }
+        delete_post_meta($this->id , self::$tag_meta_key);
+        add_post_meta($this->id , self::$tag_meta_key , $tag->tag);
 
-        if(self::$data['tag_id'] === '')
-        {
-            add_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
-        }
-        else
-        {
-            update_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
-        }
+        delete_post_meta($this->id , self::$tag_id_meta_key);
+        add_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
     }
 
     public function set_stackla_wp_title($title)
     {
-        if(self::$data['title'] === '')
-        {
-            add_post_meta($this->id , self::$title_meta_key , $title);
-        }
-        else
-        {
-            update_post_meta($this->id , self::$title_meta_key , $title);
-        }
+        delete_post_meta($this->id , self::$title_meta_key);
+        add_post_meta($this->id , self::$title_meta_key , $title);
     }
 
     public function set_stackla_wp_terms($terms)
     {
-        if(self::$data['terms'] === '')
-        {
-            add_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
-        }
-        else
-        {
-            update_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
-        }
+        delete_post_meta($this->id , self::$terms_meta_key);
+        add_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
     }
 
     public function set_stackla_wp_filters($filters)
     {
-        if(self::$data['filters'] === '')
-        {
-            add_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
-        }
-        else
-        {
-            update_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
-        }
+        delete_post_meta($this->id , self::$filters_meta_key);
+        add_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
     }
 }

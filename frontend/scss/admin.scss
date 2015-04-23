@@ -104,6 +104,21 @@
                 margin-right:10px;
             }
         }
+        .spinner 
+        {
+            background-position:0px 5px;
+            width:100px;
+            margin:0;
+            margin-left:10px;
+            opacity:1;
+            float:none;
+            display:none;
+            padding:5px 0 0 25px;
+        }
+    }
+    .jsx-metabox.saving 
+    {
+        .spinner {display:inline-block;}
     }
     .stackla-widget-section
     {
@@ -191,9 +206,10 @@
         width:100%;
         background:#eee;
     }
-    .remove-term
+    .remove-term , .remove-filter
     {
         margin-top:10px;
         display:inline-block;
     }
+
 }

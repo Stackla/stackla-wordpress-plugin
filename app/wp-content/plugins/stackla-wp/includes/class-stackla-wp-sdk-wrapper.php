@@ -73,6 +73,50 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $this->stack = new Stackla\Api\Stack($this->credentials, $this->stack_host, $this->stack_name);
     }
 
+    public function validate_term($term)
+    {
+        if(Stackla_WP_Metabox_Validator::validate_string($term['name']) === false) return false;
+
+        if(Stackla_WP_Metabox_Validator::validate_string($term['network']) === false) return false;
+
+        if(Stackla_WP_Metabox_Validator::validate_string($term['term']) === false) return false;
+
+        if(Stackla_WP_Metabox_Validator::validate_string($term['termValue']) === false) return false;
+
+        return true;
+    }
+
+    public function validate_filter($filter)
+    {
+        if(Stackla_WP_Metabox_Validator::validate_string($filter['name']) === false) return false;
+
+        if(Stackla_WP_Metabox_Validator::validate_string($filter['sorting']) === false) return false;
+    }
+
+    /**
+    *   Flushes the array of any items with the key 'removed' set to true;
+    *   @param $array   array   contains a 'removed' key with a boolean value set;
+    *   @return $array  array   contains the flushed array;
+    */
+    public function flush($array)
+    {
+        if(empty($array)) return array();
+
+        $length = count($array);
+
+        for($i = 0 ; $i < $length ; $i ++)
+        {
+            if(!isset($array[$i]['removed'])) continue;
+
+            if($array[$i]['removed'] === true || $array[$i]['removed'] === 'true')
+            {
+                unset($array[$i]);
+            }
+        }
+
+        return array_values($array);
+    }
+
     public function push_tag($name)
     {
         $tag;
@@ -99,16 +143,22 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         }
         else
         {
-             $tag->create();
+            $tag->create();
         }
 
         $this->tag = $tag;
 
-        parent::set_stackla_wp_tag($tag);
         return $tag;
     }
 
-    public function push_terms($terms)
+    /**
+    *   Pushes terms to stackla;
+    *   @see Stackla_WP_Metabox_Validator - removed terms are NOT validated at the metabox level
+    *   @param $terms   array   an array of terms;
+    *   @return $terms  array   the modified terms array for WP database insertion;
+    */
+
+    public function push_terms($terms , $tag)
     {
         if($this->tag === false)
         {
@@ -123,17 +173,17 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
             if($t['edited'] === false || $t['edited'] === 'false') continue;
 
+            if($this->validate_term($t) === false) continue;
+
             $term;
 
-            if(Stackla_WP_Metabox_Validator::validate_string($t['termId']))
+            if(Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true)
             {
                 $term = $this->stack->instance('Term' , $t['termId']);
 
                 if($t['removed'] === 'true' || $t['removed'] === true)
                 {
                     $term->delete();
-                    unset($terms[$i]);
-                    $terms = array_values($terms);
                     continue;
                 }
             }
@@ -150,22 +200,30 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $term->type = $t['term'];
             $term->term = $t['termValue'];
 
-            if(Stackla_WP_Metabox_Validator::validate_string($t['termId']))
+            try
             {
-                $term->update();
+                if(Stackla_WP_Metabox_Validator::validate_string($t['termId']))
+                {
+                    $term->update();
+                }
+                else
+                {
+                    $term->create();
+                    $term->addTag($tag);
+                    $terms[$i]['termId'] = $term->id;
+                }
             }
-            else
+            catch(Exception $e)
             {
-                $term->create();
-                $term->addTag($this->tag);
-                $terms[$i]['termId'] = $term->id;
+                echo json_encode($term->getErrors());
             }
+            
         }
 
-        return $terms;
+        return $this->flush($terms);
     }
 
-    public function push_filters($filters)
+    public function push_filters($filters , $tag)
     {
         if($this->tag === false)
         {
@@ -180,17 +238,24 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
             if($f['edited'] === false || $f['edited'] === 'false') continue;
 
+            if($this->validate_filter($f) === false) continue;
+
             $filter;
 
             if(Stackla_WP_Metabox_Validator::validate_string($f['filterId']) === true)
             {
                 $filter = $this->stack->instance('Filter' , $f['filterId']);
+
+                if($f['removed'] === 'true' || $f['removed'] === true)
+                {
+                    $filter->delete();
+                    continue;
+                }
             }
             else
             {
-
                 $filter = $this->stack->instance('Filter');
-                $filter->addTag($this->tag);
+                $filter->addTag($tag);
             }
 
             $filter->name = stripslashes($f['name']);
@@ -216,6 +281,6 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             }
         }
 
-        return $filters;
+        return $this->flush($filters);
     }
 }

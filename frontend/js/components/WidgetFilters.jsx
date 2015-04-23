@@ -15,9 +15,10 @@
                 {
                     Filter:stacklaWp.admin.components.Filter
                 },
-                count:(this.props.initialData) ? this.props.initialData.length : 1,
-                data:(this.props.initialData) ? this.props.initialData : [],
-                items:[]
+                count:(this.props.initialData.length) ? this.props.initialData.length : 1,
+                data:(this.props.initialData.length) ? this.props.initialData : [],
+                items:[],
+                removed:0
             }
         },
         /**
@@ -35,24 +36,27 @@
                 count:this.state.count + 1
             });
         },
-        /**
-        *   Removes a filter fieldset, forces re-render;
-        *   @param {e} event object;
-        *   @return void;
-        */
-        remove:function(e)
+        onRemoveFilter:function()
         {
-            e.preventDefault();
+            var removed = 0;
 
-            if(this.state.count <= 1) return;
+            $.each(this.refs , function(index , item)
+            {
+                if(item.state && item.state.removed === true)
+                {
+                    removed ++;
+                }
+            });
+
             this.setState(
             {
                 items:[],
-                count:this.state.count - 1
+                removed:removed
             });
         },
         /**
         *   Renders the component;
+        *   @note do NOT add refs to anything other than the items;
         *   @return {html};
         */
         render:function()
@@ -76,6 +80,8 @@
                         id={i}
                         ref={i}
                         data={fieldsetData}
+                        onRemove={this.onRemoveFilter}
+                        showRemove={(this.state.count - this.state.removed > 1) ? true : false}
                     />
                 );
             }
@@ -85,7 +91,6 @@
                     <header>
                         <h2>Create Filters</h2>
                         <a href='#' className='button' onClick={this.add}>Add Filter</a>
-                        <a href='#' className='button' onClick={this.remove}>Remove Filter</a>
                     </header>
                     {this.state.items}
                 </div>

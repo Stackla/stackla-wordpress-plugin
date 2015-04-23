@@ -161,12 +161,12 @@
         "source": {
             "type": "git",
             "url": "git@github.com:Stackla/stackla-php-sdk.git",
-            "reference": "d87c85aa9ac94fc2e6d06f85d06eb224d0d356fb"
+            "reference": "83b2c2636159f5d9b8694d16b951a28bd0fa5b37"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Stackla/stackla-php-sdk/zipball/d87c85aa9ac94fc2e6d06f85d06eb224d0d356fb",
-            "reference": "d87c85aa9ac94fc2e6d06f85d06eb224d0d356fb",
+            "url": "https://api.github.com/repos/Stackla/stackla-php-sdk/zipball/83b2c2636159f5d9b8694d16b951a28bd0fa5b37",
+            "reference": "83b2c2636159f5d9b8694d16b951a28bd0fa5b37",
             "shasum": ""
         },
         "require": {
@@ -177,7 +177,7 @@
             "monolog/monolog": "1.12",
             "phpunit/phpunit": "4.5.x"
         },
-        "time": "2015-04-21 08:33:17",
+        "time": "2015-04-23 01:08:32",
         "type": "library",
         "installation-source": "source",
         "autoload": {

@@ -8,8 +8,14 @@
         {
             key:React.PropTypes.number,
             id:React.PropTypes.number,
-            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
+            data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
+            onRemove:React.PropTypes.func,
+            showRemove:React.PropTypes.bool
         },
+        /**
+        *   Sets the initial state of the component;
+        *   @return {this.state} the component's state object;
+        */
         getInitialState:function()
         {
             return {
@@ -20,9 +26,20 @@
                 media:(this.props.data) ? this.props.data.media : stacklaWp.admin.config.media,
                 sorting:(this.props.data) ? this.props.data.sorting : 'latest',
                 errors:false,
-                edited:false
+                edited:false,
+                removed:false
             }
         },
+        handleRemoveFilter:function(e)
+        {
+            e.preventDefault();
+            this.setState({removed:true , edited:true} , this.props.onRemove);
+        },
+        /**
+        *   Handles the onChange event for the filter name input field;
+        *   @param {e} an event object;
+        *   @return void;
+        */
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value , edited:true});
@@ -122,6 +139,13 @@
         },
         render:function()
         {
+            if(this.state.removed === true)
+            {
+                return (
+                    React.createElement("div", null)
+                );
+            }
+
             return (
                 React.createElement("div", {className: "stackla-block"}, 
                     React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
@@ -236,7 +260,15 @@
                                     "Votes"
                                 )
                             )
-                         )
+                         ), 
+                         React.createElement("div", {className: (this.props.showRemove) ? '' : 'hide'}, 
+                            React.createElement("a", {
+                                className: "button remove-filter", 
+                                onClick: this.handleRemoveFilter
+                            }, 
+                                "Remove ", React.createElement("b", null, this.state.name)
+                            )
+                        )
                      ), 
                      React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
                         React.createElement("ul", null, 
@@ -293,20 +325,41 @@
         getInitialState:function()
         {
             return {
+                wpPublishSelector:"#publish",
+                wpFormSelector:'#post',
+                wpFormTitleSelector:'#post #title',
                 data:{},
                 dependencies:
                 {
+                    RequestError:stacklaWp.admin.components.RequestError,
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
                     WidgetFilters:stacklaWp.admin.components.WidgetFilters
                 },
                 errors:
                 {
+                    request:false,
                     title:false,
                     terms:[],
                     filters:[]
                 }
             }
+        },
+        componentDidMount:function()
+        {
+            var self = this;
+            var $metabox = $(stacklaWp.admin.config.wpMetabox);
+            var $body = $('html, body');
+
+            $(this.state.wpPublishSelector).on('click' , function(e)
+            {
+                e.preventDefault();
+                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
+                { 
+                   self.compileData();
+                });
+                
+            });
         },
         handleAddFilter:function(e)
         {
@@ -323,10 +376,10 @@
             e.preventDefault();
             this.refs.filter.removeFilter();
         },
-        compileData:function(e)
+        //compileData:function(e)
+        compileData:function()
         {
-            e.preventDefault();
-
+            //e.preventDefault();
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
             var terms = [];
@@ -364,6 +417,10 @@
         validate:function(data)
         {
             var self = this;
+            var $node = $(React.findDOMNode(this.refs.metabox));
+
+            if($node.hasClass('validating')) return;
+            $node.addClass('validating');       
 
             $.ajax(
             {
@@ -373,10 +430,12 @@
                 data:data
             }).done(function(response)
             {
+                $node.removeClass('validating');
+
                 if(typeof response == 'object')
                 {
+                    console.log(response);
                     self.handleErrors(response.errors);
-
                     if(response.result == '1')
                     {
                         self.save(data);
@@ -384,6 +443,8 @@
                 }
             }).fail(function(xhr , status , error)
             {
+                $node.removeClass('validating');
+
                 //todo; create RequestError component to render these errors
                 console.log('fail!');
                 console.log(error);
@@ -420,6 +481,13 @@
         },
         save:function(data)
         {
+            var self = this;
+            var $node = $(React.findDOMNode(this.refs.metabox));
+
+            if($node.hasClass('saving')) return;
+
+            $node.addClass('saving');
+
             $.ajax(
             {
                 url:stacklaWp.admin.metabox.handler,
@@ -428,9 +496,20 @@
                 data:data
             }).done(function(response)
             {
-                console.log(response);
+                $node.removeClass('saving');
+
+                if(response == 'success')
+                {
+                    if($(self.state.wpFormTitleSelector).val() == '')
+                    {
+                        $(self.state.wpFormTitleSelector).val(data.title)
+                    }
+
+                    $(self.state.wpFormSelector).submit();
+                }
             }).fail(function(xhr , status , error)
             {
+                $node.removeClass('saving');
                 //todo; create RequestError component to render these errors
                 console.log('post fail!');
                 console.log(error);
@@ -439,7 +518,7 @@
         render:function()
         {
             return (
-                React.createElement("div", {className: "jsx-metabox"}, 
+                React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
                     React.createElement(this.state.dependencies.WidgetTitle, {
                         initialTitle: stacklaWp.admin.metabox.data.title, 
                         ref: "title"}
@@ -450,9 +529,33 @@
                     React.createElement("section", {className: "filters"}, 
                         React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters", initialData: stacklaWp.admin.metabox.data.filters})
                     ), 
-                    React.createElement("a", {href: "#", ref: "saveMetabox", onClick: this.compileData}, "Save")
+                    React.createElement("span", {className: "spinner"}, 'Stacking...')
                 )
             );
+        }
+    });
+}());
+
+//<a href='#' className='wp-core-ui button button-primary' ref='saveMetabox' onClick={this.compileData}>Save</a>
+(function()
+{
+    'use strict';
+
+    window.stacklaWp.admin.components.RequestError = React.createClass(
+    {displayName: "RequestError",
+        propTypes:
+        {
+        
+        },
+        getInitialState:function()
+        {
+            return {
+                data:[]
+            }
+        },
+        render:function()
+        {
+            return false;
         }
     });
 }());
@@ -477,6 +580,10 @@
             id:React.PropTypes.number,
             data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
+        /**
+        *   Sets the initial state of the component;
+        *   @return {this.state} the component's state object;
+        */
         getInitialState:function()
         {
             return {
@@ -493,16 +600,20 @@
             }
         },
         /**
-        *   Resets the default values of all fields to what is defined in the state;
+        *   Removes the term from the view and sets the removed flag on this.state;
+        *   @param {e} event object;
         *   @return void;
         */
-        forceDefaultValueUpdates:function()
+        handleRemoveTerm(e)
         {
-            $(React.findDOMNode(this.refs.termName)).val(this.state.name);
-            $(React.findDOMNode(this.refs.termNetwork)).val(this.state.network);
-            $(React.findDOMNode(this.refs.termTerm)).val(this.state.termDelimited);
-            $(React.findDOMNode(this.refs[this.state.termDelimited + '-value'])).val(this.state.termValue);
+            e.preventDefault();
+            this.setState({removed:true , edited:true});
         },
+        /**
+        *   Handles the onChange event for the term name input field;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value , edited:true});
@@ -568,11 +679,6 @@
         {
             this.setState({termValue:e.target.value , edited:true});
         },
-        handleRemoveTerm(e)
-        {
-            e.preventDefault();
-            this.setState({removed:true});
-        },
         /**
         *   Matches the current network being rendered against what is in the state;
         *   @param {network} the current network in the render loop;
@@ -583,22 +689,6 @@
             if(this.state.network === '') return false;
             if(this.state.network == network) return true;
             return false;
-        },
-        /**
-        *   Sets the termTerm reference on the network term options select;
-        *   @param {network} the current network in the render loop;
-        *   @return {string} sets the reference to termTerm if the network matches what is in the state;
-        */
-        setTermRef:function(network)
-        {
-            if(this.displayNetworkTermOptions(network))
-            {
-                return 'termTerm';
-            }
-            else
-            {
-                return '';
-            }
         },
         checkTermSelected:function(termOptionsName , options)
         {
@@ -670,7 +760,7 @@
                                     return  React.createElement("select", {
                                                 className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
                                                 defaultValue: self.checkTermSelected(network , self.props[network]), 
-                                                ref: self.setTermRef(network), 
+                                                ref: network + i, 
                                                 onChange: self.handleTermChange, 
                                                 key: network + i
                                             }, 
@@ -824,7 +914,6 @@
                             )
                         )
                     ), 
-
                     React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
                         React.createElement("ul", null, 
                             React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
@@ -841,7 +930,6 @@
                             )
                         )
                     )
-                    
                 )
             );
         }
@@ -864,9 +952,10 @@
                 {
                     Filter:stacklaWp.admin.components.Filter
                 },
-                count:(this.props.initialData) ? this.props.initialData.length : 1,
-                data:(this.props.initialData) ? this.props.initialData : [],
-                items:[]
+                count:(this.props.initialData.length) ? this.props.initialData.length : 1,
+                data:(this.props.initialData.length) ? this.props.initialData : [],
+                items:[],
+                removed:0
             }
         },
         /**
@@ -884,24 +973,27 @@
                 count:this.state.count + 1
             });
         },
-        /**
-        *   Removes a filter fieldset, forces re-render;
-        *   @param {e} event object;
-        *   @return void;
-        */
-        remove:function(e)
+        onRemoveFilter:function()
         {
-            e.preventDefault();
+            var removed = 0;
 
-            if(this.state.count <= 1) return;
+            $.each(this.refs , function(index , item)
+            {
+                if(item.state && item.state.removed === true)
+                {
+                    removed ++;
+                }
+            });
+
             this.setState(
             {
                 items:[],
-                count:this.state.count - 1
+                removed:removed
             });
         },
         /**
         *   Renders the component;
+        *   @note do NOT add refs to anything other than the items;
         *   @return {html};
         */
         render:function()
@@ -924,7 +1016,9 @@
                         key: i, 
                         id: i, 
                         ref: i, 
-                        data: fieldsetData}
+                        data: fieldsetData, 
+                        onRemove: this.onRemoveFilter, 
+                        showRemove: (this.state.count - this.state.removed > 1) ? true : false}
                     )
                 );
             }
@@ -933,8 +1027,7 @@
                 React.createElement("div", {className: "stackla-widget-filters"}, 
                     React.createElement("header", null, 
                         React.createElement("h2", null, "Create Filters"), 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.add}, "Add Filter"), 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.remove}, "Remove Filter")
+                        React.createElement("a", {href: "#", className: "button", onClick: this.add}, "Add Filter")
                     ), 
                     this.state.items
                 )
@@ -976,73 +1069,6 @@
             {
                 items:[],
                 count:this.state.count + 1
-            });
-        },
-        /**
-        *   Subracts one to the count of Term components to render;
-        *   @return void;
-        */
-        removeTerm:function(e)
-        {
-            e.preventDefault();
-
-            if(this.state.count <= 1) return;
-            this.setState(
-            {
-                items:[],
-                count:this.state.count - 1
-            });
-        },
-        editTermsData:function(index)
-        {
-            if(!this.state.data.length) return;
-
-            var self = this;
-
-            if(this.state.data.length === 1)
-            {
-                this.setState(
-                {
-                    items:[],
-                    data:[],
-                    count:1
-                },
-                function()
-                {
-                    $.each(self.refs , function(key , child)
-                    {
-                        var c = child;
-
-                        child.setState(child.getInitialState() , function()
-                        {
-                            c.forceDefaultValueUpdates();
-                        });
-                    });
-                });
-
-                return;
-            }
-
-            var copy = this.state.data.slice();
-            var removed = copy.splice(index , 1);
-
-            this.setState(
-            {
-                items:[],
-                data:copy,
-                count:copy.length
-            },
-            function()
-            {
-                $.each(self.refs , function(key , child)
-                {
-                    var c = child;
-
-                    child.setState(child.getInitialState() , function()
-                    {
-                        c.forceDefaultValueUpdates();
-                    });
-                });
             });
         },
         /**
