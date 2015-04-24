@@ -30,37 +30,15 @@
                 }
             }
         },
-        componentDidMount:function()
+        compileData:function(e)
         {
-            this.addPublishHook();
-        },
-        addPublishHook:function()
-        {
-            var self = this;
-            var $metabox = $(stacklaWp.admin.config.wpMetabox);
-            var $body = $('html, body');
+            e.preventDefault();
 
-            $(this.state.wpPublishSelector).one('click' , function(e)
-            {
-                e.preventDefault();
-
-                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
-                { 
-                   self.compileData();
-                });
-            });
-        },
-        compileData:function()
-        {
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
             var terms = [];
             var filters = [];
             var data = {};
-
-            /*
-                @note copy the state of the children using $.extend just to be safe!
-            */
 
             $.each(termsRefs , function(key , value)
             {
@@ -104,33 +82,39 @@
             {
                 $node.removeClass('validating');
 
+                console.log("VALIDATE response \n");
+                console.log(response);
+
                 if(typeof response == 'object')
                 {
-                    console.log(response);
-
                     if(response.result == '1')
                     {
                         self.save(data);
                     }
                     else
                     {
-                        self.handleFormErrors(response.errors);
-                        self.addPublishHook();
+                        self.prepareErrors(response.errors);
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('validating');
-                self.addPublishHook();
                 self.handleRequestError(error);
             });
         },
+        /**
+        *   Attempts to save the entered data;
+        *   The handler saves data to WordPress, then to Stackla and finally to WordPress once again
+        *   @param {data} object containing the data to save;
+        *   @return void;
+        */
         save:function(data)
         {
             var self = this;
             var $node = $(React.findDOMNode(this.refs.metabox));
             var $title = $(self.state.wpFormTitleSelector);
             var $publish = $(self.state.wpPublishSelector);
+            var $form = $(self.state.wpFormSelector);
 
             if($node.hasClass('saving')) return;
 
@@ -144,8 +128,11 @@
                 data:data
             }).done(function(response)
             {
-                $node.removeClass('saving');
+                console.log("SAVE response \n");
                 console.log(response);
+
+                $node.removeClass('saving');
+                
                 if(typeof response == 'object')
                 {
                     if(response.result == '1')
@@ -155,50 +142,25 @@
                             $title.val(data.title)
                         }
 
-                        $publish.trigger('click');
+                        $form.submit();
                     }
                     else
                     {
-                        self.addPublishHook();
-                        self.handleSdkErrors(response.errors);
+                        self.prepareErrors(response.errors);
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('saving');
-                self.addPublishHook();
                 self.handleRequestError(error);
             });
         },
-        handleFormErrors:function(errors)
-        {
-            var termsErrors = errors.terms;
-            var filtersErrors = errors.filters;
-            var termsErrorsLength = termsErrors.length;
-            var filtersErrorsLength = filtersErrors.length;
-            var termsRefs = this.refs.terms.refs;
-            var filtersRefs = this.refs.filters.refs;
-            var f , t;
-
-            for(f = 0 ; f < filtersErrorsLength ; f ++)
-            {
-                filtersRefs[f].setState(
-                {
-                    errors:filtersErrors[f]
-                });
-            }
-
-            for(t = 0 ; t < termsErrorsLength ; t ++)
-            {
-                termsRefs[t].setState(
-                {
-                    errors:termsErrors[t]
-                });
-            }
-
-            this.refs.title.setState({error:errors.title});
-        },
-        handleSdkErrors:function(errors)
+        /**
+        *   Checks to see if errors are defined and if so, funnels them;
+        *   @param {errors} an object containing errors;
+        *   @return void;
+        */
+        prepareErrors:function(errors)
         {
             var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
             var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
@@ -219,6 +181,12 @@
                 this.refs.title.setState({error:errors.title});
             }
         },
+        /**
+        *   Funnels errors to their correct dom nodes;
+        *   @param {errors} an errors object or array;
+        *   @param {refs} the dom nodes to funnel the errors to;
+        *   @return void;
+        */
         funnelErrors:function(errors , refs)
         {
             if(!errors || typeof errors == 'undefined') return;
@@ -247,6 +215,11 @@
                 }
             }
         },
+        /**
+        *   Handles request failure errors;
+        *   @param {error} the xhr error object;
+        *   @return void;
+        */
         handleRequestError:function(error)
         {
             console.log('request failed!');
@@ -255,8 +228,30 @@
                 errorMessage:error.toString()
             });
         },
+        setRedirectCookie:function(e)
+        {
+            e.preventDefault();
+            var $target = $(e.target);
+            $.cookie(stacklaWp.admin.settings.config.redirectCookieKey , window.location.href);
+            window.location = $target.attr('href');
+            return;
+        },
         render:function()
         {
+            if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false)
+            {
+                return (
+                    <div className='auth-notification failure'>
+                        <p>
+                            {"You're not authorised to use this plugin instance."}
+                        </p>
+                        <a href={stacklaWp.admin.metabox.accessUri} onClick={this.setRedirectCookie}>
+                            {'Authorise with Stackla'}
+                        </a>
+                    </div>
+                )
+            }
+
             return (
                 <div className='jsx-metabox' ref='metabox'>
                     <this.state.dependencies.RequestError ref='requestErrors' errors={this.state.errors.request} />
@@ -270,11 +265,10 @@
                     <section className='filters'>
                         <this.state.dependencies.WidgetFilters ref='filters' initialData={stacklaWp.admin.metabox.data.filters} />
                     </section>
+                    <a href='#' className='wp-core-ui button button-primary' ref='saveMetabox' onClick={this.compileData}>Save</a>
                     <span className='spinner'>{'Stacking...'}</span>
                 </div>
             );
         }
     });
 }());
-
-//<a href='#' className='wp-core-ui button button-primary' ref='saveMetabox' onClick={this.compileData}>Save</a>

@@ -11,6 +11,7 @@
 
 require_once('class-stackla-wp-activator.php');
 require_once('class-stackla-wp-metabox-validator.php');
+require_once('class-stackla-wp-sdk-wrapper.php');
 
 class Stackla_WP_Settings 
 {
@@ -30,7 +31,7 @@ class Stackla_WP_Settings
     public $errors = array();
 
     /**
-    *   -- CONSTRUCTOR --;
+    *   -- CONSTRUCTOR --
     *   Sets class properties;
     *   @return void;
     */
@@ -46,7 +47,6 @@ class Stackla_WP_Settings
     *   Gets the public wordpress post types;
     *   @return array   $post_types  public post types array;
     */
-
     protected function get_wp_post_types()
     {
         $post_types = get_post_types(array(
@@ -60,7 +60,6 @@ class Stackla_WP_Settings
     *   Filters the wordpress public post types against the exclude_options array;
     *   @return array   $post_types the filtered post_types array;
     */
-
     public function get_post_type_options()
     {
         $post_types = $this->get_wp_post_types();
@@ -80,7 +79,6 @@ class Stackla_WP_Settings
     *   Checks the errors property, and if not empty echoes them out to the client;
     *   @return void;
     */
-
     protected function get_errors()
     {
         if(empty($this->errors)) return;
@@ -93,7 +91,6 @@ class Stackla_WP_Settings
     *   @param  array    $data    an array of POST data;
     *   @return boolean based on a valid or invalid result;
     */
-
     protected function validate_data($data)
     {
         $wp_post_types = $this->get_wp_post_types();
@@ -164,7 +161,6 @@ class Stackla_WP_Settings
     *   Sets the user_has_settings boolean to determine if a user already has settings;
     *   @return void;
     */
-
     protected function set_user_has_settings()
     {
         $statement = "SELECT `id` FROM $this->table WHERE `wp_user_id` = $this->user_id";
@@ -258,18 +254,19 @@ class Stackla_WP_Settings
         echo '1';
     }
 
+    /**
+    *   Saves the user's access token;
+    *   @param $token   string  the long term access token from stackla;
+    *   @return $result int || false;
+    */
     public function save_access_token($token)
     {
         $this->set_user_has_settings();
 
         if(!$this->user_has_settings) return;
 
-        $result = $this->wpdb->update(
-            $this->table,
-            array('stackla_token' => $token),
-            array('wp_user_id' => $this->user_id),
-            array('%s')
-        );
+        delete_user_meta($this->user_id , 'stackla_access_token');
+        $result = add_user_meta($this->user_id , 'stackla_access_token' , $token);
 
         return $result;
     }
@@ -279,7 +276,6 @@ class Stackla_WP_Settings
     *   @return array   $results    an array containing the user settings if they exist;
     *   @return boolean false   if no settings exist
     */
-
     public function get_user_settings()
     {
         $statement = "SELECT * FROM $this->table WHERE `wp_user_id` = $this->user_id";
@@ -293,18 +289,64 @@ class Stackla_WP_Settings
         return $results;
     }
 
+    /**
+    *   Gets the user's access token;
+    *   @return mixed   string || false if token is set, return it, if not return false;
+    */
     public function get_user_access_token()
     {
-        $statement = "SELECT `stackla_token` FROM $this->table WHERE `wp_user_id` = $this->user_id";
-        $results = $this->wpdb->get_row($statement , ARRAY_A);
+        $token = get_user_meta($this->user_id , 'stackla_access_token' , true);
+        return (!is_null($token) && strlen($token) > 0) ? $token : false;
+    }
 
-        if(empty($results))
+    /**
+    *   Get the user's credentials;
+    *   @return mixed object || false credentials object if success, false if fail;
+    */
+    public function get_credentials()
+    {
+        $current = $this->get_user_settings();
+
+        if($current === false)
+        {
+            return false;
+        }
+        elseif(Stackla_WP_Metabox_Validator::validate_string($current['stackla_stack']) === false)
         {
             return false;
         }
 
-        $token = $results['stackla_token'];
+        return new Stackla\Core\Credentials(Stackla_WP_SDK_Wrapper::$auth_host , null , $current['stackla_stack']);
+    }
 
-        return (!is_null($token) && strlen($token) > 0) ? $token : false;
+    /**
+    *   Get the stackla access uri;
+    *   @return mixed   string || false if authenticated, return the access uri if not, return false;
+    */
+    public function get_access_uri()
+    {
+        $current = $this->get_user_settings();
+
+        if($current === false)
+        {
+            return false;
+        }
+        elseif(Stackla_WP_Metabox_Validator::validate_string($current['stackla_client_id']) === false)
+        {
+            return false;
+        }
+        elseif(Stackla_WP_Metabox_Validator::validate_string($current['stackla_client_secret']) === false)
+        {
+            return false;
+        }
+        elseif(Stackla_WP_Metabox_Validator::validate_string($current['stackla_callback_uri']) === false)
+        {
+            return false;
+        }
+
+        $credentials = $this->get_credentials();
+        $access_uri = $credentials->getAccessUri($current['stackla_client_id'], $current['stackla_client_secret'],  $current['stackla_callback_uri']);
+
+        return $access_uri;
     }
 }

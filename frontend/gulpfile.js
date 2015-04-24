@@ -92,6 +92,7 @@ gulp.task('adminJs' , function()
     return gulp.src(paths.js.admin.src)
     .pipe(order([
         'lib/jquery-1.11.1.js',
+        'lib/jquery.cookie.js',
         'lib/react.js',
         'app.js',
         'admin/config.js',

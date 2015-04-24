@@ -33,17 +33,21 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     private $stack = false;
 
     public  $tag = false;
-    public  $auth_host = "https://api.qa.stackla.com/api/";
-    public  $stack_host = "https://my.qa.stackla.com/api/";
+    public static $auth_host = "https://api.qa.stackla.com/api/";
+    public static $stack_host = "https://my.qa.stackla.com/api/";
     public  $errors = array();
 
     public function __construct()
     {
         $settings = new Stackla_WP_Settings;
         $this->user_settings = $settings->get_user_settings();
+        $this->token = $settings->get_user_access_token();
+
+        $this->errors['request'] = false;
+        $this->errors['title'] = false;
         $this->errors['terms'] = array();
         $this->errors['filters'] = array();
-        
+
         try
         {
             $this->setup();
@@ -67,7 +71,6 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             throw new Exception('Credentials cannot be set, user has no settings');
         }
 
-        $this->token = $this->user_settings['stackla_token'];
         $this->stack_name = $this->user_settings['stackla_stack'];
         $this->existing_tag_id = parent::$data['tag_id'];
 
@@ -76,8 +79,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             throw new Exception('User is not authorized with Stackla');
         }
 
-        $this->credentials = new Stackla\Core\Credentials($this->auth_host , $this->token , $this->stack_name);
-        $this->stack = new Stackla\Api\Stack($this->credentials, $this->stack_host, $this->stack_name);
+        $this->credentials = new Stackla\Core\Credentials(self::$auth_host , $this->token , $this->stack_name);
+        $this->stack = new Stackla\Api\Stack($this->credentials, self::$stack_host, $this->stack_name);
     }
 
     public function validate_term($term)
@@ -161,7 +164,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         }
         catch(Exception $e)
         {
-            $this->errors['tag'] = $tag->getErrors();
+            $this->errors['title'] = implode(', ' , $tag->getErrors());
             return false;
         }
         
@@ -186,14 +189,12 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         foreach($terms as $t)
         {
             $i++;
+            $term;
+            $error = false;
 
             if($t['edited'] === false || $t['edited'] === 'false') continue;
 
             if($this->validate_term($t) === false) continue;
-
-            $this->errors['terms'][$t['id']] = array('sdk' => false);
-
-            $term;
 
             if(Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true)
             {
@@ -233,10 +234,10 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             }
             catch(Exception $e)
             {
-                // $terms[$i]['removed'] = true; // there was an error in this term so we don't want to save it into wp;
-                $this->errors['terms'][$t['id']]['sdk'] = implode(', ' , $term->getErrors());
+                $error = array('sdk' => implode(', ' , $term->getErrors()));
             }
-            
+
+            $this->errors['terms'][$t['id']] = $error;            
         }
 
         return $this->flush($terms);
@@ -254,12 +255,12 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         foreach($filters as $f)
         {
             $i++;
+            $filter;
+            $error = false;
 
             if($f['edited'] === false || $f['edited'] === 'false') continue;
 
             if($this->validate_filter($f) === false) continue;
-
-            $filter;
 
             if(Stackla_WP_Metabox_Validator::validate_string($f['filterId']) === true)
             {
@@ -303,12 +304,43 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             }
             catch(Exception $e)
             {
-                $f['removed'] = true; // there was an error in this filter so we don't want to save it into wp;
-                $this->errors['terms'][$f['id']]['sdk'] = implode(', ' , $filter->getErrors());
+                $error = array('sdk' => implode(', ' , $filter->getErrors()));
             }
-            
+
+            $this->errors['filters'][$f['id']] = $error;
         }
 
         return $this->flush($filters);
+    }
+
+    public function validate()
+    {
+        if($this->errors['request'] !== false)
+        {
+            return false;
+        }
+
+        if($this->errors['title'] !== false)
+        {
+            return false;
+        }
+
+        foreach($this->errors['terms'] as $k => $v)
+        {
+            if($v !== false)
+            {
+                return false;
+            }
+        }
+
+        foreach($this->errors['filters'] as $k => $v)
+        {
+            if($v !== false)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

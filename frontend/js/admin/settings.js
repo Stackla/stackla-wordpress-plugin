@@ -8,40 +8,56 @@
         {
             settingsForm:'#stackla-settings-form',
             settingsFormFeedback:'#feedback',
-            onSuccessMessage:'Your settings have been saved'
+            onSuccessMessage:'Your settings have been saved',
+            redirectCookieKey:'stacklaPluginAuthRedirect'
         },
         run:function()
         {
             if(!$(this.config.settingsForm).length) return;
 
+            if($.cookie(this.config.redirectCookieKey) && $.cookie(this.config.redirectCookieKey) !== 'undefined')
+            {
+                window.location = $.cookie(this.config.redirectCookieKey);
+                $.removeCookie(this.config.redirectCookieKey);
+                return;
+            }
+
             var self = this;
             var $form = $(this.config.settingsForm);
+            var $state = $form.data('state');
+            var $accessUri = $form.data('accessuri');
             
             $form.on('submit' , function(e)
             {
                 e.preventDefault();
-                var accessUri = $(this).data('accessuri');
-
-                $.ajax(
+                
+                if($state == 'authenticated' && $accessUri !== '')
                 {
-                    url:$form.attr('action'),
-                    method:'POST',
-                    data:$form.serialize(),
-                }).done(function(response)
+                    window.location = $accessUri;
+                }
+                else
                 {
-                    if(response !== '1')
+                    $.ajax(
                     {
-                        $(self.config.settingsFormFeedback).addClass('failure').html(response);
-                    }
-                    else
+                        url:$form.attr('action'),
+                        method:'POST',
+                        data:$form.serialize(),
+                    }).done(function(response)
                     {
-                        $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
-                        window.location = accessUri;
-                    }
-                }).fail(function(xhr , status , error)
-                {
-                    $(self.config.settingsFormFeedback).addClass('failure').html(error);
-                });
+                        if(response !== '1')
+                        {
+                            $(self.config.settingsFormFeedback).addClass('failure').html(response);
+                        }
+                        else
+                        {
+                            $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
+                            window.reload();
+                        }
+                    }).fail(function(xhr , status , error)
+                    {
+                        $(self.config.settingsFormFeedback).addClass('failure').html(error);
+                    });
+                }
             });
         }
     };

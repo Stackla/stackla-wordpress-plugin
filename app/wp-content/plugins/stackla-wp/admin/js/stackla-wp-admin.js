@@ -10307,6 +10307,121 @@ return jQuery;
 
 }));
 
+/*!
+ * jQuery Cookie Plugin v1.4.1
+ * https://github.com/carhartl/jquery-cookie
+ *
+ * Copyright 2006, 2014 Klaus Hartl
+ * Released under the MIT license
+ */
+(function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD (Register as an anonymous module)
+		define(['jquery'], factory);
+	} else if (typeof exports === 'object') {
+		// Node/CommonJS
+		module.exports = factory(require('jquery'));
+	} else {
+		// Browser globals
+		factory(jQuery);
+	}
+}(function ($) {
+
+	var pluses = /\+/g;
+
+	function encode(s) {
+		return config.raw ? s : encodeURIComponent(s);
+	}
+
+	function decode(s) {
+		return config.raw ? s : decodeURIComponent(s);
+	}
+
+	function stringifyCookieValue(value) {
+		return encode(config.json ? JSON.stringify(value) : String(value));
+	}
+
+	function parseCookieValue(s) {
+		if (s.indexOf('"') === 0) {
+			// This is a quoted cookie as according to RFC2068, unescape...
+			s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+		}
+
+		try {
+			// Replace server-side written pluses with spaces.
+			// If we can't decode the cookie, ignore it, it's unusable.
+			// If we can't parse the cookie, ignore it, it's unusable.
+			s = decodeURIComponent(s.replace(pluses, ' '));
+			return config.json ? JSON.parse(s) : s;
+		} catch(e) {}
+	}
+
+	function read(s, converter) {
+		var value = config.raw ? s : parseCookieValue(s);
+		return $.isFunction(converter) ? converter(value) : value;
+	}
+
+	var config = $.cookie = function (key, value, options) {
+
+		// Write
+
+		if (arguments.length > 1 && !$.isFunction(value)) {
+			options = $.extend({}, config.defaults, options);
+
+			if (typeof options.expires === 'number') {
+				var days = options.expires, t = options.expires = new Date();
+				t.setMilliseconds(t.getMilliseconds() + days * 864e+5);
+			}
+
+			return (document.cookie = [
+				encode(key), '=', stringifyCookieValue(value),
+				options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+				options.path    ? '; path=' + options.path : '',
+				options.domain  ? '; domain=' + options.domain : '',
+				options.secure  ? '; secure' : ''
+			].join(''));
+		}
+
+		// Read
+
+		var result = key ? undefined : {},
+			// To prevent the for loop in the first place assign an empty array
+			// in case there are no cookies at all. Also prevents odd result when
+			// calling $.cookie().
+			cookies = document.cookie ? document.cookie.split('; ') : [],
+			i = 0,
+			l = cookies.length;
+
+		for (; i < l; i++) {
+			var parts = cookies[i].split('='),
+				name = decode(parts.shift()),
+				cookie = parts.join('=');
+
+			if (key === name) {
+				// If second argument (value) is a function it's a converter...
+				result = read(cookie, value);
+				break;
+			}
+
+			// Prevent storing a cookie that we couldn't decode.
+			if (!key && (cookie = read(cookie)) !== undefined) {
+				result[name] = cookie;
+			}
+		}
+
+		return result;
+	};
+
+	config.defaults = {};
+
+	$.removeCookie = function (key, options) {
+		// Must not alter options, thus extending a fresh object...
+		$.cookie(key, '', $.extend({}, options, { expires: -1 }));
+		return !$.cookie(key);
+	};
+
+}));
+
 /**
  * React v0.13.1
  */
@@ -30229,37 +30344,15 @@ module.exports = warning;
                 }
             }
         },
-        componentDidMount:function()
+        compileData:function(e)
         {
-            this.addPublishHook();
-        },
-        addPublishHook:function()
-        {
-            var self = this;
-            var $metabox = $(stacklaWp.admin.config.wpMetabox);
-            var $body = $('html, body');
+            e.preventDefault();
 
-            $(this.state.wpPublishSelector).one('click' , function(e)
-            {
-                e.preventDefault();
-
-                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
-                { 
-                   self.compileData();
-                });
-            });
-        },
-        compileData:function()
-        {
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
             var terms = [];
             var filters = [];
             var data = {};
-
-            /*
-                @note copy the state of the children using $.extend just to be safe!
-            */
 
             $.each(termsRefs , function(key , value)
             {
@@ -30303,33 +30396,39 @@ module.exports = warning;
             {
                 $node.removeClass('validating');
 
+                console.log("VALIDATE response \n");
+                console.log(response);
+
                 if(typeof response == 'object')
                 {
-                    console.log(response);
-
                     if(response.result == '1')
                     {
                         self.save(data);
                     }
                     else
                     {
-                        self.handleSdkErrors(response.errors);
-                        self.addPublishHook();
+                        self.prepareErrors(response.errors);
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('validating');
-                self.addPublishHook();
                 self.handleRequestError(error);
             });
         },
+        /**
+        *   Attempts to save the entered data;
+        *   The handler saves data to WordPress, then to Stackla and finally to WordPress once again
+        *   @param {data} object containing the data to save;
+        *   @return void;
+        */
         save:function(data)
         {
             var self = this;
             var $node = $(React.findDOMNode(this.refs.metabox));
             var $title = $(self.state.wpFormTitleSelector);
             var $publish = $(self.state.wpPublishSelector);
+            var $form = $(self.state.wpFormSelector);
 
             if($node.hasClass('saving')) return;
 
@@ -30343,8 +30442,11 @@ module.exports = warning;
                 data:data
             }).done(function(response)
             {
-                $node.removeClass('saving');
+                console.log("SAVE response \n");
                 console.log(response);
+
+                $node.removeClass('saving');
+                
                 if(typeof response == 'object')
                 {
                     if(response.result == '1')
@@ -30354,50 +30456,25 @@ module.exports = warning;
                             $title.val(data.title)
                         }
 
-                        $publish.trigger('click');
+                        $form.submit();
                     }
                     else
                     {
-                        self.addPublishHook();
-                        self.handleSdkErrors(response.errors);
+                        self.prepareErrors(response.errors);
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('saving');
-                self.addPublishHook();
                 self.handleRequestError(error);
             });
         },
-        handleFormErrors:function(errors)
-        {
-            var termsErrors = errors.terms;
-            var filtersErrors = errors.filters;
-            var termsErrorsLength = termsErrors.length;
-            var filtersErrorsLength = filtersErrors.length;
-            var termsRefs = this.refs.terms.refs;
-            var filtersRefs = this.refs.filters.refs;
-            var f , t;
-
-            for(f = 0 ; f < filtersErrorsLength ; f ++)
-            {
-                filtersRefs[f].setState(
-                {
-                    errors:filtersErrors[f]
-                });
-            }
-
-            for(t = 0 ; t < termsErrorsLength ; t ++)
-            {
-                termsRefs[t].setState(
-                {
-                    errors:termsErrors[t]
-                });
-            }
-
-            this.refs.title.setState({error:errors.title});
-        },
-        handleSdkErrors:function(errors)
+        /**
+        *   Checks to see if errors are defined and if so, funnels them;
+        *   @param {errors} an object containing errors;
+        *   @return void;
+        */
+        prepareErrors:function(errors)
         {
             var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
             var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
@@ -30418,6 +30495,12 @@ module.exports = warning;
                 this.refs.title.setState({error:errors.title});
             }
         },
+        /**
+        *   Funnels errors to their correct dom nodes;
+        *   @param {errors} an errors object or array;
+        *   @param {refs} the dom nodes to funnel the errors to;
+        *   @return void;
+        */
         funnelErrors:function(errors , refs)
         {
             if(!errors || typeof errors == 'undefined') return;
@@ -30446,6 +30529,11 @@ module.exports = warning;
                 }
             }
         },
+        /**
+        *   Handles request failure errors;
+        *   @param {error} the xhr error object;
+        *   @return void;
+        */
         handleRequestError:function(error)
         {
             console.log('request failed!');
@@ -30454,8 +30542,30 @@ module.exports = warning;
                 errorMessage:error.toString()
             });
         },
+        setRedirectCookie:function(e)
+        {
+            e.preventDefault();
+            var $target = $(e.target);
+            $.cookie(stacklaWp.admin.settings.config.redirectCookieKey , window.location.href);
+            window.location = $target.attr('href');
+            return;
+        },
         render:function()
         {
+            if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false)
+            {
+                return (
+                    React.createElement("div", {className: "auth-notification failure"}, 
+                        React.createElement("p", null, 
+                            "You're not authorised to use this plugin instance."
+                        ), 
+                        React.createElement("a", {href: stacklaWp.admin.metabox.accessUri, onClick: this.setRedirectCookie}, 
+                            'Authorise with Stackla'
+                        )
+                    )
+                )
+            }
+
             return (
                 React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
                     React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
@@ -30469,6 +30579,7 @@ module.exports = warning;
                     React.createElement("section", {className: "filters"}, 
                         React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters", initialData: stacklaWp.admin.metabox.data.filters})
                     ), 
+                    React.createElement("a", {href: "#", className: "wp-core-ui button button-primary", ref: "saveMetabox", onClick: this.compileData}, "Save"), 
                     React.createElement("span", {className: "spinner"}, 'Stacking...')
                 )
             );
@@ -30476,7 +30587,6 @@ module.exports = warning;
     });
 }());
 
-//<a href='#' className='wp-core-ui button button-primary' ref='saveMetabox' onClick={this.compileData}>Save</a>
 (function()
 {
     'use strict';
@@ -31170,13 +31280,15 @@ module.exports = warning;
         validator:false,
         handler:false,
         token:false,
+        accessUri:false,
+        /**
+        *   Runs code required for rendering the metabox;
+        *   @param {callback} a callback function to render the view;
+        *   @return void;
+        */
         run:function(callback)
         {
-            /**
-            *   Runs code required for rendering the metabox;
-            *   @param {callback} a callback function to render the view;
-            *   @return void;
-            */
+
             if(!$(stacklaWp.admin.config.wpMetabox).length) return;
 
             var $wpMetabox = $(stacklaWp.admin.config.wpMetabox);
@@ -31189,26 +31301,12 @@ module.exports = warning;
             this.validator = $wpMetabox.data('validator');
             this.handler = $wpMetabox.data('handler');
             this.token = $wpMetabox.data('token');
+            this.accessUri = $wpMetabox.data('accessuri');
 
             if(typeof callback == 'function')
             {
                 callback();
             }
-        },
-        getData:function(promises)
-        {
-            $.ajax(
-            {
-                url:$wpMetabox.data('json') + '?postId=' + $wpMetabox.data('postid'),
-                type:"GET",
-                dataType:'json'
-            }).done(function(response)
-            {
-                promises.onDone(response);
-            }).fail(function(xhr , status , error)
-            {
-                promises.onFail(xhr , status , error);
-            });
         },
         tryJsonParse:function(string)
         {
@@ -31237,40 +31335,56 @@ module.exports = warning;
         {
             settingsForm:'#stackla-settings-form',
             settingsFormFeedback:'#feedback',
-            onSuccessMessage:'Your settings have been saved'
+            onSuccessMessage:'Your settings have been saved',
+            redirectCookieKey:'stacklaPluginAuthRedirect'
         },
         run:function()
         {
             if(!$(this.config.settingsForm).length) return;
 
+            if($.cookie(this.config.redirectCookieKey) && $.cookie(this.config.redirectCookieKey) !== 'undefined')
+            {
+                window.location = $.cookie(this.config.redirectCookieKey);
+                $.removeCookie(this.config.redirectCookieKey);
+                return;
+            }
+
             var self = this;
             var $form = $(this.config.settingsForm);
+            var $state = $form.data('state');
+            var $accessUri = $form.data('accessuri');
             
             $form.on('submit' , function(e)
             {
                 e.preventDefault();
-                var accessUri = $(this).data('accessuri');
-
-                $.ajax(
+                
+                if($state == 'authenticated' && $accessUri !== '')
                 {
-                    url:$form.attr('action'),
-                    method:'POST',
-                    data:$form.serialize(),
-                }).done(function(response)
+                    window.location = $accessUri;
+                }
+                else
                 {
-                    if(response !== '1')
+                    $.ajax(
                     {
-                        $(self.config.settingsFormFeedback).addClass('failure').html(response);
-                    }
-                    else
+                        url:$form.attr('action'),
+                        method:'POST',
+                        data:$form.serialize(),
+                    }).done(function(response)
                     {
-                        $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
-                        window.location = accessUri;
-                    }
-                }).fail(function(xhr , status , error)
-                {
-                    $(self.config.settingsFormFeedback).addClass('failure').html(error);
-                });
+                        if(response !== '1')
+                        {
+                            $(self.config.settingsFormFeedback).addClass('failure').html(response);
+                        }
+                        else
+                        {
+                            $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
+                            window.reload();
+                        }
+                    }).fail(function(xhr , status , error)
+                    {
+                        $(self.config.settingsFormFeedback).addClass('failure').html(error);
+                    });
+                }
             });
         }
     };

@@ -35,18 +35,16 @@
     $stackla_terms = $sdk->push_terms($terms , $stackla_tag);
     $stackla_filters = $sdk->push_filters($filters , $stackla_tag);
 
-    if(!empty($sdk->errors))
+    $sdk_valid = $sdk->validate();
+
+    if($sdk_valid === false)
     {
         echo $sdk->get_errors();
         return;
     }
-    else
-    {
-        $metabox->set_stackla_wp_terms($stackla_terms);
-        $metabox->set_stackla_wp_filters($stackla_filters);
 
-        echo json_encode(array('errors' => false , 'result' => '1'));
-    }
+    $metabox->set_stackla_wp_terms($stackla_terms);
+    $metabox->set_stackla_wp_filters($stackla_filters);
 
-
+    echo json_encode(array('errors' => false , 'result' => '1'));
 ?>
