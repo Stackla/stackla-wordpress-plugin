@@ -50,7 +50,6 @@ class Stackla_WP_Metabox_Validator {
     *   @param {$var} a string;
     *   @return boolean;
     */
-
     public static function validate_string($var)
     {
         return (!$var || $var === '' || strlen($var) <= 0 || !isset($var)) ? false : true;
@@ -61,7 +60,6 @@ class Stackla_WP_Metabox_Validator {
     *   @param {$var} an array;
     *   @return boolean;
     */
-
     public static function validate_array($var)
     {
         return (!is_array($var) || empty($var)) ? false : true;
@@ -72,7 +70,6 @@ class Stackla_WP_Metabox_Validator {
     *   Pushes the result into the $this->errors array;
     *   @return void;
     */
-
     protected function validate_widget_title()
     {
         if(self::validate_string($this->data['title']) === false)
@@ -86,7 +83,6 @@ class Stackla_WP_Metabox_Validator {
     *   Pushes the result into the $this->errors array;
     *   @return void;
     */
-
     protected function validate_widget_terms()
     {
         foreach($this->data['terms'] as $term)
@@ -148,7 +144,6 @@ class Stackla_WP_Metabox_Validator {
     *   Pushes the result into the $this->errors array;
     *   @return void;
     */
-
     protected function validate_widget_filters()
     {
         foreach($this->data['filters'] as $filter)
@@ -218,10 +213,9 @@ class Stackla_WP_Metabox_Validator {
     }
 
     /**
-    *   Runs all validation methods;
+    *   Runs all validation methods; Determines if valid is true or false;
     *   @return void;
     */
-
     public function validate()
     {
         $this->validate_widget_title();

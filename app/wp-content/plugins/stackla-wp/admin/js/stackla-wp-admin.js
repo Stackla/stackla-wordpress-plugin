@@ -29872,7 +29872,7 @@ module.exports = warning;
         network:
         {
             twitter:['user' , 'hashtag'],
-            facebook:['page' , 'search'],
+            facebook:['page'],
             instagram:['user' , 'hashtag'],
             youtube:['user' , 'search']
         },
@@ -29880,101 +29880,6 @@ module.exports = warning;
         media:['text-only' , 'images' , 'video']
     };
 }(window));
-
-/*
-    Polyfills
-*/
-
-(function(){
-
-  if ("performance" in window === false) {
-      window.performance = {};
-  }
-  
-  Date.now = (Date.now || function () {  // thanks IE8
-      return new Date().getTime();
-  });
- 
-  if ("now" in window.performance === false){
-    
-    var nowOffset = Date.now();
-    
-    if (performance.timing && performance.timing.navigationStart){
-      nowOffset = performance.timing.navigationStart;
-    }
- 
-    window.performance.now = function now(){
-      return Date.now() - nowOffset;
-    };
-  }
- 
-})();
-
-// Production steps of ECMA-262, Edition 5, 15.4.4.14
-// Reference: http://es5.github.io/#x15.4.4.14
-if (!Array.prototype.indexOf) {
-  Array.prototype.indexOf = function(searchElement, fromIndex) {
-
-    var k;
-
-    // 1. Let O be the result of calling ToObject passing
-    //    the this value as the argument.
-    if (this === null) {
-      throw new TypeError('"this" is null or not defined');
-    }
-
-    var O = Object(this);
-
-    // 2. Let lenValue be the result of calling the Get
-    //    internal method of O with the argument "length".
-    // 3. Let len be ToUint32(lenValue).
-    var len = O.length >>> 0;
-
-    // 4. If len is 0, return -1.
-    if (len === 0) {
-      return -1;
-    }
-
-    // 5. If argument fromIndex was passed let n be
-    //    ToInteger(fromIndex); else let n be 0.
-    var n = +fromIndex || 0;
-
-    if (Math.abs(n) === Infinity) {
-      n = 0;
-    }
-
-    // 6. If n >= len, return -1.
-    if (n >= len) {
-      return -1;
-    }
-
-    // 7. If n >= 0, then Let k be n.
-    // 8. Else, n<0, Let k be len - abs(n).
-    //    If k is less than 0, then let k be 0.
-    k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
-
-    // 9. Repeat, while k < len
-    while (k < len) {
-      // a. Let Pk be ToString(k).
-      //   This is implicit for LHS operands of the in operator
-      // b. Let kPresent be the result of calling the
-      //    HasProperty internal method of O with argument Pk.
-      //   This step can be combined with c
-      // c. If kPresent is true, then
-      //    i.  Let elementK be the result of calling the Get
-      //        internal method of O with the argument ToString(k).
-      //   ii.  Let same be the result of applying the
-      //        Strict Equality Comparison Algorithm to
-      //        searchElement and elementK.
-      //  iii.  If same is true, return k.
-      if (k in O && O[k] === searchElement) {
-        return k;
-      }
-      k++;
-    }
-    return -1;
-  };
-}
 (function()
 {
     'use strict';
@@ -30260,6 +30165,9 @@ if (!Array.prototype.indexOf) {
                             ), 
                             React.createElement("li", {className: (this.state.errors.sorting) ? '' : 'hide'}, 
                                 (this.state.errors.sorting) ? this.state.errors.sorting : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
+                                (this.state.errors.sdk) ? this.state.errors.sdk : ''
                             )
                         )
                      )
@@ -30315,7 +30223,6 @@ if (!Array.prototype.indexOf) {
                 },
                 errors:
                 {
-                    request:false,
                     title:false,
                     terms:[],
                     filters:[]
@@ -30324,39 +30231,26 @@ if (!Array.prototype.indexOf) {
         },
         componentDidMount:function()
         {
+            this.addPublishHook();
+        },
+        addPublishHook:function()
+        {
             var self = this;
             var $metabox = $(stacklaWp.admin.config.wpMetabox);
             var $body = $('html, body');
 
-            $(this.state.wpPublishSelector).on('click' , function(e)
+            $(this.state.wpPublishSelector).one('click' , function(e)
             {
                 e.preventDefault();
+
                 $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
                 { 
                    self.compileData();
                 });
-                
             });
         },
-        handleAddFilter:function(e)
-        {
-            e.preventDefault();
-            this.refs.filter.addFilter();
-        },
-        /**
-        *   Calls the WidgetFilters removeFilter method;
-        *   @param {e} a JavaScript event object;
-        *   @return void;
-        */
-        handleRemoveFilter:function(e)
-        {
-            e.preventDefault();
-            this.refs.filter.removeFilter();
-        },
-        //compileData:function(e)
         compileData:function()
         {
-            //e.preventDefault();
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
             var terms = [];
@@ -30388,7 +30282,7 @@ if (!Array.prototype.indexOf) {
                 'terms':terms,
                 'filters':filters
             };
-            console.log(data);
+
             this.validate(data);
         },
         validate:function(data)
@@ -30412,22 +30306,70 @@ if (!Array.prototype.indexOf) {
                 if(typeof response == 'object')
                 {
                     console.log(response);
-                    self.handleErrors(response.errors);
+
                     if(response.result == '1')
                     {
                         self.save(data);
+                    }
+                    else
+                    {
+                        self.handleSdkErrors(response.errors);
+                        self.addPublishHook();
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('validating');
-
-                //todo; create RequestError component to render these errors
-                console.log('fail!');
-                console.log(error);
+                self.addPublishHook();
+                self.handleRequestError(error);
             });
         },
-        handleErrors:function(errors)
+        save:function(data)
+        {
+            var self = this;
+            var $node = $(React.findDOMNode(this.refs.metabox));
+            var $title = $(self.state.wpFormTitleSelector);
+            var $publish = $(self.state.wpPublishSelector);
+
+            if($node.hasClass('saving')) return;
+
+            $node.addClass('saving');
+
+            $.ajax(
+            {
+                url:stacklaWp.admin.metabox.handler,
+                type:'POST',
+                dataType:'json',
+                data:data
+            }).done(function(response)
+            {
+                $node.removeClass('saving');
+                console.log(response);
+                if(typeof response == 'object')
+                {
+                    if(response.result == '1')
+                    {
+                        if($title.val() == '')
+                        {
+                            $title.val(data.title)
+                        }
+
+                        $publish.trigger('click');
+                    }
+                    else
+                    {
+                        self.addPublishHook();
+                        self.handleSdkErrors(response.errors);
+                    }
+                }
+            }).fail(function(xhr , status , error)
+            {
+                $node.removeClass('saving');
+                self.addPublishHook();
+                self.handleRequestError(error);
+            });
+        },
+        handleFormErrors:function(errors)
         {
             var termsErrors = errors.terms;
             var filtersErrors = errors.filters;
@@ -30454,48 +30396,69 @@ if (!Array.prototype.indexOf) {
             }
 
             this.refs.title.setState({error:errors.title});
-
         },
-        save:function(data)
+        handleSdkErrors:function(errors)
         {
-            var self = this;
-            var $node = $(React.findDOMNode(this.refs.metabox));
+            var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
+            var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
+            var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
 
-            if($node.hasClass('saving')) return;
-
-            $node.addClass('saving');
-
-            $.ajax(
+            if(termsErrors)
             {
-                url:stacklaWp.admin.metabox.handler,
-                type:'POST',
-                //dataType:'json',
-                data:data
-            }).done(function(response)
-            {
-                $node.removeClass('saving');
+                this.funnelErrors(termsErrors , this.refs.terms.refs);
+            }
 
-                if(response == 'success')
+            if(filtersErrors)
+            {
+                this.funnelErrors(filtersErrors , this.refs.filters.refs);
+            }
+
+            if(titleErrors)
+            {
+                this.refs.title.setState({error:errors.title});
+            }
+        },
+        funnelErrors:function(errors , refs)
+        {
+            if(!errors || typeof errors == 'undefined') return;
+
+            if(typeof errors == 'object')
+            {
+                $.each(errors , function(index , item)
                 {
-                    if($(self.state.wpFormTitleSelector).val() == '')
+                    refs[index].setState(
                     {
-                        $(self.state.wpFormTitleSelector).val(data.title)
-                    }
-
-                    $(self.state.wpFormSelector).submit();
-                }
-            }).fail(function(xhr , status , error)
+                        errors:errors[index]
+                    })
+                });
+            }
+            else if(typeof errors == 'array')
             {
-                $node.removeClass('saving');
-                //todo; create RequestError component to render these errors
-                console.log('post fail!');
-                console.log(error);
+                var length = errors.length;
+                var i;
+
+                for(i = 0 ; i < length ; i ++)
+                {
+                    refs[i].setState(
+                    {
+                        errors:errors[i]
+                    });
+                }
+            }
+        },
+        handleRequestError:function(error)
+        {
+            console.log('request failed!');
+            this.refs.requestErrors.setState(
+            {
+                errorMessage:error.toString()
             });
         },
         render:function()
         {
             return (
                 React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
+                    React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
                     React.createElement(this.state.dependencies.WidgetTitle, {
                         initialTitle: stacklaWp.admin.metabox.data.title, 
                         ref: "title"}
@@ -30527,12 +30490,22 @@ if (!Array.prototype.indexOf) {
         getInitialState:function()
         {
             return {
-                data:[]
+                errorMessage:false
             }
         },
         render:function()
         {
-            return false;
+            var $class = (this.state.errorMessage) ? 'stackla-error-message stackla-request-error' : 'hide';
+
+            return (
+                React.createElement("div", {className: $class}, 
+                    React.createElement("ul", null, 
+                        React.createElement("li", null, 
+                            this.state.errorMessage
+                        )
+                    )
+                )
+            );
         }
     });
 }());
@@ -30729,7 +30702,7 @@ if (!Array.prototype.indexOf) {
                         ), 
                         React.createElement("fieldset", {ref: "termRules"}, 
                             React.createElement("label", {className: (this.state.network === '') ? 'hide' : '', ref: "termRulesLabel"}, 
-                                "Choose a term"
+                                "Choose a type"
                             ), 
                             
                                 stacklaWp.admin.config.networks.map(function(network , i)
@@ -30738,6 +30711,7 @@ if (!Array.prototype.indexOf) {
                                                 className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
                                                 defaultValue: self.checkTermSelected(network , self.props[network]), 
                                                 ref: network + i, 
+                                                onClick: self.checkTermSet, 
                                                 onChange: self.handleTermChange, 
                                                 key: network + i
                                             }, 
@@ -30788,7 +30762,7 @@ if (!Array.prototype.indexOf) {
                                 React.createElement("input", {
                                     type: "text", 
                                     maxLength: "129", 
-                                    defaultValue: this.getDefaultTermValue('twitter-hastag'), 
+                                    defaultValue: this.getDefaultTermValue('twitter-hashtag'), 
                                     ref: "twitter-hashtag-value", 
                                     onChange: this.handleTermValueChange}
                                 )
@@ -30904,6 +30878,9 @@ if (!Array.prototype.indexOf) {
                             ), 
                             React.createElement("li", {className: (this.state.errors.termValue) ? '' : 'hide'}, 
                                 (this.state.errors.termValue) ? this.state.errors.termValue : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
+                                (this.state.errors.sdk) ? this.state.errors.sdk : ''
                             )
                         )
                     )
@@ -31305,6 +31282,100 @@ $(function()
         stacklaWp.admin.views.stacklaMetabox
     );
 });
+/*
+    Polyfills
+*/
+
+(function(){
+
+  if ("performance" in window === false) {
+      window.performance = {};
+  }
+  
+  Date.now = (Date.now || function () {  // thanks IE8
+      return new Date().getTime();
+  });
+ 
+  if ("now" in window.performance === false){
+    
+    var nowOffset = Date.now();
+    
+    if (performance.timing && performance.timing.navigationStart){
+      nowOffset = performance.timing.navigationStart;
+    }
+ 
+    window.performance.now = function now(){
+      return Date.now() - nowOffset;
+    };
+  }
+ 
+})();
+
+// Production steps of ECMA-262, Edition 5, 15.4.4.14
+// Reference: http://es5.github.io/#x15.4.4.14
+if (!Array.prototype.indexOf) {
+  Array.prototype.indexOf = function(searchElement, fromIndex) {
+
+    var k;
+
+    // 1. Let O be the result of calling ToObject passing
+    //    the this value as the argument.
+    if (this === null) {
+      throw new TypeError('"this" is null or not defined');
+    }
+
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get
+    //    internal method of O with the argument "length".
+    // 3. Let len be ToUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If len is 0, return -1.
+    if (len === 0) {
+      return -1;
+    }
+
+    // 5. If argument fromIndex was passed let n be
+    //    ToInteger(fromIndex); else let n be 0.
+    var n = +fromIndex || 0;
+
+    if (Math.abs(n) === Infinity) {
+      n = 0;
+    }
+
+    // 6. If n >= len, return -1.
+    if (n >= len) {
+      return -1;
+    }
+
+    // 7. If n >= 0, then Let k be n.
+    // 8. Else, n<0, Let k be len - abs(n).
+    //    If k is less than 0, then let k be 0.
+    k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+
+    // 9. Repeat, while k < len
+    while (k < len) {
+      // a. Let Pk be ToString(k).
+      //   This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the
+      //    HasProperty internal method of O with argument Pk.
+      //   This step can be combined with c
+      // c. If kPresent is true, then
+      //    i.  Let elementK be the result of calling the Get
+      //        internal method of O with the argument ToString(k).
+      //   ii.  Let same be the result of applying the
+      //        Strict Equality Comparison Algorithm to
+      //        searchElement and elementK.
+      //  iii.  If same is true, return k.
+      if (k in O && O[k] === searchElement) {
+        return k;
+      }
+      k++;
+    }
+    return -1;
+  };
+}
 (function(window)
 {
     'use strict';

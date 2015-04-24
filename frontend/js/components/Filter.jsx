@@ -284,6 +284,9 @@
                             <li className={(this.state.errors.sorting) ? '' : 'hide'}>
                                 {(this.state.errors.sorting) ? this.state.errors.sorting : ''}
                             </li>
+                            <li className={(this.state.errors.sdk) ? '' : 'hide'}>
+                                {(this.state.errors.sdk) ? this.state.errors.sdk : ''}
+                            </li>
                         </ul>
                      </div>
                  </div>

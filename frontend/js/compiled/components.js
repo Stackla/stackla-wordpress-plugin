@@ -283,6 +283,9 @@
                             ), 
                             React.createElement("li", {className: (this.state.errors.sorting) ? '' : 'hide'}, 
                                 (this.state.errors.sorting) ? this.state.errors.sorting : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
+                                (this.state.errors.sdk) ? this.state.errors.sdk : ''
                             )
                         )
                      )
@@ -338,7 +341,6 @@
                 },
                 errors:
                 {
-                    request:false,
                     title:false,
                     terms:[],
                     filters:[]
@@ -347,39 +349,26 @@
         },
         componentDidMount:function()
         {
+            this.addPublishHook();
+        },
+        addPublishHook:function()
+        {
             var self = this;
             var $metabox = $(stacklaWp.admin.config.wpMetabox);
             var $body = $('html, body');
 
-            $(this.state.wpPublishSelector).on('click' , function(e)
+            $(this.state.wpPublishSelector).one('click' , function(e)
             {
                 e.preventDefault();
+
                 $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
                 { 
                    self.compileData();
                 });
-                
             });
         },
-        handleAddFilter:function(e)
-        {
-            e.preventDefault();
-            this.refs.filter.addFilter();
-        },
-        /**
-        *   Calls the WidgetFilters removeFilter method;
-        *   @param {e} a JavaScript event object;
-        *   @return void;
-        */
-        handleRemoveFilter:function(e)
-        {
-            e.preventDefault();
-            this.refs.filter.removeFilter();
-        },
-        //compileData:function(e)
         compileData:function()
         {
-            //e.preventDefault();
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
             var terms = [];
@@ -411,7 +400,7 @@
                 'terms':terms,
                 'filters':filters
             };
-            console.log(data);
+
             this.validate(data);
         },
         validate:function(data)
@@ -435,22 +424,70 @@
                 if(typeof response == 'object')
                 {
                     console.log(response);
-                    self.handleErrors(response.errors);
+
                     if(response.result == '1')
                     {
                         self.save(data);
+                    }
+                    else
+                    {
+                        self.handleFormErrors(response.errors);
+                        self.addPublishHook();
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('validating');
-
-                //todo; create RequestError component to render these errors
-                console.log('fail!');
-                console.log(error);
+                self.addPublishHook();
+                self.handleRequestError(error);
             });
         },
-        handleErrors:function(errors)
+        save:function(data)
+        {
+            var self = this;
+            var $node = $(React.findDOMNode(this.refs.metabox));
+            var $title = $(self.state.wpFormTitleSelector);
+            var $publish = $(self.state.wpPublishSelector);
+
+            if($node.hasClass('saving')) return;
+
+            $node.addClass('saving');
+
+            $.ajax(
+            {
+                url:stacklaWp.admin.metabox.handler,
+                type:'POST',
+                dataType:'json',
+                data:data
+            }).done(function(response)
+            {
+                $node.removeClass('saving');
+                console.log(response);
+                if(typeof response == 'object')
+                {
+                    if(response.result == '1')
+                    {
+                        if($title.val() == '')
+                        {
+                            $title.val(data.title)
+                        }
+
+                        $publish.trigger('click');
+                    }
+                    else
+                    {
+                        self.addPublishHook();
+                        self.handleSdkErrors(response.errors);
+                    }
+                }
+            }).fail(function(xhr , status , error)
+            {
+                $node.removeClass('saving');
+                self.addPublishHook();
+                self.handleRequestError(error);
+            });
+        },
+        handleFormErrors:function(errors)
         {
             var termsErrors = errors.terms;
             var filtersErrors = errors.filters;
@@ -477,48 +514,69 @@
             }
 
             this.refs.title.setState({error:errors.title});
-
         },
-        save:function(data)
+        handleSdkErrors:function(errors)
         {
-            var self = this;
-            var $node = $(React.findDOMNode(this.refs.metabox));
+            var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
+            var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
+            var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
 
-            if($node.hasClass('saving')) return;
-
-            $node.addClass('saving');
-
-            $.ajax(
+            if(termsErrors)
             {
-                url:stacklaWp.admin.metabox.handler,
-                type:'POST',
-                //dataType:'json',
-                data:data
-            }).done(function(response)
-            {
-                $node.removeClass('saving');
+                this.funnelErrors(termsErrors , this.refs.terms.refs);
+            }
 
-                if(response == 'success')
+            if(filtersErrors)
+            {
+                this.funnelErrors(filtersErrors , this.refs.filters.refs);
+            }
+
+            if(titleErrors)
+            {
+                this.refs.title.setState({error:errors.title});
+            }
+        },
+        funnelErrors:function(errors , refs)
+        {
+            if(!errors || typeof errors == 'undefined') return;
+
+            if(typeof errors == 'object')
+            {
+                $.each(errors , function(index , item)
                 {
-                    if($(self.state.wpFormTitleSelector).val() == '')
+                    refs[index].setState(
                     {
-                        $(self.state.wpFormTitleSelector).val(data.title)
-                    }
-
-                    $(self.state.wpFormSelector).submit();
-                }
-            }).fail(function(xhr , status , error)
+                        errors:errors[index]
+                    })
+                });
+            }
+            else if(typeof errors == 'array')
             {
-                $node.removeClass('saving');
-                //todo; create RequestError component to render these errors
-                console.log('post fail!');
-                console.log(error);
+                var length = errors.length;
+                var i;
+
+                for(i = 0 ; i < length ; i ++)
+                {
+                    refs[i].setState(
+                    {
+                        errors:errors[i]
+                    });
+                }
+            }
+        },
+        handleRequestError:function(error)
+        {
+            console.log('request failed!');
+            this.refs.requestErrors.setState(
+            {
+                errorMessage:error.toString()
             });
         },
         render:function()
         {
             return (
                 React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
+                    React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
                     React.createElement(this.state.dependencies.WidgetTitle, {
                         initialTitle: stacklaWp.admin.metabox.data.title, 
                         ref: "title"}
@@ -550,12 +608,22 @@
         getInitialState:function()
         {
             return {
-                data:[]
+                errorMessage:false
             }
         },
         render:function()
         {
-            return false;
+            var $class = (this.state.errorMessage) ? 'stackla-error-message stackla-request-error' : 'hide';
+
+            return (
+                React.createElement("div", {className: $class}, 
+                    React.createElement("ul", null, 
+                        React.createElement("li", null, 
+                            this.state.errorMessage
+                        )
+                    )
+                )
+            );
         }
     });
 }());
@@ -752,7 +820,7 @@
                         ), 
                         React.createElement("fieldset", {ref: "termRules"}, 
                             React.createElement("label", {className: (this.state.network === '') ? 'hide' : '', ref: "termRulesLabel"}, 
-                                "Choose a term"
+                                "Choose a type"
                             ), 
                             
                                 stacklaWp.admin.config.networks.map(function(network , i)
@@ -761,6 +829,7 @@
                                                 className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
                                                 defaultValue: self.checkTermSelected(network , self.props[network]), 
                                                 ref: network + i, 
+                                                onClick: self.checkTermSet, 
                                                 onChange: self.handleTermChange, 
                                                 key: network + i
                                             }, 
@@ -811,7 +880,7 @@
                                 React.createElement("input", {
                                     type: "text", 
                                     maxLength: "129", 
-                                    defaultValue: this.getDefaultTermValue('twitter-hastag'), 
+                                    defaultValue: this.getDefaultTermValue('twitter-hashtag'), 
                                     ref: "twitter-hashtag-value", 
                                     onChange: this.handleTermValueChange}
                                 )
@@ -927,6 +996,9 @@
                             ), 
                             React.createElement("li", {className: (this.state.errors.termValue) ? '' : 'hide'}, 
                                 (this.state.errors.termValue) ? this.state.errors.termValue : ''
+                            ), 
+                            React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
+                                (this.state.errors.sdk) ? this.state.errors.sdk : ''
                             )
                         )
                     )

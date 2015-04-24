@@ -191,7 +191,7 @@
                         </fieldset>
                         <fieldset ref='termRules'>
                             <label className={(this.state.network === '') ? 'hide' : ''} ref='termRulesLabel'>
-                                Choose a term
+                                Choose a type
                             </label>
                             {
                                 stacklaWp.admin.config.networks.map(function(network , i)
@@ -199,7 +199,8 @@
                                     return  <select 
                                                 className={(self.displayNetworkTermOptions(network)) ? '' : 'hide'} 
                                                 defaultValue={self.checkTermSelected(network , self.props[network])} 
-                                                ref={network + i} 
+                                                ref={network + i}
+                                                onClick={self.checkTermSet}
                                                 onChange={self.handleTermChange}
                                                 key={network + i}
                                             >
@@ -250,7 +251,7 @@
                                 <input 
                                     type='text'
                                     maxLength='129'
-                                    defaultValue={this.getDefaultTermValue('twitter-hastag')}
+                                    defaultValue={this.getDefaultTermValue('twitter-hashtag')}
                                     ref='twitter-hashtag-value'
                                     onChange={this.handleTermValueChange}
                                 />
@@ -366,6 +367,9 @@
                             </li>
                             <li className={(this.state.errors.termValue) ? '' : 'hide'}>
                                 {(this.state.errors.termValue) ? this.state.errors.termValue : ''}
+                            </li>
+                            <li className={(this.state.errors.sdk) ? '' : 'hide'}>
+                                {(this.state.errors.sdk) ? this.state.errors.sdk : ''}
                             </li>
                         </ul>
                     </div>
