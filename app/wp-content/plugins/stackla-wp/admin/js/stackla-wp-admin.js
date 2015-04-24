@@ -31378,7 +31378,7 @@ module.exports = warning;
                         else
                         {
                             $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
-                            window.reload();
+                            location.reload();
                         }
                     }).fail(function(xhr , status , error)
                     {
