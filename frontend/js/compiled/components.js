@@ -30,20 +30,30 @@
                 removed:false
             }
         },
+        /**
+        *   Handles the "removal" of a filter component;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleRemoveFilter:function(e)
         {
             e.preventDefault();
             this.setState({removed:true , edited:true} , this.props.onRemove);
         },
         /**
-        *   Handles the onChange event for the filter name input field;
-        *   @param {e} an event object;
+        *   Handles the change event for the filter name input field;
+        *   @param {e} event object;
         *   @return void;
         */
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value , edited:true});
         },
+        /**
+        *   Handles the change events for the network checkboxes;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleNetworkCheck:function(e)
         {
             var copy = this.state.network.slice();
@@ -76,6 +86,11 @@
                 }
             }
         },
+        /**
+        *   Handles the change events for the media checkboxes;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleMediaCheck:function(e)
         {
             var copy = this.state.media.slice();
@@ -108,10 +123,21 @@
                 }
             }
         },
+        /**
+        *   Handles the change event for the sorting select field;
+        *   @param {e} event object;
+        *   @return void;
+        */
         handleSortingChange:function(e)
         {
             this.setState({sorting:e.target.value , edited:true});
         },
+        /**
+        *   Checks to see if an array value has been set;
+        *   @param {key} the array key to look for;
+        *   @param {value} the value to look for mapped to the key;
+        *   @return void;
+        */
         checkArrayValue:function(key , value)
         {
             if(!this.state[key].length) return false;
@@ -122,21 +148,10 @@
             }
             return false;
         },
-        compileData:function()
-        {
-            var data = $.extend({} , this.state); 
-
-            if(!data.network || !data.network.length)
-            {
-                data.network = stacklaWp.admin.config.networks;
-            }
-            if(!data.media || !data.network.length)
-            {
-                data.media = stacklaWp.admin.config.media;
-            }
-
-            return data;
-        },
+        /**
+        *   Renders a filter component;
+        *   @return React component;
+        */
         render:function()
         {
             if(this.state.removed === true)
@@ -347,6 +362,11 @@
                 }
             }
         },
+        /**
+        *   Compiles the data from the view to be posted to the db;
+        *   @param {e} event object;
+        *   @return void;
+        */
         compileData:function(e)
         {
             e.preventDefault();
@@ -381,6 +401,11 @@
 
             this.validate(data);
         },
+        /**
+        *   Validates the data from the view;
+        *   @param {data} the compiled data from the view;
+        *   @return void;
+        */
         validate:function(data)
         {
             var self = this;
@@ -545,6 +570,11 @@
                 errorMessage:error.toString()
             });
         },
+        /**
+        *   Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
+        *   @param {e} event object;
+        *   @return void;
+        */
         setRedirectCookie:function(e)
         {
             e.preventDefault();
@@ -553,6 +583,10 @@
             window.location = $target.attr('href');
             return;
         },
+        /**
+        *   Renders the Metabox component;
+        *   @return React component;
+        */
         render:function()
         {
             if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false)

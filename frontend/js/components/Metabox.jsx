@@ -30,6 +30,11 @@
                 }
             }
         },
+        /**
+        *   Compiles the data from the view to be posted to the db;
+        *   @param {e} event object;
+        *   @return void;
+        */
         compileData:function(e)
         {
             e.preventDefault();
@@ -64,6 +69,11 @@
 
             this.validate(data);
         },
+        /**
+        *   Validates the data from the view;
+        *   @param {data} the compiled data from the view;
+        *   @return void;
+        */
         validate:function(data)
         {
             var self = this;
@@ -228,6 +238,11 @@
                 errorMessage:error.toString()
             });
         },
+        /**
+        *   Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
+        *   @param {e} event object;
+        *   @return void;
+        */
         setRedirectCookie:function(e)
         {
             e.preventDefault();
@@ -236,6 +251,10 @@
             window.location = $target.attr('href');
             return;
         },
+        /**
+        *   Renders the Metabox component;
+        *   @return React component;
+        */
         render:function()
         {
             if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false)

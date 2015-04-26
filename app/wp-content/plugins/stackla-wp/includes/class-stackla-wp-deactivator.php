@@ -56,6 +56,8 @@ class Stackla_WP_Deactivator {
             }
         }
 
+        delete_user_meta(get_current_user_id() , 'stackla_access_token');
+
 	}
 
 }

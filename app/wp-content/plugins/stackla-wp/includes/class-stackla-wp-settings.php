@@ -163,10 +163,10 @@ class Stackla_WP_Settings
     */
     protected function set_user_has_settings()
     {
-        $statement = "SELECT `id` FROM $this->table WHERE `wp_user_id` = $this->user_id";
-        $results = $this->wpdb->get_results($statement , ARRAY_N);
+        $statement = "SELECT `id` FROM $this->table";
+        $results = $this->wpdb->get_var($statement);
 
-        (!empty($results)) ? $this->user_has_settings = true : $this->user_has_settings = false;
+        (!empty($results) || !$results || is_null($results)) ? $this->user_has_settings = true : $this->user_has_settings = false;
     }
 
     /**
@@ -191,7 +191,8 @@ class Stackla_WP_Settings
         {
             try
             {
-                $this->wpdb->update(
+                $this->wpdb->query("TRUNCATE TABLE $this->table");
+                $this->wpdb->insert(
                     $this->table,
                     array(
                         'stackla_stack' => $this->stackla_stack,
@@ -201,9 +202,7 @@ class Stackla_WP_Settings
                         'stackla_post_types' => $this->stackla_post_types
                     ),
                     array(
-                        'wp_user_id' => $this->user_id
-                    ),
-                    array(
+                        '%s',
                         '%s',
                         '%s',
                         '%s',
@@ -226,7 +225,6 @@ class Stackla_WP_Settings
                 $this->wpdb->insert(
                     $this->table,
                     array(
-                        'wp_user_id' => $this->user_id,
                         'stackla_stack' => $this->stackla_stack,
                         'stackla_client_id' => $this->stackla_client_id,
                         'stackla_client_secret' => $this->stackla_client_secret,
@@ -278,7 +276,7 @@ class Stackla_WP_Settings
     */
     public function get_user_settings()
     {
-        $statement = "SELECT * FROM $this->table WHERE `wp_user_id` = $this->user_id";
+        $statement = "SELECT * FROM $this->table";
         $results = $this->wpdb->get_row($statement , ARRAY_A);
 
         if(empty($results))
