@@ -200,7 +200,7 @@
     {
         margin-bottom:10px;
     }
-    .term-network-set
+    .term-network-set , .term-type-set
     {
         padding:5px;
         display: inline-block;
@@ -209,6 +209,10 @@
         border-radius:5px;
         width:100%;
         background:#eee;
+    }
+    .term-type-set
+    {
+        text-transform: lowercase;
     }
     .remove-term , .remove-filter
     {

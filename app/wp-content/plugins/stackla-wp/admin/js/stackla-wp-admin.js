@@ -30884,6 +30884,11 @@ if (!Array.prototype.indexOf) {
             if(options.indexOf(this.state.term) > -1) return termOptionsName + '-' + this.state.term;
             return '';
         },
+        removeTermDelimiter:function(termDelimited)
+        {
+            var split = termDelimited.split('-');
+            return split[1];
+        },
         checkTermValueOption:function(ref)
         {
             if(this.state.termDelimited === '') return false;
@@ -30945,27 +30950,39 @@ if (!Array.prototype.indexOf) {
                             
                                 stacklaWp.admin.config.networks.map(function(network , i)
                                 {
-                                    return  React.createElement("select", {
-                                                className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
-                                                defaultValue: self.checkTermSelected(network , self.props[network]), 
-                                                ref: network + i, 
-                                                onClick: self.checkTermSet, 
-                                                onChange: self.handleTermChange, 
-                                                key: network + i
-                                            }, 
-                                                React.createElement("option", {value: ""}), 
+                                    if(self.checkTermSelected(network , self.props[network]) !== '')
+                                    {
+                                        return  React.createElement("div", {key: i, className: (self.displayNetworkTermOptions(network)) ? 'term-type-set' : 'hide'}, 
                                                 
-                                                    self.props[network].map(function(option , j)
-                                                    {
-                                                        return  React.createElement("option", {
-                                                                    key: option + j, 
-                                                                    value: network + '-' + option
-                                                                }, 
-                                                                    option
-                                                                )
-                                                    })
+                                                    self.removeTermDelimiter(self.checkTermSelected(network , self.props[network]))
                                                 
-                                            )
+                                                )
+                                    }
+                                    else
+                                    {
+                                        return  React.createElement("select", {
+                                                    className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
+                                                    defaultValue: self.checkTermSelected(network , self.props[network]), 
+                                                    ref: network + i, 
+                                                    onClick: self.checkTermSet, 
+                                                    onChange: self.handleTermChange, 
+                                                    key: network + i
+                                                }, 
+                                                    React.createElement("option", {value: ""}), 
+                                                    
+                                                        self.props[network].map(function(option , j)
+                                                        {
+                                                            return  React.createElement("option", {
+                                                                        key: option + j, 
+                                                                        value: network + '-' + option
+                                                                    }, 
+                                                                        option
+                                                                    )
+                                                        })
+                                                    
+                                                )
+                                    }
+                                    
                                 })
                             
                         ), 

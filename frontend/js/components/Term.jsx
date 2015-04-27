@@ -135,6 +135,11 @@
             if(options.indexOf(this.state.term) > -1) return termOptionsName + '-' + this.state.term;
             return '';
         },
+        removeTermDelimiter:function(termDelimited)
+        {
+            var split = termDelimited.split('-');
+            return split[1];
+        },
         checkTermValueOption:function(ref)
         {
             if(this.state.termDelimited === '') return false;
@@ -196,27 +201,39 @@
                             {
                                 stacklaWp.admin.config.networks.map(function(network , i)
                                 {
-                                    return  <select 
-                                                className={(self.displayNetworkTermOptions(network)) ? '' : 'hide'} 
-                                                defaultValue={self.checkTermSelected(network , self.props[network])} 
-                                                ref={network + i}
-                                                onClick={self.checkTermSet}
-                                                onChange={self.handleTermChange}
-                                                key={network + i}
-                                            >
-                                                <option value=''></option>
+                                    if(self.checkTermSelected(network , self.props[network]) !== '')
+                                    {
+                                        return  <div key={i} className={(self.displayNetworkTermOptions(network)) ? 'term-type-set' : 'hide'}>
                                                 {
-                                                    self.props[network].map(function(option , j)
-                                                    {
-                                                        return  <option
-                                                                    key={option + j}
-                                                                    value={network + '-' + option}
-                                                                >
-                                                                    {option}
-                                                                </option>
-                                                    })
+                                                    self.removeTermDelimiter(self.checkTermSelected(network , self.props[network]))
                                                 }
-                                            </select>
+                                                </div>
+                                    }
+                                    else
+                                    {
+                                        return  <select 
+                                                    className={(self.displayNetworkTermOptions(network)) ? '' : 'hide'} 
+                                                    defaultValue={self.checkTermSelected(network , self.props[network])} 
+                                                    ref={network + i}
+                                                    onClick={self.checkTermSet}
+                                                    onChange={self.handleTermChange}
+                                                    key={network + i}
+                                                >
+                                                    <option value=''></option>
+                                                    {
+                                                        self.props[network].map(function(option , j)
+                                                        {
+                                                            return  <option
+                                                                        key={option + j}
+                                                                        value={network + '-' + option}
+                                                                    >
+                                                                        {option}
+                                                                    </option>
+                                                        })
+                                                    }
+                                                </select>
+                                    }
+                                    
                                 })
                             }
                         </fieldset>
