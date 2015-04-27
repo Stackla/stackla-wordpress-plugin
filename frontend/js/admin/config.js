@@ -14,6 +14,6 @@
             youtube:['user' , 'search']
         },
         sorting:['latest' , 'greatest' , 'votes'],
-        media:['text-only' , 'images' , 'video']
+        media:['text' , 'image' , 'video']
     };
 }(window));

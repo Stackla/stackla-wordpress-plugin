@@ -104,12 +104,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:Stackla/stackla-php-sdk.git",
-                "reference": "1ea845a27a63850dd18f541443519891980d2603"
+                "reference": "739bcbc909e6bcd2a0909a49573e244d22ec7047"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Stackla/stackla-php-sdk/zipball/1ea845a27a63850dd18f541443519891980d2603",
-                "reference": "1ea845a27a63850dd18f541443519891980d2603",
+                "url": "https://api.github.com/repos/Stackla/stackla-php-sdk/zipball/739bcbc909e6bcd2a0909a49573e244d22ec7047",
+                "reference": "739bcbc909e6bcd2a0909a49573e244d22ec7047",
                 "shasum": ""
             },
             "require": {
@@ -138,7 +138,7 @@
                 "source": "https://github.com/Stackla/stackla-php-sdk/tree/master",
                 "issues": "https://github.com/Stackla/stackla-php-sdk/issues"
             },
-            "time": "2015-04-23 23:43:29"
+            "time": "2015-04-27 03:42:36"
         },
         {
             "name": "symfony/event-dispatcher",

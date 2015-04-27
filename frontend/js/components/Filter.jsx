@@ -231,8 +231,8 @@
                             <fieldset>
                                 <input 
                                     type='checkbox' 
-                                    value='text-only' 
-                                    defaultChecked={this.checkArrayValue('media' , 'text-only')}
+                                    value='text' 
+                                    defaultChecked={this.checkArrayValue('media' , 'text')}
                                     onChange={this.handleMediaCheck}/>
                                 <label className='checkbox'>
                                     Text-only
@@ -241,8 +241,8 @@
                             <fieldset>
                                 <input 
                                     type='checkbox' 
-                                    value='images'
-                                    defaultChecked={this.checkArrayValue('media' , 'images')}
+                                    value='image'
+                                    defaultChecked={this.checkArrayValue('media' , 'image')}
                                     onChange={this.handleMediaCheck}/>
                                 <label className='checkbox'>
                                     Images

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Validate widget data;
+ * Validate metabox data;
  *
  *
  * @package    Stackla_WP
@@ -13,7 +13,7 @@ class Stackla_WP_Metabox_Validator {
 
     private $data;
     protected $allowed_networks = ['twitter' , 'facebook' , 'instagram' , 'youtube'];
-    protected $allowed_media = ['text-only' , 'images' , 'video'];
+    protected $allowed_media = ['text' , 'image' , 'video'];
     protected $allowed_sorting = ['latest' , 'greatest' , 'votes'];
     protected $error_title = "You must set a widget title";
     protected $error_terms = "You must define at least one term";

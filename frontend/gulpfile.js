@@ -42,12 +42,12 @@ var paths =
     {
         'admin':
         {
-            'src':['js/**/*.js'],
+            'src':['js/**/*.js' , '!**/public/**'],
             'dest':pluginAdminDirectory + '/js/'
         },
         'public':
         {
-            'src':['js/lib/*.js' , 'js/*.js' , 'js/public/**/*.js'],
+            'src':['js/lib/jquery-1.11.1.js' , 'js/app.js' , 'js/public/**/*.js'],
             'dest':pluginPublicDirectory + '/js/'
         }
     },
@@ -95,6 +95,7 @@ gulp.task('adminJs' , function()
         'lib/jquery.cookie.js',
         'lib/react.js',
         'app.js',
+        'admin/polyfills.js',
         'admin/config.js',
         'compiled/components.js',
         'compiled/views.js',
@@ -107,10 +108,31 @@ gulp.task('adminJs' , function()
     .pipe(gulp.dest(paths.js.admin.dest));
 });
 
+gulp.task('publicJs' , function()
+{
+    return gulp.src(paths.js.public.src)
+    .pipe(concat(pluginName + '-public.js'))
+    //.pipe(uglify())
+    .pipe(gulp.dest(paths.js.public.dest));
+});
 
 gulp.task('watch' , function()
 {
-    gulp.watch([paths.scss.admin.watch , paths.js.admin.src , paths.reactComponents.watch , paths.reactViews.src] , ['reactComponents' , 'reactViews', 'adminScss' , 'adminJs']);
+    gulp.watch(
+    [
+        paths.scss.admin.watch,
+        paths.js.admin.src,
+        paths.reactComponents.watch,
+        paths.reactViews.src,
+        paths.js.public.src
+    ],
+    [
+        'reactComponents',
+        'reactViews',
+        'adminScss',
+        'adminJs',
+        'publicJs'
+    ]);
 });
 
 gulp.task('default' , ['watch' , 'reactComponents' , 'reactViews',  'adminScss' , 'adminJs']);

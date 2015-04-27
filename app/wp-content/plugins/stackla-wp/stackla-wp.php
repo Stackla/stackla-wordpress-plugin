@@ -19,7 +19,7 @@
  * Version:           1.0.0
  * Author:            Stackla Inc
  * Author URI:        http://stackla.com/
- * License:           Private
+ * License:           GPLv2 or later
  */
 
 // If this file is called directly, abort.

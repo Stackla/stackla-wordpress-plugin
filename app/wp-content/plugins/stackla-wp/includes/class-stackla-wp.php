@@ -197,7 +197,6 @@ class Stackla_WP {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
 		$this->loader->add_action('admin_menu' , $plugin_admin , 'add_settings_page');
 		$this->loader->add_action('add_meta_boxes' , $metaboxes , 'setup_metaboxes');
 	}
@@ -215,7 +214,7 @@ class Stackla_WP {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
+		$this->loader->add_action('template_redirect' , $plugin_public , 'register_widget_shortcode');
 	}
 
 	/**

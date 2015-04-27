@@ -54,6 +54,51 @@ class Stackla_WP_Public {
 
 	}
 
+	public function render_widget()
+	{
+		global $wp_query;
+
+		$data = array(
+			'title' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$title_meta_key , true),
+			'tag' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$tag_meta_key , true),
+			'tag_id' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$tag_id_meta_key , true),
+			'terms' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$terms_meta_key , true),
+			'filters' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$filters_meta_key , true),
+		);
+
+		if(Stackla_WP_Metabox_Validator::validate_string($data['tag_id']) === false)
+		{
+			echo 'These are not the widgets you\'re looking for';
+			return;
+		}
+
+		$filters = json_decode($data['filters']);
+
+		if(Stackla_WP_Metabox_Validator::validate_array($filters) === false)
+		{
+			echo 'Something\'s wrong, your widget doesn\'t have any filters'; 
+			return;
+		}
+
+		echo "<nav class='stackla-widget-nav'>";
+		echo 	"<ul class='stackla-widget-filters'>";
+
+		foreach($filters as $filter)
+		{
+			echo	"<li class='stackla-widget-filter'>";
+			echo 		"<a href='#' class='stackla-widget-anchor' data-filter='$filter->filterId'>$filter->name</a>";
+			echo	"</li>";
+		}
+
+		echo 	"</ul>";
+		echo "</nav>";
+	}
+
+	public function register_widget_shortcode()
+	{
+		add_shortcode('stackla' , array($this , 'render_widget'));
+	}
+
 	/**
 	 * Register the stylesheets for the public-facing side of the site.
 	 *
