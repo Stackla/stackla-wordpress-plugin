@@ -352,7 +352,8 @@
                     RequestError:stacklaWp.admin.components.RequestError,
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
-                    WidgetFilters:stacklaWp.admin.components.WidgetFilters
+                    WidgetFilters:stacklaWp.admin.components.WidgetFilters,
+                    Widget:stacklaWp.admin.components.Widget
                 },
                 errors:
                 {
@@ -373,6 +374,7 @@
 
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
+            var widgetConfig = $.extend({} , this.refs.widget.refs.config.state);
             var terms = [];
             var filters = [];
             var data = {};
@@ -396,9 +398,17 @@
                 'postId':stacklaWp.admin.metabox.postId,
                 'title':this.refs.title.state.value,
                 'terms':terms,
-                'filters':filters
+                'filters':filters,
+                'widget':
+                {
+                    id:widgetConfig.id,
+                    copyId:widgetConfig.copyId,
+                    type:widgetConfig.type,
+                    style:widgetConfig.style
+                }
             };
 
+            console.log(data);
             this.validate(data);
         },
         /**
@@ -507,6 +517,7 @@
             var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
             var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
             var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
+            var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
 
             if(termsErrors)
             {
@@ -521,6 +532,11 @@
             if(titleErrors)
             {
                 this.refs.title.setState({error:errors.title});
+            }
+
+            if(widgetErrors)
+            {
+                this.refs.widget.setState({error:errors.widget});
             }
         },
         /**
@@ -616,6 +632,9 @@
                     React.createElement("section", {className: "filters"}, 
                         React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters", initialData: stacklaWp.admin.metabox.data.filters})
                     ), 
+                    React.createElement("section", {className: "config"}, 
+                        React.createElement(this.state.dependencies.Widget, {ref: "widget"})
+                    ), 
                     React.createElement("a", {href: "#", className: "wp-core-ui button button-primary", ref: "saveMetabox", onClick: this.compileData}, "Save"), 
                     React.createElement("span", {className: "spinner"}, 'Stacking...')
                 )
@@ -657,7 +676,14 @@
     });
 }());
 /*
-    Beware all ye who enter; there's a bunch of hardcoded stuff in here
+    !! NOTE !!
+
+    There are some outdated naming conventions here as this code was written a bit before the SDK was complete. 
+    Here's a rough key mapping how they match up to their counterparts in the SDK:
+
+    this.state.term == term->type
+    this.state.termValue == term->term
+    this.state.termDelimited == term->type + '-' + term->network
 */
 
 (function(window)
@@ -677,9 +703,10 @@
             id:React.PropTypes.number,
             data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
+
         /**
         *   Sets the initial state of the component;
-        *   @return {this.state} the component's state object;
+        *   @return object  {this.state}    the component's state object;
         */
         getInitialState:function()
         {
@@ -696,9 +723,10 @@
                 removed:false
             }
         },
+
         /**
         *   Removes the term from the view and sets the removed flag on this.state;
-        *   @param {e} event object;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleRemoveTerm(e)
@@ -706,18 +734,20 @@
             e.preventDefault();
             this.setState({removed:true , edited:true});
         },
+
         /**
         *   Handles the onChange event for the term name input field;
-        *   @param {e} event object;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value , edited:true});
         },
+
         /**
-        *   Handles the user changed the network option;
-        *   @param {e} a JavaScript event object;
+        *   Handles the user changing the network option;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleNetworkChange:function(e)
@@ -746,12 +776,13 @@
                 edited:true
             });
         },
+
         /**
-        *   Handles the user changed the network's term option;
-        *   @param {e} event object;
+        *   Handles the user changing the network's type option;
+        *   @param object   {e} event object;
         *   @return void;
         */
-        handleTermChange:function(e)
+        handleTypeChange:function(e)
         {
             var value = e.target.value;
             var split = value.split('-');
@@ -767,49 +798,81 @@
                 edited:true
             });
         },
+
         /**
-        *   Handles what happens when a term value is changed by the user;
-        *   @param {e} event object;
+        *   Handles the user changing the term value;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleTermValueChange:function(e)
         {
             this.setState({termValue:e.target.value , edited:true});
         },
+
         /**
-        *   Matches the current network being rendered against what is in the state;
-        *   @param {network} the current network in the render loop;
-        *   @return boolean;
+        *   Determines which type options to display based on the current this.state.network;
+        *   @param string   {network}   the current network in the component's state;
+        *   @return boolean {true || false} true if the passed network is the current network || false if not;
         */
-        displayNetworkTermOptions:function(network)
+        displayNetworkTypeOptions:function(network)
         {
             if(this.state.network === '') return false;
             if(this.state.network == network) return true;
             return false;
         },
-        checkTermSelected:function(termOptionsName , options)
+
+        /**
+        *   Checks if the typeOptionsName passed is the current;
+        *   @param string   {typeOptionsName} the needle;
+        *   @param array   {options} the haystack;
+        *   @return string  {mixed} delimited type option with this.state.term || empty string;
+        */
+        checkTypeSelected:function(typeOptionsName , options)
         {
             if(this.state.term === '') return '';
-            if(options.indexOf(this.state.term) > -1) return termOptionsName + '-' + this.state.term;
+            if(options.indexOf(this.state.term) > -1) return typeOptionsName + '-' + this.state.term;
             return '';
         },
-        removeTermDelimiter:function(termDelimited)
+
+        /**
+        *   Removes the '-' delimiter from the network type option;
+        *   @param string   {delimited} a string delimited by one hyphen;
+        *   @return string  the term type without its network;
+        */
+        removeTypeDelimiter:function(delimited)
         {
-            var split = termDelimited.split('-');
+            var split = delimited.split('-');
             return split[1];
         },
+
+        /**
+        *   About;
+        *   @param {};
+        *   @return void;
+        */
         checkTermValueOption:function(ref)
         {
             if(this.state.termDelimited === '') return false;
             if(this.state.termDelimited == ref) return true;
             return false;
         },
+
+        /**
+        *   About;
+        *   @param {};
+        *   @return void;
+        */
         getDefaultTermValue:function(delimited)
         {
             if(this.state.termDelimited === '') return '';
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
+        /**
+        *   About;
+        *   @param {};
+        *   @return void;
+        */
         render:function()
         {
             var self = this;
@@ -859,22 +922,22 @@
                             
                                 stacklaWp.admin.config.networks.map(function(network , i)
                                 {
-                                    if(self.checkTermSelected(network , self.props[network]) !== '')
+                                    if(self.checkTypeSelected(network , self.props[network]) !== '')
                                     {
-                                        return  React.createElement("div", {key: i, className: (self.displayNetworkTermOptions(network)) ? 'term-type-set' : 'hide'}, 
+                                        return  React.createElement("div", {key: i, className: (self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}, 
                                                 
-                                                    self.removeTermDelimiter(self.checkTermSelected(network , self.props[network]))
+                                                    self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
                                                 
                                                 )
                                     }
                                     else
                                     {
                                         return  React.createElement("select", {
-                                                    className: (self.displayNetworkTermOptions(network)) ? '' : 'hide', 
-                                                    defaultValue: self.checkTermSelected(network , self.props[network]), 
+                                                    className: (self.displayNetworkTypeOptions(network)) ? '' : 'hide', 
+                                                    defaultValue: self.checkTypeSelected(network , self.props[network]), 
                                                     ref: network + i, 
                                                     onClick: self.checkTermSet, 
-                                                    onChange: self.handleTermChange, 
+                                                    onChange: self.handleTypeChange, 
                                                     key: network + i
                                                 }, 
                                                     React.createElement("option", {value: ""}), 
@@ -1053,6 +1116,204 @@
         }
     });
 }(window));
+(function()
+{
+    'use strict';
+
+    window.stacklaWp.admin.components.Widget = React.createClass(
+    {displayName: "Widget",
+        propTypes:
+        {
+        
+        },
+        getInitialState:function()
+        {
+            return {
+                dependencies:
+                {
+                    WidgetConfig:stacklaWp.admin.components.WidgetConfig,
+                    InputError:stacklaWp.admin.components.InputError
+                },
+                error:false
+            }
+        },
+        render:function()
+        {
+            var self = this;
+
+            return (
+                React.createElement("div", {className: "stackla-block"}, 
+                    React.createElement("header", null, 
+                        React.createElement("h2", null, 
+                            "Look and Feel"
+                        )
+                    ), 
+                    React.createElement("div", {className: (this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}, 
+                        React.createElement(this.state.dependencies.WidgetConfig, {
+                            ref: "config"}
+                        )
+                    ), 
+                    React.createElement("div", {className: (this.state.error) ? 'stackla-error-message' : 'hide'}, 
+                        React.createElement(this.state.dependencies.InputError, {errorMessage: this.state.error})
+                    )
+                )
+            );
+        }
+    });
+}());
+(function()
+{
+    'use strict';
+
+    window.stacklaWp.admin.components.WidgetConfig = React.createClass(
+    {displayName: "WidgetConfig",
+        propTypes:
+        {
+            initialData:React.PropTypes.object
+        },
+        getInitialState:function()
+        {
+            return {
+                id:
+                (typeof this.props.initialData !== 'undefined') 
+                ? this.props.initialData.widgetId 
+                : false,
+                copyId:false,
+                type:
+                (typeof this.props.initialData !== 'undefined') 
+                ? this.props.initialData.type 
+                : 'new',
+                style:
+                (typeof this.props.initialData !== 'undefined') 
+                ? this.props.initialData.style 
+                : 'fluid',
+                displayStyles:
+                (typeof this.props.initialData !== 'undefined' && this.props.initialData.type == 'derive')
+                ? false 
+                : true,
+                displayWidgets:false,
+                options:
+                {
+                    types:
+                    [
+                        'new',
+                        'clone',
+                        'derive'
+                    ],
+                    styles:
+                    [
+                        'fluid',
+                        'horizontal-fluid'
+                    ]
+                },
+                labels:
+                {
+                    types:
+                    [
+                        'Create a new Stackla Widget',
+                        'Copy an existing Stackla Widget',
+                        'Reuse an existing Stackla Widget'
+                    ],
+                    styles:
+                    [
+                        'Fluid Vertical',
+                        'Fluid Horizontal'
+                    ]
+                }
+            }
+        },
+        handleTypeChange:function(e)
+        {
+            var self = this;
+
+            this.setState(
+            {
+                type:e.target.value,
+                displayStyles:self.setStyleDisplayState(e.target.value),
+                displayWidgets:self.setWidgetsDisplayState(e.target.value)
+            });
+        },
+        handleWidgetCopyChange:function(e)
+        {
+            var self = this;
+
+            this.setState(
+            {
+                widgetCopyId:e.target.value
+            })
+        },
+        getDefaultChecked:function(option , key)
+        {
+            return (this.state[key] == option) ? true : false;
+        },
+        setWidgetsDisplayState:function(type)
+        {
+            return (type == 'new') ? false : true;
+        },
+        setStyleDisplayState:function(type)
+        {
+            return (type == 'derive') ? false : true;
+        },
+
+        render:function()
+        {
+            var self = this;
+
+            return (
+                React.createElement("div", null, 
+                    React.createElement("div", {ref: "types"}, 
+                    
+                        this.state.options.types.map(function(option , i)
+                        {
+                            return  React.createElement("fieldset", {key: i}, 
+                                        React.createElement("input", {
+                                            ref: option, 
+                                            type: "radio", 
+                                            value: option, 
+                                            name: "type", 
+                                            onChange: self.handleTypeChange, 
+                                            defaultChecked: self.getDefaultChecked(option , 'type')}
+                                        ), 
+                                        self.state.labels.types[i]
+                                    )
+                        })
+                    
+                    ), 
+                    React.createElement("div", {ref: "widgets", className: (self.state.displayWidgets) ? '' : 'hide'}, 
+                        React.createElement("select", {onChange: this.handleWidgetCopyChange}, 
+                            React.createElement("option", {value: ""}), 
+                            
+                                Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
+                                {
+                                    return  React.createElement("option", {value: key, key: key}, 
+                                                stacklaWp.admin.metabox.widgets[key]
+                                            )
+                                })
+                            
+                        )
+                    ), 
+                    React.createElement("div", {ref: "styles", className: (self.state.displayStyles) ? '' : 'hide'}, 
+                    
+                        this.state.options.styles.map(function(option , i)
+                        {
+                            return  React.createElement("fieldset", {key: i}, 
+                                        React.createElement("input", {
+                                            type: "radio", 
+                                            ref: option, 
+                                            name: "style", 
+                                            onChange: self.handleStyleChange, 
+                                            defaultChecked: self.getDefaultChecked(option , 'style')}
+                                        ), 
+                                        self.state.labels.styles[i]
+                                    )
+                        })
+                    
+                    )
+                )
+            );
+        }
+    });
+}());
 (function(window)
 {
     'use strict';

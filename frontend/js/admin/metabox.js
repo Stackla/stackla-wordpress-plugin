@@ -10,6 +10,7 @@
         handler:false,
         token:false,
         accessUri:false,
+        widgets:false,
         /**
         *   Runs code required for rendering the metabox;
         *   @param {callback} a callback function to render the view;
@@ -24,13 +25,13 @@
             
             this.postId = $wpMetabox.data('postid');
             this.data = $wpMetabox.data('stackla');
-
             this.data.filters = this.tryJsonParse(this.data.filters);
             this.data.terms = this.tryJsonParse(this.data.terms);
             this.validator = $wpMetabox.data('validator');
             this.handler = $wpMetabox.data('handler');
             this.token = $wpMetabox.data('token');
             this.accessUri = $wpMetabox.data('accessuri');
+            this.widgets = $wpMetabox.data('widgets');
 
             if(typeof callback == 'function')
             {

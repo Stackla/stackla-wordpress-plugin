@@ -31,11 +31,14 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     private $token = false;
     private $stack_name = false;
     private $stack = false;
+    private $widget_default_filter = false;
+    private $filter_objects = array();
 
     public  $tag = false;
+    public  $errors = array();
+
     public static $auth_host = "https://api.qa.stackla.com/api/";
     public static $stack_host = "https://my.qa.stackla.com/api/";
-    public  $errors = array();
 
     public function __construct()
     {
@@ -47,6 +50,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $this->errors['title'] = false;
         $this->errors['terms'] = array();
         $this->errors['filters'] = array();
+        $this->errors['widget'] = false;
 
         try
         {
@@ -301,6 +305,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                     $filter->create();
                     $filters[$i]['filterId'] = $filter->id;
                 }
+
+                $this->filter_objects[] = $filter;
             }
             catch(Exception $e)
             {
@@ -311,6 +317,89 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         }
 
         return $this->flush($filters);
+    }
+
+    /**
+    *   Handles creating, updating, cloning and deriving of a new widget instance;
+    *   @param  array   $options    an array of options to configure the widget;
+    *   @return array   $options    the options with the potential widget id set;
+    */
+    public function push_widget($name , $filter , $options)
+    {
+        $widget;
+        $filter_id = $filter['filterId'];
+
+        if($options['copyId'] === true || $options['copyId'] === 'true')
+        {
+            $parent = $this->stack->instance('Widget' , (int) $options['copyId'] , false);
+
+            if($options['type'] == 'clone')
+            {
+                $widget = $parent->duplicate();
+            }
+            elseif($options['type'] == 'derive')
+            {
+                $widget = $parent->derive($filter_id , $name);
+                $options['embed'] = $widget->embed_code;
+                return $options;
+            }
+        }
+        elseif($options['id'] === false || $options['id'] === 'false')
+        {
+            $widget = $this->stack->instance('Widget');
+        }
+        else
+        {
+            $widget = $this->stack->instance('Widget' , $options['id']);
+        }
+
+        $widget->name = stripslashes($name);
+        $widget->type = \Stackla\Api\Widget::TYPE_FLUID;
+        $widget->type_style = (isset($options['style'])) ? $options['style'] : \Stackla\Api\Widget::STYLE_VERTICAL_FLUID;
+        $widget->filter_id = $filter_id;
+
+        try
+        {
+            if(
+                $options['id'] === false || $options['id'] === 'false' 
+                && $options['copyId'] === false || $options['copyId'] === 'false'
+            )
+            {
+                $widget->create();
+                $options['id'] = $widget->id;
+            }
+            else
+            {
+                $widget->update();
+            }
+
+            $options['embed'] = $widget->embed_code;
+        }
+        catch(Exception $e)
+        {
+            $this->errors['widget'] = implode(', ' , $widget->getErrors());
+            return false;
+        }
+
+        return $options;
+    }
+
+    /**
+    *   Gets the existing widgets from the user's stack;
+    *   @return array   $widgets    an array of widget objects;
+    */
+    public function get_widgets()
+    {
+        $widgets = $this->stack->instance('Widget');
+        $widgets->get(25, 1, array('derived' => 'false'));
+        $parsed = array();
+
+        foreach($widgets as $widget)
+        {
+            $parsed[$widget->id] = $widget->name;
+        }
+
+        return $parsed;
     }
 
     public function validate()

@@ -2,6 +2,9 @@
     wp_nonce_field( basename( __FILE__ ), 'stackla_for_wordpress_nonce' );
     $metabox = new Stackla_WP_Metabox($object->ID);
     $settings = new Stackla_WP_Settings;
+    $sdk = new Stackla_WP_SDK_Wrapper;
+    $widgets = $sdk->get_widgets();
+    $widgets_json = $metabox->set_json($widgets);
     $access_token = $settings->get_user_access_token();
     $access_uri = $settings->get_access_uri();
     $metabox_json = $metabox->get_json();
@@ -18,11 +21,12 @@
 <?php
     endif;
 ?>
-<div id='stackla-metabox' 
+<div id='stackla-metabox'
     data-stackla='<?php echo $metabox_json; ?>'
     data-postid="<?php echo $object->ID ?>"
     data-validator="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox-validator.php"
     data-handler="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox.php"
     data-accessuri="<?php echo $access_uri ?>"
     data-token="<?php echo ($access_token) ? $access_token : '' ?>"
+    data-widgets='<?php echo $widgets_json; ?>'
 ></div>

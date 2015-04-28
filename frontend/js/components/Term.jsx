@@ -1,5 +1,12 @@
 /*
-    Beware all ye who enter; there's a bunch of hardcoded stuff in here
+    !! NOTE !!
+
+    There are some outdated naming conventions here as this code was written a bit before the SDK was complete. 
+    Here's a rough key mapping how they match up to their counterparts in the SDK:
+
+    this.state.term == term->type
+    this.state.termValue == term->term
+    this.state.termDelimited == term->type + '-' + term->network
 */
 
 (function(window)
@@ -19,9 +26,10 @@
             id:React.PropTypes.number,
             data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
+
         /**
         *   Sets the initial state of the component;
-        *   @return {this.state} the component's state object;
+        *   @return object  {this.state}    the component's state object;
         */
         getInitialState:function()
         {
@@ -38,9 +46,10 @@
                 removed:false
             }
         },
+
         /**
         *   Removes the term from the view and sets the removed flag on this.state;
-        *   @param {e} event object;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleRemoveTerm(e)
@@ -48,18 +57,20 @@
             e.preventDefault();
             this.setState({removed:true , edited:true});
         },
+
         /**
         *   Handles the onChange event for the term name input field;
-        *   @param {e} event object;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleNameChange:function(e)
         {
             this.setState({name:e.target.value , edited:true});
         },
+
         /**
-        *   Handles the user changed the network option;
-        *   @param {e} a JavaScript event object;
+        *   Handles the user changing the network option;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleNetworkChange:function(e)
@@ -88,12 +99,13 @@
                 edited:true
             });
         },
+
         /**
-        *   Handles the user changed the network's term option;
-        *   @param {e} event object;
+        *   Handles the user changing the network's type option;
+        *   @param object   {e} event object;
         *   @return void;
         */
-        handleTermChange:function(e)
+        handleTypeChange:function(e)
         {
             var value = e.target.value;
             var split = value.split('-');
@@ -109,49 +121,81 @@
                 edited:true
             });
         },
+
         /**
-        *   Handles what happens when a term value is changed by the user;
-        *   @param {e} event object;
+        *   Handles the user changing the term value;
+        *   @param object   {e} event object;
         *   @return void;
         */
         handleTermValueChange:function(e)
         {
             this.setState({termValue:e.target.value , edited:true});
         },
+
         /**
-        *   Matches the current network being rendered against what is in the state;
-        *   @param {network} the current network in the render loop;
-        *   @return boolean;
+        *   Determines which type options to display based on the current this.state.network;
+        *   @param string   {network}   the current network in the component's state;
+        *   @return boolean {true || false} true if the passed network is the current network || false if not;
         */
-        displayNetworkTermOptions:function(network)
+        displayNetworkTypeOptions:function(network)
         {
             if(this.state.network === '') return false;
             if(this.state.network == network) return true;
             return false;
         },
-        checkTermSelected:function(termOptionsName , options)
+
+        /**
+        *   Checks if the typeOptionsName passed is the current;
+        *   @param string   {typeOptionsName} the needle;
+        *   @param array   {options} the haystack;
+        *   @return string  {mixed} delimited type option with this.state.term || empty string;
+        */
+        checkTypeSelected:function(typeOptionsName , options)
         {
             if(this.state.term === '') return '';
-            if(options.indexOf(this.state.term) > -1) return termOptionsName + '-' + this.state.term;
+            if(options.indexOf(this.state.term) > -1) return typeOptionsName + '-' + this.state.term;
             return '';
         },
-        removeTermDelimiter:function(termDelimited)
+
+        /**
+        *   Removes the '-' delimiter from the network type option;
+        *   @param string   {delimited} a string delimited by one hyphen;
+        *   @return string  the term type without its network;
+        */
+        removeTypeDelimiter:function(delimited)
         {
-            var split = termDelimited.split('-');
+            var split = delimited.split('-');
             return split[1];
         },
+
+        /**
+        *   About;
+        *   @param {};
+        *   @return void;
+        */
         checkTermValueOption:function(ref)
         {
             if(this.state.termDelimited === '') return false;
             if(this.state.termDelimited == ref) return true;
             return false;
         },
+
+        /**
+        *   About;
+        *   @param {};
+        *   @return void;
+        */
         getDefaultTermValue:function(delimited)
         {
             if(this.state.termDelimited === '') return '';
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
+        /**
+        *   About;
+        *   @param {};
+        *   @return void;
+        */
         render:function()
         {
             var self = this;
@@ -201,22 +245,22 @@
                             {
                                 stacklaWp.admin.config.networks.map(function(network , i)
                                 {
-                                    if(self.checkTermSelected(network , self.props[network]) !== '')
+                                    if(self.checkTypeSelected(network , self.props[network]) !== '')
                                     {
-                                        return  <div key={i} className={(self.displayNetworkTermOptions(network)) ? 'term-type-set' : 'hide'}>
+                                        return  <div key={i} className={(self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}>
                                                 {
-                                                    self.removeTermDelimiter(self.checkTermSelected(network , self.props[network]))
+                                                    self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
                                                 }
                                                 </div>
                                     }
                                     else
                                     {
                                         return  <select 
-                                                    className={(self.displayNetworkTermOptions(network)) ? '' : 'hide'} 
-                                                    defaultValue={self.checkTermSelected(network , self.props[network])} 
+                                                    className={(self.displayNetworkTypeOptions(network)) ? '' : 'hide'} 
+                                                    defaultValue={self.checkTypeSelected(network , self.props[network])} 
                                                     ref={network + i}
                                                     onClick={self.checkTermSet}
-                                                    onChange={self.handleTermChange}
+                                                    onChange={self.handleTypeChange}
                                                     key={network + i}
                                                 >
                                                     <option value=''></option>

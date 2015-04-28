@@ -20,7 +20,8 @@
                     RequestError:stacklaWp.admin.components.RequestError,
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
-                    WidgetFilters:stacklaWp.admin.components.WidgetFilters
+                    WidgetFilters:stacklaWp.admin.components.WidgetFilters,
+                    Widget:stacklaWp.admin.components.Widget
                 },
                 errors:
                 {
@@ -41,6 +42,7 @@
 
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
+            var widgetConfig = $.extend({} , this.refs.widget.refs.config.state);
             var terms = [];
             var filters = [];
             var data = {};
@@ -64,9 +66,17 @@
                 'postId':stacklaWp.admin.metabox.postId,
                 'title':this.refs.title.state.value,
                 'terms':terms,
-                'filters':filters
+                'filters':filters,
+                'widget':
+                {
+                    id:widgetConfig.id,
+                    copyId:widgetConfig.copyId,
+                    type:widgetConfig.type,
+                    style:widgetConfig.style
+                }
             };
 
+            console.log(data);
             this.validate(data);
         },
         /**
@@ -175,6 +185,7 @@
             var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
             var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
             var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
+            var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
 
             if(termsErrors)
             {
@@ -189,6 +200,11 @@
             if(titleErrors)
             {
                 this.refs.title.setState({error:errors.title});
+            }
+
+            if(widgetErrors)
+            {
+                this.refs.widget.setState({error:errors.widget});
             }
         },
         /**
@@ -283,6 +299,9 @@
                     </section>
                     <section className='filters'>
                         <this.state.dependencies.WidgetFilters ref='filters' initialData={stacklaWp.admin.metabox.data.filters} />
+                    </section>
+                    <section className='config'>
+                        <this.state.dependencies.Widget ref='widget' />
                     </section>
                     <a href='#' className='wp-core-ui button button-primary' ref='saveMetabox' onClick={this.compileData}>Save</a>
                     <span className='spinner'>{'Stacking...'}</span>

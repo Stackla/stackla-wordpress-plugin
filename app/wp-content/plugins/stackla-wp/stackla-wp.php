@@ -17,7 +17,7 @@
  * Plugin URI:        http://stackla.com/
  * Description:       Enables Stackla widget integrations with the WordPress platform.
  * Version:           1.0.0
- * Author:            Stackla Inc
+ * Author:            Rohan Deshpande
  * Author URI:        http://stackla.com/
  * License:           GPLv2 or later
  */
