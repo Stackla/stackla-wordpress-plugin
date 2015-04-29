@@ -3,23 +3,10 @@
     $metabox = new Stackla_WP_Metabox($object->ID);
     $settings = new Stackla_WP_Settings;
     $sdk = new Stackla_WP_SDK_Wrapper;
-    $widgets = $sdk->get_widgets();
-    $widgets_json = $metabox->set_json($widgets);
     $access_token = $settings->get_user_access_token();
     $access_uri = $settings->get_access_uri();
     $metabox_json = $metabox->get_json();
-?>
-<?php  
-    if(!$access_uri):
-?>
-    <div class='auth-notification failure'>
-        <p>
-            You have not authorized this plugin instance with Stackla. To authorize, please visit the 
-            <a href="<?php echo get_admin_url()?>/?page=stackla"> settings page</a>. Until your plugin is authorized, you will unable to make changes to your Stack from WordPress.
-        </p>
-    </div>
-<?php
-    endif;
+    $widgets_json = ($access_token) ? $metabox->set_json($sdk->get_widgets()) : '';
 ?>
 <div id='stackla-metabox'
     data-stackla='<?php echo $metabox_json; ?>'

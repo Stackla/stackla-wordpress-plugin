@@ -57,18 +57,20 @@ class Stackla_WP_Public {
 	public function render_widget()
 	{
 		global $wp_query;
-
+		$post_id = $wp_query->post->ID;
 		$data = array(
-			'title' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$title_meta_key , true),
-			'tag' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$tag_meta_key , true),
-			'tag_id' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$tag_id_meta_key , true),
-			'terms' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$terms_meta_key , true),
-			'filters' => get_post_meta($wp_query->post->ID , Stackla_WP_Metabox::$filters_meta_key , true),
+			'title' => get_post_meta($post_id , Stackla_WP_Metabox::$title_meta_key , true),
+			'tag' => get_post_meta($post_id , Stackla_WP_Metabox::$tag_meta_key , true),
+			'tag_id' => get_post_meta($post_id , Stackla_WP_Metabox::$tag_id_meta_key , true),
+			'terms' => get_post_meta($post_id , Stackla_WP_Metabox::$terms_meta_key , true),
+			'filters' => get_post_meta($post_id , Stackla_WP_Metabox::$filters_meta_key , true),
+			'embed' => get_post_meta($post_id , Stackla_WP_Metabox::$widget_embed_meta_key , true),
+			'widget' => get_post_meta($post_id , Stackla_WP_Metabox::$widget_meta_key , true)
 		);
 
 		if(Stackla_WP_Metabox_Validator::validate_string($data['tag_id']) === false)
 		{
-			echo 'These are not the widgets you\'re looking for';
+			echo 'You don\'t seem to have a Stackla Tag ID set, please try saving your Stackla For WordPress metabox for this post again.' ;
 			return;
 		}
 
@@ -76,22 +78,42 @@ class Stackla_WP_Public {
 
 		if(Stackla_WP_Metabox_Validator::validate_array($filters) === false)
 		{
-			echo 'Something\'s wrong, your widget doesn\'t have any filters'; 
+			echo 'You don\'t seem to have a Stackla Filter set, please try saving your Stackla For WordPress metabox for this post again.' ;
 			return;
 		}
 
-		echo "<nav class='stackla-widget-nav'>";
-		echo 	"<ul class='stackla-widget-filters'>";
+		if(Stackla_WP_Metabox_Validator::validate_string($data['embed']) === false)
+		{
+			echo 'You don\'t seem to have a widget embed code, please try saving your Stackla For WordPress metabox for this post again.';
+			return;
+		}
+
+		if(Stackla_WP_Metabox_Validator::validate_string($data['widget']) === false)
+		{
+			echo 'You don\'t seem to have any widget data saved, please try saving your Stackla For WordPress metabox for this post again';
+			return;
+		}
+
+		$widget_data = json_decode($data['widget']);
+		$widget_id = $widget_data->id;
+
+		echo	"<div class='stackla-widget-wrapper' data-widgetid='$widget_id'>";
+		echo 		"<nav class='stackla-widget-nav'>";
+		echo 			"<ul class='stackla-widget-filters'>";
 
 		foreach($filters as $filter)
 		{
-			echo	"<li class='stackla-widget-filter'>";
-			echo 		"<a href='#' class='stackla-widget-anchor' data-filter='$filter->filterId'>$filter->name</a>";
-			echo	"</li>";
+			echo			"<li class='stackla-widget-filter'>";
+			echo 				"<a href='#' class='stackla-widget-anchor' data-filter='$filter->filterId'>$filter->name</a>";
+			echo			"</li>";
 		}
 
-		echo 	"</ul>";
-		echo "</nav>";
+		echo 			"</ul>";
+		echo 		"</nav>";
+
+		
+		echo 		$data['embed'];
+		echo 	"</div>";
 	}
 
 	public function register_widget_shortcode()

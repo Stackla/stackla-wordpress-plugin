@@ -28,7 +28,13 @@ class Stackla_WP_Settings
         'attachment'
     );
 
-    public $errors = array();
+    public $errors = array(
+        'request' => false,
+        'stack' => false,
+        'client_id' => false,
+        'client_secret' => false,
+        'callback' => false
+    );
 
     /**
     *   -- CONSTRUCTOR --
@@ -79,11 +85,9 @@ class Stackla_WP_Settings
     *   Checks the errors property, and if not empty echoes them out to the client;
     *   @return void;
     */
-    protected function get_errors()
+    protected function send_errors()
     {
-        if(empty($this->errors)) return;
-
-        echo implode(", \n" , $this->errors);
+        echo json_encode($this->errors);
     }
 
     /**
@@ -97,7 +101,7 @@ class Stackla_WP_Settings
 
         if(!Stackla_WP_Metabox_Validator::validate_string($data['stack']))
         {
-            $this->errors[] = "You must submit a valid stack name";
+            $this->errors['stack'] = "You must submit a valid stack name";
         }
         else
         {
@@ -106,7 +110,7 @@ class Stackla_WP_Settings
 
         if(!Stackla_WP_Metabox_Validator::validate_string($data['client_id']))
         {
-            $this->errors[] = 'You must submit a valid client id';
+            $this->errors['client_id'] = 'You must submit a valid client id';
         }
         else
         {
@@ -115,7 +119,7 @@ class Stackla_WP_Settings
 
         if(!Stackla_WP_Metabox_Validator::validate_string($data['client_secret']))
         {
-            $this->errors[] = 'You must submit a valid client secret';
+            $this->errors['client_secret'] = 'You must submit a valid client secret';
         }
         else
         {
@@ -124,16 +128,19 @@ class Stackla_WP_Settings
 
         if(!Stackla_WP_Metabox_Validator::validate_string($data['callback']))
         {
-            $this->errors[] = 'You must submit a valid callback URI';
+            $this->errors['callback'] = 'You must submit a valid callback URI';
         }
         else
         {
             $this->stackla_callback_uri = $data['callback'];
         }
 
-        if(!empty($this->errors))
+        foreach($this->errors as $k => $v)
         {
-            return false;
+            if($v !== false)
+            {
+                return false;
+            }
         }
 
         if(isset($data['types']))
@@ -146,9 +153,12 @@ class Stackla_WP_Settings
                 }
             }
 
-            if(!empty($this->errors))
+            foreach($this->errors as $k => $v)
             {
-                return false;
+                if($v !== false)
+                {
+                    return false;
+                }
             }
 
             $this->stackla_post_types = implode(',' , $data['types']);
@@ -181,10 +191,11 @@ class Stackla_WP_Settings
 
         if($validated === false)
         {
-            $this->get_errors();
+            $this->send_errors();
             return;
         }
 
+        $this->clear_access_tokens();
         $this->set_user_has_settings();
 
         if($this->user_has_settings)
@@ -213,8 +224,8 @@ class Stackla_WP_Settings
             }
             catch (Exception $e)
             {
-                $this->errors[] = $e->getMessage();
-                $this->get_errors();
+                $this->errors['request'] = $e->getMessage();
+                $this->send_errors();
                 return;
             }
         }
@@ -243,13 +254,22 @@ class Stackla_WP_Settings
             }
             catch (Exception $e)
             {
-                $this->errors[] = $e->getMessage();
-                $this->get_errors();
+                $this->errors['request'] = $e->getMessage();
+                $this->send_errors();
                 return;
             }
         }
 
         echo '1';
+    }
+
+    /**
+    *   Clears ALL access tokens from the usermeta table;
+    *   @return void;
+    */
+    public function clear_access_tokens()
+    {
+        $this->wpdb->delete($this->wpdb->usermeta , array('meta_key' => 'stackla_access_token') , array('%s'));
     }
 
     /**

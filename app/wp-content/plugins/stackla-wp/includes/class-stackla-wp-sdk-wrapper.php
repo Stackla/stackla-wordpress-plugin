@@ -283,16 +283,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             }
 
             $filter->name = stripslashes($f['name']);
-
-            foreach($f['network'] as $network)
-            {
-                $filter->addNetwork($network);
-            }
-
-            foreach($f['media'] as $media)
-            {
-                $filter->addMedia($media);
-            }
+            $filter->networks  = $f['network'];
+            $filter->media = $f['media'];
 
             try
             {
@@ -329,22 +321,31 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $widget;
         $filter_id = $filter['filterId'];
 
-        if($options['copyId'] === true || $options['copyId'] === 'true')
-        {
+        if(Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === true)
+        { 
             $parent = $this->stack->instance('Widget' , (int) $options['copyId'] , false);
+
+            if(Stackla_WP_Metabox_Validator::validate_string($options['id']) === true)
+            {
+                $old_widget = $this->stack->instance('Widget' , (int) $options['id'] , false);
+                $old_widget->delete();
+            }
 
             if($options['type'] == 'clone')
             {
                 $widget = $parent->duplicate();
+                $widget->type_style = $options['style'];
+                $options['id'] = $widget->id;
             }
             elseif($options['type'] == 'derive')
             {
                 $widget = $parent->derive($filter_id , $name);
+                $options['id'] = $widget->id;
                 $options['embed'] = $widget->embed_code;
                 return $options;
             }
         }
-        elseif($options['id'] === false || $options['id'] === 'false')
+        elseif(Stackla_WP_Metabox_Validator::validate_string($options['id']) === false)
         {
             $widget = $this->stack->instance('Widget');
         }
@@ -361,8 +362,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         try
         {
             if(
-                $options['id'] === false || $options['id'] === 'false' 
-                && $options['copyId'] === false || $options['copyId'] === 'false'
+                Stackla_WP_Metabox_Validator::validate_string($options['id']) === false 
+                && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === false
             )
             {
                 $widget->create();

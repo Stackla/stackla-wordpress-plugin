@@ -45,6 +45,7 @@ class Stackla_WP_Metabox
             "filters" => get_post_meta($this->id , self::$filters_meta_key , true),
             "tag" => get_post_meta($this->id , self::$tag_meta_key , true),
             "tag_id" => get_post_meta($this->id , self::$tag_id_meta_key , true),
+            "widget" => get_post_meta($this->id , self::$widget_meta_key , true)
         );
     }
 
@@ -142,6 +143,6 @@ class Stackla_WP_Metabox
         add_post_meta($this->id , self::$widget_meta_key , $this->set_json($data));
 
         delete_post_meta($this->id , self::$widget_embed_meta_key);
-        add_post_meta($this->id , self::$widget_embed_meta_key , json_encode($widget['embed']));
+        add_post_meta($this->id , self::$widget_embed_meta_key , $widget['embed']);
     }
 }
