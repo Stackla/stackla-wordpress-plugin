@@ -154,6 +154,8 @@
         */
         render:function()
         {
+            var first = (this.props.id === 0) ? 'first ' : ''
+
             if(this.state.removed === true)
             {
                 return (
@@ -162,147 +164,147 @@
             }
 
             return (
-                React.createElement("div", {className: "stackla-block"}, 
+                React.createElement("div", {className: first + 'stackla-block'}, 
                     React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
-                        React.createElement("fieldset", {className: "term-name"}, 
-                            React.createElement("label", null, 
-                                "Filter name"
-                            ), 
-                            React.createElement("input", {
-                                type: "text", 
-                                className: "widefat", 
-                                value: this.state.name, 
-                                onChange: this.handleNameChange}
-                            )
-                        ), 
-                        React.createElement("fieldset", null, 
-                            React.createElement("label", null, 
-                                "Network"
-                            ), 
-                            React.createElement("fieldset", null, 
-                                React.createElement("input", {
-                                    type: "checkbox", 
-                                    value: "twitter", 
-                                    defaultChecked: this.checkArrayValue('network' , 'twitter'), 
-                                    onChange: this.handleNetworkCheck}
+                        React.createElement("div", {className: "stackla-widget-inner"}, 
+                            React.createElement("fieldset", {className: "term-name"}, 
+                                React.createElement("label", null, 
+                                    "Filter name"
                                 ), 
-                                React.createElement("label", {className: "checkbox"}, 
-                                    "Twitter"
+                                React.createElement("input", {
+                                    type: "text", 
+                                    className: "widefat", 
+                                    value: this.state.name, 
+                                    onChange: this.handleNameChange}
                                 )
                             ), 
                             React.createElement("fieldset", null, 
-                                React.createElement("input", {
-                                    type: "checkbox", 
-                                    value: "facebook", 
-                                    defaultChecked: this.checkArrayValue('network' , 'facebook'), 
-                                    onChange: this.handleNetworkCheck}
+                                React.createElement("label", null, 
+                                    "Network"
                                 ), 
-                                React.createElement("label", {className: "checkbox"}, 
-                                    "Facebook"
-                                )
-                            ), 
-                            React.createElement("fieldset", null, 
-                                React.createElement("input", {
-                                    type: "checkbox", 
-                                    value: "instagram", 
-                                    defaultChecked: this.checkArrayValue('network' , 'instagram'), 
-                                    onChange: this.handleNetworkCheck}
+                                React.createElement("fieldset", null, 
+                                    React.createElement("input", {
+                                        type: "checkbox", 
+                                        value: "twitter", 
+                                        defaultChecked: this.checkArrayValue('network' , 'twitter'), 
+                                        onChange: this.handleNetworkCheck}
+                                    ), 
+                                    React.createElement("label", {className: "checkbox"}, 
+                                        "Twitter"
+                                    )
                                 ), 
-                                React.createElement("label", {className: "checkbox"}, 
-                                    "Instagram"
-                                )
-                            ), 
-                            React.createElement("fieldset", null, 
-                                React.createElement("input", {
-                                    type: "checkbox", 
-                                    value: "youtube", 
-                                    defaultChecked: this.checkArrayValue('network' , 'youtube'), 
-                                    onChange: this.handleNetworkCheck}
+                                React.createElement("fieldset", null, 
+                                    React.createElement("input", {
+                                        type: "checkbox", 
+                                        value: "facebook", 
+                                        defaultChecked: this.checkArrayValue('network' , 'facebook'), 
+                                        onChange: this.handleNetworkCheck}
+                                    ), 
+                                    React.createElement("label", {className: "checkbox"}, 
+                                        "Facebook"
+                                    )
                                 ), 
-                                React.createElement("label", {className: "checkbox"}, 
-                                    "YouTube"
-                                )
-                            )
-                        ), 
-                         React.createElement("fieldset", null, 
-                            React.createElement("label", null, 
-                                "Media"
-                            ), 
-                            React.createElement("fieldset", null, 
-                                React.createElement("input", {
-                                    type: "checkbox", 
-                                    value: "text", 
-                                    defaultChecked: this.checkArrayValue('media' , 'text'), 
-                                    onChange: this.handleMediaCheck}), 
-                                React.createElement("label", {className: "checkbox"}, 
-                                    "Text-only"
-                                )
-                            ), 
-                            React.createElement("fieldset", null, 
-                                React.createElement("input", {
-                                    type: "checkbox", 
-                                    value: "image", 
-                                    defaultChecked: this.checkArrayValue('media' , 'image'), 
-                                    onChange: this.handleMediaCheck}), 
-                                React.createElement("label", {className: "checkbox"}, 
-                                    "Images"
-                                )
-                            ), 
-                            React.createElement("fieldset", null, 
-                                React.createElement("input", {
-                                    type: "checkbox", 
-                                    value: "video", 
-                                    defaultChecked: this.checkArrayValue('media' , 'video'), 
-                                    onChange: this.handleMediaCheck}
+                                React.createElement("fieldset", null, 
+                                    React.createElement("input", {
+                                        type: "checkbox", 
+                                        value: "instagram", 
+                                        defaultChecked: this.checkArrayValue('network' , 'instagram'), 
+                                        onChange: this.handleNetworkCheck}
+                                    ), 
+                                    React.createElement("label", {className: "checkbox"}, 
+                                        "Instagram"
+                                    )
                                 ), 
-                                React.createElement("label", {className: "checkbox"}, 
-                                    "Video"
+                                React.createElement("fieldset", null, 
+                                    React.createElement("input", {
+                                        type: "checkbox", 
+                                        value: "youtube", 
+                                        defaultChecked: this.checkArrayValue('network' , 'youtube'), 
+                                        onChange: this.handleNetworkCheck}
+                                    ), 
+                                    React.createElement("label", {className: "checkbox"}, 
+                                        "YouTube"
+                                    )
                                 )
-                            )
-                         ), 
-                         React.createElement("fieldset", null, 
-                            React.createElement("label", null, 
-                                "Sorting"
                             ), 
-                            React.createElement("select", {value: this.state.sorting, onChange: this.handleSortingChange}, 
-                                React.createElement("option", {value: "latest"}, 
-                                    "Latest"
+                             React.createElement("fieldset", null, 
+                                React.createElement("label", null, 
+                                    "Media"
                                 ), 
-                                React.createElement("option", {value: "greatest"}, 
-                                    "Greatest"
+                                React.createElement("fieldset", null, 
+                                    React.createElement("input", {
+                                        type: "checkbox", 
+                                        value: "text", 
+                                        defaultChecked: this.checkArrayValue('media' , 'text'), 
+                                        onChange: this.handleMediaCheck}), 
+                                    React.createElement("label", {className: "checkbox"}, 
+                                        "Text-only"
+                                    )
                                 ), 
-                                React.createElement("option", {value: "votes"}, 
-                                    "Votes"
+                                React.createElement("fieldset", null, 
+                                    React.createElement("input", {
+                                        type: "checkbox", 
+                                        value: "image", 
+                                        defaultChecked: this.checkArrayValue('media' , 'image'), 
+                                        onChange: this.handleMediaCheck}), 
+                                    React.createElement("label", {className: "checkbox"}, 
+                                        "Images"
+                                    )
+                                ), 
+                                React.createElement("fieldset", null, 
+                                    React.createElement("input", {
+                                        type: "checkbox", 
+                                        value: "video", 
+                                        defaultChecked: this.checkArrayValue('media' , 'video'), 
+                                        onChange: this.handleMediaCheck}
+                                    ), 
+                                    React.createElement("label", {className: "checkbox"}, 
+                                        "Video"
+                                    )
                                 )
-                            )
-                         ), 
-                         React.createElement("div", {className: (this.props.showRemove) ? '' : 'hide'}, 
-                            React.createElement("a", {
-                                className: "button remove-filter", 
-                                onClick: this.handleRemoveFilter
-                            }, 
-                                "Remove ", React.createElement("b", null, this.state.name)
-                            )
-                        )
-                     ), 
-                     React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
-                        React.createElement("ul", null, 
-                            React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
-                                (this.state.errors.name) ? this.state.errors.name : ''
+                             ), 
+                             React.createElement("fieldset", null, 
+                                React.createElement("label", null, 
+                                    "Sorting"
+                                ), 
+                                React.createElement("select", {value: this.state.sorting, onChange: this.handleSortingChange}, 
+                                    React.createElement("option", {value: "latest"}, 
+                                        "Latest"
+                                    ), 
+                                    React.createElement("option", {value: "greatest"}, 
+                                        "Greatest"
+                                    ), 
+                                    React.createElement("option", {value: "votes"}, 
+                                        "Votes"
+                                    )
+                                )
+                             ), 
+                             React.createElement("div", {className: (this.props.showRemove) ? '' : 'hide'}, 
+                                React.createElement("a", {className: "remove-filter", onClick: this.handleRemoveFilter}, 
+                                    "Remove ", React.createElement("b", null, this.state.name)
+                                )
                             ), 
-                            React.createElement("li", {className: (this.state.errors.media) ? '' : 'hide'}, 
-                                (this.state.errors.media) ? this.state.errors.media : ''
-                            ), 
-                            React.createElement("li", {className: (this.state.errors.network) ? '' : 'hide'}, 
-                                (this.state.errors.network) ? this.state.errors.network : ''
-                            ), 
-                            React.createElement("li", {className: (this.state.errors.sorting) ? '' : 'hide'}, 
-                                (this.state.errors.sorting) ? this.state.errors.sorting : ''
-                            ), 
-                            React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
-                                (this.state.errors.sdk) ? this.state.errors.sdk : ''
-                            )
-                        )
+                            React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
+                                React.createElement("ul", null, 
+                                    React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
+                                        (this.state.errors.name) ? this.state.errors.name : ''
+                                    ), 
+                                    React.createElement("li", {className: (this.state.errors.media) ? '' : 'hide'}, 
+                                        (this.state.errors.media) ? this.state.errors.media : ''
+                                    ), 
+                                    React.createElement("li", {className: (this.state.errors.network) ? '' : 'hide'}, 
+                                        (this.state.errors.network) ? this.state.errors.network : ''
+                                    ), 
+                                    React.createElement("li", {className: (this.state.errors.sorting) ? '' : 'hide'}, 
+                                        (this.state.errors.sorting) ? this.state.errors.sorting : ''
+                                    ), 
+                                    React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
+                                        (this.state.errors.sdk) ? this.state.errors.sdk : ''
+                                    )
+                                )
+                             )
+                         )
+                         
                      )
                  )
             );
@@ -334,6 +336,8 @@
 {
     'use strict';
 
+    var WP_SAVE_CONTROLLER;
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
     {displayName: "Metabox",
         propTypes:
@@ -344,8 +348,10 @@
         {
             return {
                 wpPublishSelector:"#publish",
+                wpDraftSelector:'#save-post',
                 wpFormSelector:'#post',
                 wpFormTitleSelector:'#post #title',
+                overlay:'#jsx-metabox .overlay',
                 data:{},
                 dependencies:
                 {
@@ -360,17 +366,63 @@
                     title:false,
                     terms:[],
                     filters:[]
-                }
+                },
             }
+        },
+        /**
+        *   React method that runs when the component is mounted to the DOM;
+        *   @return void;
+        */
+        componentDidMount:function()
+        {
+            this.addSaveHook();
+        },
+        /**
+        *   Applies the event catchers to the wp draft and publish buttons;
+        *   @return void;
+        */
+        addSaveHook:function()
+        {
+            var self = this;
+            var $metabox = $(stacklaWp.admin.config.wpMetabox);
+            var $body = $('html, body');
+
+            $('#save-post , #publish').one('click' , function(e)
+            {
+                e.preventDefault();
+
+                WP_SAVE_CONTROLLER = $(e.target);
+
+                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
+                { 
+                    self.compileData();
+                });
+            });
+        },
+        /**
+        *   Activates the ajax loader;
+        *   @return void;
+        */
+        activateLoader:function()
+        {
+            $(React.findDOMNode(this.refs.overlay)).addClass('display');
+        },
+        /**
+        *   Deactivates the ajax loader;
+        *   @return void;
+        */
+        deactivateLoader:function()
+        {
+            $(React.findDOMNode(this.refs.overlay)).removeClass('display');
         },
         /**
         *   Compiles the data from the view to be posted to the db;
         *   @param {e} event object;
         *   @return void;
         */
-        compileData:function(e)
+        compileData:function()
         {
-            e.preventDefault();
+            //e.preventDefault();
 
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
@@ -408,7 +460,6 @@
                 }
             };
 
-            console.log(data);
             this.validate(data);
         },
         /**
@@ -433,7 +484,7 @@
             }).done(function(response)
             {
                 $node.removeClass('validating');
-
+                
                 console.log("VALIDATE response \n");
                 console.log(response);
 
@@ -446,11 +497,13 @@
                     else
                     {
                         self.prepareErrors(response.errors);
+                        self.addSaveHook();
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('validating');
+                self.addSaveHook();
                 self.handleRequestError(error);
             });
         },
@@ -465,11 +518,10 @@
             var self = this;
             var $node = $(React.findDOMNode(this.refs.metabox));
             var $title = $(self.state.wpFormTitleSelector);
-            var $publish = $(self.state.wpPublishSelector);
-            var $form = $(self.state.wpFormSelector);
 
             if($node.hasClass('saving')) return;
 
+            self.activateLoader();
             $node.addClass('saving');
 
             $.ajax(
@@ -483,6 +535,7 @@
                 console.log("SAVE response \n");
                 console.log(response);
 
+                self.deactivateLoader();
                 $node.removeClass('saving');
                 
                 if(typeof response == 'object')
@@ -494,16 +547,18 @@
                             $title.val(data.title)
                         }
 
-                        $form.submit();
+                        WP_SAVE_CONTROLLER.trigger('click');
                     }
                     else
                     {
+                        self.addSaveHook();
                         self.prepareErrors(response.errors);
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('saving');
+                self.addSaveHook();
                 self.handleRequestError(error);
             });
         },
@@ -608,12 +663,17 @@
             if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false)
             {
                 return (
-                    React.createElement("div", {className: "auth-notification failure"}, 
-                        React.createElement("p", null, 
-                            "You're not authorised to use this plugin instance."
+                    React.createElement("div", {className: "auth-notification prompt"}, 
+                        React.createElement("h3", null, 
+                            "Authorisation Required"
                         ), 
-                        React.createElement("a", {href: stacklaWp.admin.metabox.accessUri, onClick: this.setRedirectCookie}, 
-                            'Authorise with Stackla'
+                        React.createElement("ul", null, 
+                            React.createElement("li", null, 
+                                "You're WordPress account is not authorised to use this plugin instance. ", 
+                                React.createElement("a", {href: stacklaWp.admin.metabox.accessUri, onClick: this.setRedirectCookie}, 
+                                    'Authorise with Stackla'
+                                )
+                            )
                         )
                     )
                 )
@@ -621,10 +681,23 @@
 
             return (
                 React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
+                    React.createElement("div", {className: "overlay", ref: "overlay"}, 
+                        React.createElement("div", {className: "loader"}, 
+                            React.createElement("div", {className: "logo"}, 
+                            React.createElement("div", {className: "message"}, 
+                                "Stacking your widget, please wait ..."
+                            )
+                            )
+                            
+                        )
+                        
+                    ), 
                     React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
-                    React.createElement(this.state.dependencies.WidgetTitle, {
-                        initialTitle: stacklaWp.admin.metabox.data.title, 
-                        ref: "title"}
+                    React.createElement("section", {className: "title"}, 
+                        React.createElement(this.state.dependencies.WidgetTitle, {
+                            initialTitle: stacklaWp.admin.metabox.data.title, 
+                            ref: "title"}
+                        )
                     ), 
                     React.createElement("section", {className: "terms"}, 
                         React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms", initialData: stacklaWp.admin.metabox.data.terms})
@@ -634,9 +707,8 @@
                     ), 
                     React.createElement("section", {className: "config"}, 
                         React.createElement(this.state.dependencies.Widget, {ref: "widget"})
-                    ), 
-                    React.createElement("a", {href: "#", className: "wp-core-ui button button-primary", ref: "saveMetabox", onClick: this.compileData}, "Save"), 
-                    React.createElement("span", {className: "spinner"}, 'Stacking...')
+                    )
+
                 )
             );
         }
@@ -703,7 +775,6 @@
             id:React.PropTypes.number,
             data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
-
         /**
         *   Sets the initial state of the component;
         *   @return object  {this.state}    the component's state object;
@@ -723,7 +794,6 @@
                 removed:false
             }
         },
-
         /**
         *   Removes the term from the view and sets the removed flag on this.state;
         *   @param object   {e} event object;
@@ -734,7 +804,6 @@
             e.preventDefault();
             this.setState({removed:true , edited:true});
         },
-
         /**
         *   Handles the onChange event for the term name input field;
         *   @param object   {e} event object;
@@ -744,7 +813,6 @@
         {
             this.setState({name:e.target.value , edited:true});
         },
-
         /**
         *   Handles the user changing the network option;
         *   @param object   {e} event object;
@@ -776,7 +844,6 @@
                 edited:true
             });
         },
-
         /**
         *   Handles the user changing the network's type option;
         *   @param object   {e} event object;
@@ -798,7 +865,6 @@
                 edited:true
             });
         },
-
         /**
         *   Handles the user changing the term value;
         *   @param object   {e} event object;
@@ -808,7 +874,6 @@
         {
             this.setState({termValue:e.target.value , edited:true});
         },
-
         /**
         *   Determines which type options to display based on the current this.state.network;
         *   @param string   {network}   the current network in the component's state;
@@ -820,7 +885,6 @@
             if(this.state.network == network) return true;
             return false;
         },
-
         /**
         *   Checks if the typeOptionsName passed is the current;
         *   @param string   {typeOptionsName} the needle;
@@ -833,7 +897,6 @@
             if(options.indexOf(this.state.term) > -1) return typeOptionsName + '-' + this.state.term;
             return '';
         },
-
         /**
         *   Removes the '-' delimiter from the network type option;
         *   @param string   {delimited} a string delimited by one hyphen;
@@ -844,7 +907,6 @@
             var split = delimited.split('-');
             return split[1];
         },
-
         /**
         *   About;
         *   @param {};
@@ -856,7 +918,6 @@
             if(this.state.termDelimited == ref) return true;
             return false;
         },
-
         /**
         *   About;
         *   @param {};
@@ -868,14 +929,10 @@
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
-        /**
-        *   About;
-        *   @param {};
-        *   @return void;
-        */
         render:function()
         {
             var self = this;
+            var first = (this.props.id === 0) ? 'first' : ''
 
             if(this.state.removed === true)
             {
@@ -885,229 +942,228 @@
             }
 
             return (
-                React.createElement("div", {className: "stackla-block"}, 
+                React.createElement("div", {className: first + ' stackla-block'}, 
                     React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
-                        React.createElement("fieldset", {className: "term-name"}, 
-                            React.createElement("label", null, 
-                                "Term name"
+                        React.createElement("div", {className: "stackla-widget-inner"}, 
+                            React.createElement("fieldset", {className: "term-name"}, 
+                                React.createElement("label", null, 
+                                    "Term name"
+                                ), 
+                                React.createElement("input", {type: "text", className: "widefat", ref: "termName", defaultValue: this.state.name, onChange: this.handleNameChange})
                             ), 
-                            React.createElement("input", {type: "text", className: "widefat", ref: "termName", defaultValue: this.state.name, onChange: this.handleNameChange})
-                        ), 
-                        React.createElement("fieldset", null, 
-                            React.createElement("label", null, 
-                                "Choose a network"
+                            React.createElement("fieldset", null, 
+                                React.createElement("label", null, 
+                                    "Choose a network"
+                                ), 
+                                React.createElement("div", {className: (this.state.network !== '') ? 'term-network-set' : 'hide'}, 
+                                    this.state.network
+                                ), 
+                                React.createElement("select", {
+                                    ref: "termNetwork", 
+                                    onChange: this.handleNetworkChange, 
+                                    className: (this.state.network !== '') ? 'hide' : '', 
+                                    defaultValue: this.state.network
+                                }, 
+                                    React.createElement("option", {value: ""}), 
+                                    
+                                        stacklaWp.admin.config.networks.map(function(network , i)
+                                        {
+                                            return React.createElement("option", {value: network, key: i}, network)
+                                        })
+                                    
+                                )
                             ), 
-                            React.createElement("div", {className: (this.state.network !== '') ? 'term-network-set' : 'hide'}, 
-                                this.state.network
-                            ), 
-                            React.createElement("select", {
-                                ref: "termNetwork", 
-                                onChange: this.handleNetworkChange, 
-                                className: (this.state.network !== '') ? 'hide' : '', 
-                                defaultValue: this.state.network
-                            }, 
-                                React.createElement("option", {value: ""}), 
+                            React.createElement("fieldset", {ref: "termRules"}, 
+                                React.createElement("label", {className: (this.state.network === '') ? 'hide' : '', ref: "termRulesLabel"}, 
+                                    "Choose a type"
+                                ), 
                                 
                                     stacklaWp.admin.config.networks.map(function(network , i)
                                     {
-                                        return React.createElement("option", {value: network, key: i}, network)
+                                        if(self.checkTypeSelected(network , self.props[network]) !== '')
+                                        {
+                                            return  React.createElement("div", {key: i, className: (self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}, 
+                                                    
+                                                        self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
+                                                    
+                                                    )
+                                        }
+                                        else
+                                        {
+                                            return  React.createElement("select", {
+                                                        className: (self.displayNetworkTypeOptions(network)) ? '' : 'hide', 
+                                                        defaultValue: self.checkTypeSelected(network , self.props[network]), 
+                                                        ref: network + i, 
+                                                        onClick: self.checkTermSet, 
+                                                        onChange: self.handleTypeChange, 
+                                                        key: network + i
+                                                    }, 
+                                                        React.createElement("option", {value: ""}), 
+                                                        
+                                                            self.props[network].map(function(option , j)
+                                                            {
+                                                                return  React.createElement("option", {
+                                                                            key: option + j, 
+                                                                            value: network + '-' + option
+                                                                        }, 
+                                                                            option
+                                                                        )
+                                                            })
+                                                        
+                                                    )
+                                        }
+                                        
                                     })
                                 
-                            )
-                        ), 
-                        React.createElement("fieldset", {ref: "termRules"}, 
-                            React.createElement("label", {className: (this.state.network === '') ? 'hide' : '', ref: "termRulesLabel"}, 
-                                "Choose a type"
                             ), 
-                            
-                                stacklaWp.admin.config.networks.map(function(network , i)
-                                {
-                                    if(self.checkTypeSelected(network , self.props[network]) !== '')
-                                    {
-                                        return  React.createElement("div", {key: i, className: (self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}, 
-                                                
-                                                    self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
-                                                
-                                                )
-                                    }
-                                    else
-                                    {
-                                        return  React.createElement("select", {
-                                                    className: (self.displayNetworkTypeOptions(network)) ? '' : 'hide', 
-                                                    defaultValue: self.checkTypeSelected(network , self.props[network]), 
-                                                    ref: network + i, 
-                                                    onClick: self.checkTermSet, 
-                                                    onChange: self.handleTypeChange, 
-                                                    key: network + i
-                                                }, 
-                                                    React.createElement("option", {value: ""}), 
-                                                    
-                                                        self.props[network].map(function(option , j)
-                                                        {
-                                                            return  React.createElement("option", {
-                                                                        key: option + j, 
-                                                                        value: network + '-' + option
-                                                                    }, 
-                                                                        option
-                                                                    )
-                                                        })
-                                                    
-                                                )
-                                    }
-                                    
-                                })
-                            
-                        ), 
-                        React.createElement("fieldset", {ref: "termValue", className: "term-values"}, 
-                            React.createElement("fieldset", {
-                                ref: "twitter-user", 
-                                className: (this.checkTermValueOption('twitter-user')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "Twitter Username"
+                            React.createElement("fieldset", {ref: "termValue", className: "term-values"}, 
+                                React.createElement("fieldset", {
+                                    ref: "twitter-user", 
+                                    className: (this.checkTermValueOption('twitter-user')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "Twitter Username"
+                                    ), 
+                                    React.createElement("span", {className: "decorator"}, 
+                                        "@"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        defaultValue: this.getDefaultTermValue('twitter-user'), 
+                                        ref: "twitter-user-value", 
+                                        maxLength: "15", 
+                                        onChange: this.handleTermValueChange})
                                 ), 
-                                React.createElement("span", {className: "decorator"}, 
-                                    "@"
+                                React.createElement("fieldset", {
+                                    ref: "twitter-hashtag", 
+                                    className: (this.checkTermValueOption('twitter-hashtag')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "Twitter Hashtag"
+                                    ), 
+                                    React.createElement("span", {className: "decorator"}, 
+                                        "#"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        maxLength: "129", 
+                                        defaultValue: this.getDefaultTermValue('twitter-hashtag'), 
+                                        ref: "twitter-hashtag-value", 
+                                        onChange: this.handleTermValueChange}
+                                    )
                                 ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    defaultValue: this.getDefaultTermValue('twitter-user'), 
-                                    ref: "twitter-user-value", 
-                                    maxLength: "15", 
-                                    onChange: this.handleTermValueChange})
-                            ), 
-                            React.createElement("fieldset", {
-                                ref: "twitter-hashtag", 
-                                className: (this.checkTermValueOption('twitter-hashtag')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "Twitter Hashtag"
+                                React.createElement("fieldset", {
+                                    ref: "facebook-page", 
+                                    className: (this.checkTermValueOption('facebook-page')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "Facebook Page URL or Facebook Page Name"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        defaultValue: this.getDefaultTermValue('facebook-page'), 
+                                        ref: "facebook-page-value", 
+                                        onChange: this.handleTermValueChange}
+                                    )
                                 ), 
-                                React.createElement("span", {className: "decorator"}, 
-                                    "#"
+                                React.createElement("fieldset", {
+                                    ref: "facebook-search", 
+                                    className: (this.checkTermValueOption('facebook-search')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "Facebook Search (Search for all these words)"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        defaultValue: this.getDefaultTermValue('facebook-search'), 
+                                        ref: "facebook-search-value", 
+                                        onChange: this.handleTermValueChange})
                                 ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    maxLength: "129", 
-                                    defaultValue: this.getDefaultTermValue('twitter-hashtag'), 
-                                    ref: "twitter-hashtag-value", 
-                                    onChange: this.handleTermValueChange}
+                                React.createElement("fieldset", {
+                                    ref: "instagram-user", 
+                                    className: (this.checkTermValueOption('instagram-user')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "Instagram User"
+                                    ), 
+                                    React.createElement("span", {className: "decorator"}, 
+                                        "@"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        defaultValue: this.getDefaultTermValue('instagram-user'), 
+                                        ref: "instagram-user-value", 
+                                        onChange: this.handleTermValueChange}
+                                    )
+                                ), 
+                                React.createElement("fieldset", {
+                                    ref: "instagram-hashtag", 
+                                    className: (this.checkTermValueOption('instagram-hashtag')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "Instagram Hashtag"
+                                    ), 
+                                    React.createElement("span", {className: "decorator"}, 
+                                        "#"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        defaultValue: this.getDefaultTermValue('instagram-hashtag'), 
+                                        ref: "instagram-hashtag-value", 
+                                        onChange: this.handleTermValueChange})
+                                ), 
+                                React.createElement("fieldset", {
+                                    ref: "youtube-user", 
+                                    className: (this.checkTermValueOption('youtube-user')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "YouTube Username"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        defaultValue: this.getDefaultTermValue('youtube-user'), 
+                                        ref: "youtube-user-value", 
+                                        onChange: this.handleTermValueChange}
+                                    )
+                                ), 
+                                React.createElement("fieldset", {
+                                    ref: "youtube-search", 
+                                    className: (this.checkTermValueOption('youtube-search')) ? 'hide display' : 'hide'
+                                }, 
+                                    React.createElement("label", null, 
+                                        "YouTube Search"
+                                    ), 
+                                    React.createElement("input", {
+                                        type: "text", 
+                                        defaultValue: this.getDefaultTermValue('youtube-search'), 
+                                        ref: "youtube-search-value", 
+                                        onChange: this.handleTermValueChange}
+                                    )
                                 )
                             ), 
-                            React.createElement("fieldset", {
-                                ref: "facebook-page", 
-                                className: (this.checkTermValueOption('facebook-page')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "Facebook Page URL or Facebook Page Name"
-                                ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    defaultValue: this.getDefaultTermValue('facebook-page'), 
-                                    ref: "facebook-page-value", 
-                                    onChange: this.handleTermValueChange}
-                                )
-                            ), 
-                            React.createElement("fieldset", {
-                                ref: "facebook-search", 
-                                className: (this.checkTermValueOption('facebook-search')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "Facebook Search (Search for all these words)"
-                                ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    defaultValue: this.getDefaultTermValue('facebook-search'), 
-                                    ref: "facebook-search-value", 
-                                    onChange: this.handleTermValueChange})
-                            ), 
-                            React.createElement("fieldset", {
-                                ref: "instagram-user", 
-                                className: (this.checkTermValueOption('instagram-user')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "Instagram User"
-                                ), 
-                                React.createElement("span", {className: "decorator"}, 
-                                    "@"
-                                ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    defaultValue: this.getDefaultTermValue('instagram-user'), 
-                                    ref: "instagram-user-value", 
-                                    onChange: this.handleTermValueChange}
-                                )
-                            ), 
-                            React.createElement("fieldset", {
-                                ref: "instagram-hashtag", 
-                                className: (this.checkTermValueOption('instagram-hashtag')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "Instagram Hashtag"
-                                ), 
-                                React.createElement("span", {className: "decorator"}, 
-                                    "#"
-                                ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    defaultValue: this.getDefaultTermValue('instagram-hashtag'), 
-                                    ref: "instagram-hashtag-value", 
-                                    onChange: this.handleTermValueChange})
-                            ), 
-                            React.createElement("fieldset", {
-                                ref: "youtube-user", 
-                                className: (this.checkTermValueOption('youtube-user')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "YouTube Username"
-                                ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    defaultValue: this.getDefaultTermValue('youtube-user'), 
-                                    ref: "youtube-user-value", 
-                                    onChange: this.handleTermValueChange}
-                                )
-                            ), 
-                            React.createElement("fieldset", {
-                                ref: "youtube-search", 
-                                className: (this.checkTermValueOption('youtube-search')) ? 'hide display' : 'hide'
-                            }, 
-                                React.createElement("label", null, 
-                                    "YouTube Search"
-                                ), 
-                                React.createElement("input", {
-                                    type: "text", 
-                                    defaultValue: this.getDefaultTermValue('youtube-search'), 
-                                    ref: "youtube-search-value", 
-                                    onChange: this.handleTermValueChange}
+                            React.createElement("div", null, 
+                                React.createElement("a", {className: "remove-term", onClick: this.handleRemoveTerm}, 
+                                    "Remove ", React.createElement("b", null, this.state.name)
                                 )
                             )
                         ), 
-                        React.createElement("div", null, 
-                            React.createElement("a", {
-                                className: "button remove-term", 
-                                onClick: this.handleRemoveTerm
-                            }, 
-                                "Remove ", React.createElement("b", null, this.state.name)
-                            )
-                        )
-                    ), 
-                    React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
-                        React.createElement("ul", null, 
-                            React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
-                                (this.state.errors.name) ? this.state.errors.name : ''
-                            ), 
-                            React.createElement("li", {className: (this.state.errors.network) ? '' : 'hide'}, 
-                                (this.state.errors.network) ? this.state.errors.network : ''
-                            ), 
-                            React.createElement("li", {className: (this.state.errors.term) ? '' : 'hide'}, 
-                                (this.state.errors.term) ? this.state.errors.term : ''
-                            ), 
-                            React.createElement("li", {className: (this.state.errors.termValue) ? '' : 'hide'}, 
-                                (this.state.errors.termValue) ? this.state.errors.termValue : ''
-                            ), 
-                            React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
-                                (this.state.errors.sdk) ? this.state.errors.sdk : ''
+                        React.createElement("div", {className: (this.state.errors === false) ? 'hide' : 'stackla-error-message'}, 
+                            React.createElement("ul", null, 
+                                React.createElement("li", {className: (this.state.errors.name) ? '' : 'hide'}, 
+                                    (this.state.errors.name) ? this.state.errors.name : ''
+                                ), 
+                                React.createElement("li", {className: (this.state.errors.network) ? '' : 'hide'}, 
+                                    (this.state.errors.network) ? this.state.errors.network : ''
+                                ), 
+                                React.createElement("li", {className: (this.state.errors.term) ? '' : 'hide'}, 
+                                    (this.state.errors.term) ? this.state.errors.term : ''
+                                ), 
+                                React.createElement("li", {className: (this.state.errors.termValue) ? '' : 'hide'}, 
+                                    (this.state.errors.termValue) ? this.state.errors.termValue : ''
+                                ), 
+                                React.createElement("li", {className: (this.state.errors.sdk) ? '' : 'hide'}, 
+                                    (this.state.errors.sdk) ? this.state.errors.sdk : ''
+                                )
                             )
                         )
                     )
@@ -1150,7 +1206,8 @@
                     ), 
                     React.createElement("div", {className: (this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}, 
                         React.createElement(this.state.dependencies.WidgetConfig, {
-                            ref: "config"}
+                            ref: "config", 
+                            initialData: stacklaWp.admin.metabox.data.widget}
                         )
                     ), 
                     React.createElement("div", {className: (this.state.error) ? 'stackla-error-message' : 'hide'}, 
@@ -1169,29 +1226,23 @@
     {displayName: "WidgetConfig",
         propTypes:
         {
-            initialData:React.PropTypes.object
+            initialData:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
         getInitialState:function()
         {
             return {
-                id:
-                (typeof this.props.initialData !== 'undefined') 
-                ? this.props.initialData.widgetId 
-                : false,
-                copyId:false,
-                type:
-                (typeof this.props.initialData !== 'undefined') 
-                ? this.props.initialData.type 
-                : 'new',
-                style:
-                (typeof this.props.initialData !== 'undefined') 
-                ? this.props.initialData.style 
-                : 'fluid',
+                id:(this.props.initialData !== false) ? this.props.initialData.id : '',
+                copyId:(this.props.initialData !== false) ? this.props.initialData.copyId : '',
+                type:(this.props.initialData !== false) ? this.props.initialData.type : 'new',
+                style:(this.props.initialData !== false) ? this.props.initialData.style : 'fluid',
                 displayStyles:
-                (typeof this.props.initialData !== 'undefined' && this.props.initialData.type == 'derive')
+                (this.props.initialData !== false && this.props.initialData.type == 'derive')
                 ? false 
                 : true,
-                displayWidgets:false,
+                displayWidgets:
+                (this.props.initialData !== false && this.props.initialData.type !== 'new')
+                ? true
+                : false,
                 options:
                 {
                     types:
@@ -1210,7 +1261,7 @@
                 {
                     types:
                     [
-                        'Create a new Stackla Widget',
+                        'Create/Update a new/existing Stackla Widget',
                         'Copy an existing Stackla Widget',
                         'Reuse an existing Stackla Widget'
                     ],
@@ -1219,6 +1270,17 @@
                         'Fluid Vertical',
                         'Fluid Horizontal'
                     ]
+                },
+                descriptions:
+                [
+                    'Amet nisi duis magna integer in, parturient rhoncus mid a turpis adipiscing, sit pellentesque, pulvinar',
+                    'Velit, et auctor. Lundium enim pulvinar nec parturient rhoncus a! Rhoncus platea dapibus vel duis parturient quis cras dis amet placerat risus adipiscing',
+                    'Liquam elit, magna eu, magnis magna ultricies, mauris velit! Scelerisque turpis, a, risus! Dis, lorem ut a'
+                ],
+                messages:
+                {
+                    'clone': 'Choose the widget you wish to copy',
+                    'derive': 'Choose the widget you wish to reuse'
                 }
             }
         },
@@ -1229,6 +1291,7 @@
             this.setState(
             {
                 type:e.target.value,
+                copyId:'',
                 displayStyles:self.setStyleDisplayState(e.target.value),
                 displayWidgets:self.setWidgetsDisplayState(e.target.value)
             });
@@ -1239,12 +1302,20 @@
 
             this.setState(
             {
-                widgetCopyId:e.target.value
+                copyId:e.target.value
             })
+        },
+        handleStyleChange:function(e)
+        {
+            this.setState({style:e.target.value});
         },
         getDefaultChecked:function(option , key)
         {
             return (this.state[key] == option) ? true : false;
+        },
+        getDefaultSelected:function()
+        { 
+            return (this.props.initialData) ? this.props.initialData.copyId : '';
         },
         setWidgetsDisplayState:function(type)
         {
@@ -1254,60 +1325,79 @@
         {
             return (type == 'derive') ? false : true;
         },
-
         render:function()
         {
             var self = this;
-
             return (
                 React.createElement("div", null, 
                     React.createElement("div", {ref: "types"}, 
-                    
-                        this.state.options.types.map(function(option , i)
-                        {
-                            return  React.createElement("fieldset", {key: i}, 
-                                        React.createElement("input", {
-                                            ref: option, 
-                                            type: "radio", 
-                                            value: option, 
-                                            name: "type", 
-                                            onChange: self.handleTypeChange, 
-                                            defaultChecked: self.getDefaultChecked(option , 'type')}
-                                        ), 
-                                        self.state.labels.types[i]
-                                    )
-                        })
-                    
-                    ), 
-                    React.createElement("div", {ref: "widgets", className: (self.state.displayWidgets) ? '' : 'hide'}, 
-                        React.createElement("select", {onChange: this.handleWidgetCopyChange}, 
-                            React.createElement("option", {value: ""}), 
+                        React.createElement("fieldset", null, 
+                        React.createElement("label", null, 
+                            "Choose your Stackla Widget Type"
+                        ), 
                             
-                                Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
+                                this.state.options.types.map(function(option , i)
                                 {
-                                    return  React.createElement("option", {value: key, key: key}, 
-                                                stacklaWp.admin.metabox.widgets[key]
+                                    return  React.createElement("div", {className: "widget-types", key: i}, 
+                                                React.createElement("input", {
+                                                    ref: option, 
+                                                    type: "radio", 
+                                                    value: option, 
+                                                    name: "type", 
+                                                    onChange: self.handleTypeChange, 
+                                                    defaultChecked: self.getDefaultChecked(option , 'type')}
+                                                ), 
+                                                self.state.labels.types[i], 
+                                                React.createElement("p", null, 
+                                                    self.state.descriptions[i]
+                                                )
                                             )
                                 })
                             
                         )
                     ), 
-                    React.createElement("div", {ref: "styles", className: (self.state.displayStyles) ? '' : 'hide'}, 
-                    
-                        this.state.options.styles.map(function(option , i)
-                        {
-                            return  React.createElement("fieldset", {key: i}, 
-                                        React.createElement("input", {
-                                            type: "radio", 
-                                            ref: option, 
-                                            name: "style", 
-                                            onChange: self.handleStyleChange, 
-                                            defaultChecked: self.getDefaultChecked(option , 'style')}
-                                        ), 
-                                        self.state.labels.styles[i]
-                                    )
-                        })
-                    
+                    React.createElement("div", {ref: "widgets", className: (self.state.displayWidgets) ? 'widget-choices' : 'hide'}, 
+                        React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                (this.state.type !== 'new') ? this.state.messages[this.state.type] : ''
+                            ), 
+                            React.createElement("select", {
+                                onChange: this.handleWidgetCopyChange, 
+                                defaultValue: (this.props.initialData) ? this.props.initialData.copyId : ''}, 
+                                React.createElement("option", {value: ""}), 
+                                
+                                    Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
+                                    {
+                                        return  React.createElement("option", {value: key, key: key}, 
+                                                    stacklaWp.admin.metabox.widgets[key]
+                                                )
+                                    })
+                                
+                            )
+                        )
+                    ), 
+                    React.createElement("div", {ref: "styles", className: (self.state.displayStyles) ? 'widget-styles' : 'hide'}, 
+                        React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                "Choose your Stackla Widget Style"
+                            ), 
+                            
+                                this.state.options.styles.map(function(option , i)
+                                {
+                                    return  React.createElement("div", {key: i}, 
+                                                React.createElement("input", {
+                                                    type: "radio", 
+                                                    ref: option, 
+                                                    name: "style", 
+                                                    onChange: self.handleStyleChange, 
+                                                    value: option, 
+                                                    defaultChecked: self.getDefaultChecked(option , 'style')}
+                                                ), 
+                                                self.state.labels.styles[i]
+                                            )
+                                })
+                            
+                        )
                     )
                 )
             );
@@ -1405,10 +1495,12 @@
             return (
                 React.createElement("div", {className: "stackla-widget-filters"}, 
                     React.createElement("header", null, 
-                        React.createElement("h2", null, "Create Filters"), 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.add}, "Add Filter")
+                        React.createElement("h2", null, "Create Filters")
                     ), 
-                    this.state.items
+                    this.state.items, 
+                    React.createElement("div", {className: "add-wrap"}, 
+                        React.createElement("a", {href: "#", className: "button", onClick: this.add}, "Add Filter")
+                    )
                 )
             );
         }
@@ -1489,10 +1581,13 @@
             return (
                 React.createElement("div", {className: "stackla-widget-terms"}, 
                     React.createElement("header", null, 
-                        React.createElement("h2", null, "Create Terms"), 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Term")
+                        React.createElement("h2", null, "Create Terms")
+                        
                     ), 
-                    this.state.items
+                    this.state.items, 
+                    React.createElement("div", {className: "add-wrap"}, 
+                        React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Another Term")
+                    )
                 )
             );
         }
@@ -1529,11 +1624,14 @@
                 React.createElement("div", {className: "stackla-block"}, 
                     React.createElement("header", null, 
                         React.createElement("h2", null, 
-                            "The title for your stackla widget"
+                            "Create or Edit a Stackla Widget"
                         )
                     ), 
                     React.createElement("div", {className: (this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}, 
                         React.createElement("fieldset", {className: "widget-title"}, 
+                            React.createElement("label", null, 
+                                "Widget Name"
+                            ), 
                             React.createElement("input", {
                                 type: "text", 
                                 className: "widefat", 

@@ -26,7 +26,6 @@
             id:React.PropTypes.number,
             data:React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool])
         },
-
         /**
         *   Sets the initial state of the component;
         *   @return object  {this.state}    the component's state object;
@@ -46,7 +45,6 @@
                 removed:false
             }
         },
-
         /**
         *   Removes the term from the view and sets the removed flag on this.state;
         *   @param object   {e} event object;
@@ -57,7 +55,6 @@
             e.preventDefault();
             this.setState({removed:true , edited:true});
         },
-
         /**
         *   Handles the onChange event for the term name input field;
         *   @param object   {e} event object;
@@ -67,7 +64,6 @@
         {
             this.setState({name:e.target.value , edited:true});
         },
-
         /**
         *   Handles the user changing the network option;
         *   @param object   {e} event object;
@@ -99,7 +95,6 @@
                 edited:true
             });
         },
-
         /**
         *   Handles the user changing the network's type option;
         *   @param object   {e} event object;
@@ -121,7 +116,6 @@
                 edited:true
             });
         },
-
         /**
         *   Handles the user changing the term value;
         *   @param object   {e} event object;
@@ -131,7 +125,6 @@
         {
             this.setState({termValue:e.target.value , edited:true});
         },
-
         /**
         *   Determines which type options to display based on the current this.state.network;
         *   @param string   {network}   the current network in the component's state;
@@ -143,7 +136,6 @@
             if(this.state.network == network) return true;
             return false;
         },
-
         /**
         *   Checks if the typeOptionsName passed is the current;
         *   @param string   {typeOptionsName} the needle;
@@ -156,7 +148,6 @@
             if(options.indexOf(this.state.term) > -1) return typeOptionsName + '-' + this.state.term;
             return '';
         },
-
         /**
         *   Removes the '-' delimiter from the network type option;
         *   @param string   {delimited} a string delimited by one hyphen;
@@ -167,7 +158,6 @@
             var split = delimited.split('-');
             return split[1];
         },
-
         /**
         *   About;
         *   @param {};
@@ -179,7 +169,6 @@
             if(this.state.termDelimited == ref) return true;
             return false;
         },
-
         /**
         *   About;
         *   @param {};
@@ -191,14 +180,10 @@
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
-        /**
-        *   About;
-        *   @param {};
-        *   @return void;
-        */
         render:function()
         {
             var self = this;
+            var first = (this.props.id === 0) ? 'first' : ''
 
             if(this.state.removed === true)
             {
@@ -208,231 +193,230 @@
             }
 
             return (
-                <div className='stackla-block'>
+                <div className={first + ' stackla-block'}>
                     <div className={(this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}>
-                        <fieldset className='term-name'>
-                            <label>
-                                Term name
-                            </label>
-                            <input type='text' className='widefat' ref='termName' defaultValue={this.state.name} onChange={this.handleNameChange}/>
-                        </fieldset>
-                        <fieldset>
-                            <label>
-                                Choose a network
-                            </label>
-                            <div className={(this.state.network !== '') ? 'term-network-set' : 'hide'}>
-                                {this.state.network}
-                            </div>
-                            <select 
-                                ref='termNetwork' 
-                                onChange={this.handleNetworkChange}
-                                className={(this.state.network !== '') ? 'hide' : ''} 
-                                defaultValue={this.state.network}
-                            >
-                                <option value=''></option>
+                        <div className='stackla-widget-inner'>
+                            <fieldset className='term-name'>
+                                <label>
+                                    Term name
+                                </label>
+                                <input type='text' className='widefat' ref='termName' defaultValue={this.state.name} onChange={this.handleNameChange}/>
+                            </fieldset>
+                            <fieldset>
+                                <label>
+                                    Choose a network
+                                </label>
+                                <div className={(this.state.network !== '') ? 'term-network-set' : 'hide'}>
+                                    {this.state.network}
+                                </div>
+                                <select 
+                                    ref='termNetwork' 
+                                    onChange={this.handleNetworkChange}
+                                    className={(this.state.network !== '') ? 'hide' : ''} 
+                                    defaultValue={this.state.network}
+                                >
+                                    <option value=''></option>
+                                    {
+                                        stacklaWp.admin.config.networks.map(function(network , i)
+                                        {
+                                            return <option value={network} key={i}>{network}</option>
+                                        })
+                                    }
+                                </select>
+                            </fieldset>
+                            <fieldset ref='termRules'>
+                                <label className={(this.state.network === '') ? 'hide' : ''} ref='termRulesLabel'>
+                                    Choose a type
+                                </label>
                                 {
                                     stacklaWp.admin.config.networks.map(function(network , i)
                                     {
-                                        return <option value={network} key={i}>{network}</option>
+                                        if(self.checkTypeSelected(network , self.props[network]) !== '')
+                                        {
+                                            return  <div key={i} className={(self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}>
+                                                    {
+                                                        self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
+                                                    }
+                                                    </div>
+                                        }
+                                        else
+                                        {
+                                            return  <select 
+                                                        className={(self.displayNetworkTypeOptions(network)) ? '' : 'hide'} 
+                                                        defaultValue={self.checkTypeSelected(network , self.props[network])} 
+                                                        ref={network + i}
+                                                        onClick={self.checkTermSet}
+                                                        onChange={self.handleTypeChange}
+                                                        key={network + i}
+                                                    >
+                                                        <option value=''></option>
+                                                        {
+                                                            self.props[network].map(function(option , j)
+                                                            {
+                                                                return  <option
+                                                                            key={option + j}
+                                                                            value={network + '-' + option}
+                                                                        >
+                                                                            {option}
+                                                                        </option>
+                                                            })
+                                                        }
+                                                    </select>
+                                        }
+                                        
                                     })
                                 }
-                            </select>
-                        </fieldset>
-                        <fieldset ref='termRules'>
-                            <label className={(this.state.network === '') ? 'hide' : ''} ref='termRulesLabel'>
-                                Choose a type
-                            </label>
-                            {
-                                stacklaWp.admin.config.networks.map(function(network , i)
-                                {
-                                    if(self.checkTypeSelected(network , self.props[network]) !== '')
-                                    {
-                                        return  <div key={i} className={(self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}>
-                                                {
-                                                    self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
-                                                }
-                                                </div>
-                                    }
-                                    else
-                                    {
-                                        return  <select 
-                                                    className={(self.displayNetworkTypeOptions(network)) ? '' : 'hide'} 
-                                                    defaultValue={self.checkTypeSelected(network , self.props[network])} 
-                                                    ref={network + i}
-                                                    onClick={self.checkTermSet}
-                                                    onChange={self.handleTypeChange}
-                                                    key={network + i}
-                                                >
-                                                    <option value=''></option>
-                                                    {
-                                                        self.props[network].map(function(option , j)
-                                                        {
-                                                            return  <option
-                                                                        key={option + j}
-                                                                        value={network + '-' + option}
-                                                                    >
-                                                                        {option}
-                                                                    </option>
-                                                        })
-                                                    }
-                                                </select>
-                                    }
-                                    
-                                })
-                            }
-                        </fieldset>
-                        <fieldset ref='termValue' className='term-values'>
-                            <fieldset 
-                                ref='twitter-user' 
-                                className={(this.checkTermValueOption('twitter-user')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    Twitter Username
-                                </label>
-                                <span className='decorator'>
-                                    @
-                                </span>
-                                <input 
-                                    type='text'
-                                    defaultValue={this.getDefaultTermValue('twitter-user')}
-                                    ref='twitter-user-value'
-                                    maxLength='15' 
-                                    onChange={this.handleTermValueChange}/>
                             </fieldset>
-                            <fieldset 
-                                ref='twitter-hashtag' 
-                                className={(this.checkTermValueOption('twitter-hashtag')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    Twitter Hashtag
-                                </label>
-                                <span className='decorator'>
-                                    #
-                                </span>
-                                <input 
-                                    type='text'
-                                    maxLength='129'
-                                    defaultValue={this.getDefaultTermValue('twitter-hashtag')}
-                                    ref='twitter-hashtag-value'
-                                    onChange={this.handleTermValueChange}
-                                />
+                            <fieldset ref='termValue' className='term-values'>
+                                <fieldset 
+                                    ref='twitter-user' 
+                                    className={(this.checkTermValueOption('twitter-user')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        Twitter Username
+                                    </label>
+                                    <span className='decorator'>
+                                        @
+                                    </span>
+                                    <input 
+                                        type='text'
+                                        defaultValue={this.getDefaultTermValue('twitter-user')}
+                                        ref='twitter-user-value'
+                                        maxLength='15' 
+                                        onChange={this.handleTermValueChange}/>
+                                </fieldset>
+                                <fieldset 
+                                    ref='twitter-hashtag' 
+                                    className={(this.checkTermValueOption('twitter-hashtag')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        Twitter Hashtag
+                                    </label>
+                                    <span className='decorator'>
+                                        #
+                                    </span>
+                                    <input 
+                                        type='text'
+                                        maxLength='129'
+                                        defaultValue={this.getDefaultTermValue('twitter-hashtag')}
+                                        ref='twitter-hashtag-value'
+                                        onChange={this.handleTermValueChange}
+                                    />
+                                </fieldset>
+                                <fieldset 
+                                    ref='facebook-page' 
+                                    className={(this.checkTermValueOption('facebook-page')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        Facebook Page URL or Facebook Page Name
+                                    </label>
+                                    <input 
+                                        type='text'
+                                        defaultValue={this.getDefaultTermValue('facebook-page')}
+                                        ref='facebook-page-value'
+                                        onChange={this.handleTermValueChange}
+                                    />
+                                </fieldset>
+                                <fieldset 
+                                    ref='facebook-search'
+                                    className={(this.checkTermValueOption('facebook-search')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        Facebook Search (Search for all these words)
+                                    </label>
+                                    <input 
+                                        type='text'
+                                        defaultValue={this.getDefaultTermValue('facebook-search')}
+                                        ref='facebook-search-value'
+                                        onChange={this.handleTermValueChange}/>
+                                </fieldset>
+                                <fieldset 
+                                    ref='instagram-user' 
+                                    className={(this.checkTermValueOption('instagram-user')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        Instagram User
+                                    </label>
+                                    <span className='decorator'>
+                                        @
+                                    </span>
+                                    <input 
+                                        type='text'
+                                        defaultValue={this.getDefaultTermValue('instagram-user')}
+                                        ref='instagram-user-value'
+                                        onChange={this.handleTermValueChange}
+                                    />
+                                </fieldset>
+                                <fieldset 
+                                    ref='instagram-hashtag' 
+                                    className={(this.checkTermValueOption('instagram-hashtag')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        Instagram Hashtag
+                                    </label>
+                                    <span className='decorator'>
+                                        #
+                                    </span>
+                                    <input 
+                                        type='text'
+                                        defaultValue={this.getDefaultTermValue('instagram-hashtag')}
+                                        ref='instagram-hashtag-value'
+                                        onChange={this.handleTermValueChange}/>
+                                </fieldset>
+                                <fieldset 
+                                    ref='youtube-user' 
+                                    className={(this.checkTermValueOption('youtube-user')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        YouTube Username
+                                    </label>
+                                    <input 
+                                        type='text'
+                                        defaultValue={this.getDefaultTermValue('youtube-user')}
+                                        ref='youtube-user-value'
+                                        onChange={this.handleTermValueChange}
+                                    />
+                                </fieldset>
+                                <fieldset 
+                                    ref='youtube-search' 
+                                    className={(this.checkTermValueOption('youtube-search')) ? 'hide display' : 'hide'}
+                                >
+                                    <label>
+                                        YouTube Search
+                                    </label>
+                                    <input 
+                                        type='text'
+                                        defaultValue={this.getDefaultTermValue('youtube-search')}
+                                        ref='youtube-search-value' 
+                                        onChange={this.handleTermValueChange}
+                                    />
+                                </fieldset>
                             </fieldset>
-                            <fieldset 
-                                ref='facebook-page' 
-                                className={(this.checkTermValueOption('facebook-page')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    Facebook Page URL or Facebook Page Name
-                                </label>
-                                <input 
-                                    type='text'
-                                    defaultValue={this.getDefaultTermValue('facebook-page')}
-                                    ref='facebook-page-value'
-                                    onChange={this.handleTermValueChange}
-                                />
-                            </fieldset>
-                            <fieldset 
-                                ref='facebook-search'
-                                className={(this.checkTermValueOption('facebook-search')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    Facebook Search (Search for all these words)
-                                </label>
-                                <input 
-                                    type='text'
-                                    defaultValue={this.getDefaultTermValue('facebook-search')}
-                                    ref='facebook-search-value'
-                                    onChange={this.handleTermValueChange}/>
-                            </fieldset>
-                            <fieldset 
-                                ref='instagram-user' 
-                                className={(this.checkTermValueOption('instagram-user')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    Instagram User
-                                </label>
-                                <span className='decorator'>
-                                    @
-                                </span>
-                                <input 
-                                    type='text'
-                                    defaultValue={this.getDefaultTermValue('instagram-user')}
-                                    ref='instagram-user-value'
-                                    onChange={this.handleTermValueChange}
-                                />
-                            </fieldset>
-                            <fieldset 
-                                ref='instagram-hashtag' 
-                                className={(this.checkTermValueOption('instagram-hashtag')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    Instagram Hashtag
-                                </label>
-                                <span className='decorator'>
-                                    #
-                                </span>
-                                <input 
-                                    type='text'
-                                    defaultValue={this.getDefaultTermValue('instagram-hashtag')}
-                                    ref='instagram-hashtag-value'
-                                    onChange={this.handleTermValueChange}/>
-                            </fieldset>
-                            <fieldset 
-                                ref='youtube-user' 
-                                className={(this.checkTermValueOption('youtube-user')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    YouTube Username
-                                </label>
-                                <input 
-                                    type='text'
-                                    defaultValue={this.getDefaultTermValue('youtube-user')}
-                                    ref='youtube-user-value'
-                                    onChange={this.handleTermValueChange}
-                                />
-                            </fieldset>
-                            <fieldset 
-                                ref='youtube-search' 
-                                className={(this.checkTermValueOption('youtube-search')) ? 'hide display' : 'hide'}
-                            >
-                                <label>
-                                    YouTube Search
-                                </label>
-                                <input 
-                                    type='text'
-                                    defaultValue={this.getDefaultTermValue('youtube-search')}
-                                    ref='youtube-search-value' 
-                                    onChange={this.handleTermValueChange}
-                                />
-                            </fieldset>
-                        </fieldset>
-                        <div>
-                            <a 
-                                className='button remove-term'
-                                onClick={this.handleRemoveTerm}
-                            >
-                                Remove <b>{this.state.name}</b>
-                            </a>
+                            <div>
+                                <a className='remove-term' onClick={this.handleRemoveTerm}>
+                                    Remove <b>{this.state.name}</b>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
-                        <ul>
-                            <li className={(this.state.errors.name) ? '' : 'hide'}>
-                                {(this.state.errors.name) ? this.state.errors.name : ''}
-                            </li>
-                            <li className={(this.state.errors.network) ? '' : 'hide'}>
-                                {(this.state.errors.network) ? this.state.errors.network : ''}
-                            </li>
-                            <li className={(this.state.errors.term) ? '' : 'hide'}>
-                                {(this.state.errors.term) ? this.state.errors.term : ''}
-                            </li>
-                            <li className={(this.state.errors.termValue) ? '' : 'hide'}>
-                                {(this.state.errors.termValue) ? this.state.errors.termValue : ''}
-                            </li>
-                            <li className={(this.state.errors.sdk) ? '' : 'hide'}>
-                                {(this.state.errors.sdk) ? this.state.errors.sdk : ''}
-                            </li>
-                        </ul>
+                        <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
+                            <ul>
+                                <li className={(this.state.errors.name) ? '' : 'hide'}>
+                                    {(this.state.errors.name) ? this.state.errors.name : ''}
+                                </li>
+                                <li className={(this.state.errors.network) ? '' : 'hide'}>
+                                    {(this.state.errors.network) ? this.state.errors.network : ''}
+                                </li>
+                                <li className={(this.state.errors.term) ? '' : 'hide'}>
+                                    {(this.state.errors.term) ? this.state.errors.term : ''}
+                                </li>
+                                <li className={(this.state.errors.termValue) ? '' : 'hide'}>
+                                    {(this.state.errors.termValue) ? this.state.errors.termValue : ''}
+                                </li>
+                                <li className={(this.state.errors.sdk) ? '' : 'hide'}>
+                                    {(this.state.errors.sdk) ? this.state.errors.sdk : ''}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             );

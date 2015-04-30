@@ -140,8 +140,14 @@ class Stackla_WP_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/stackla-wp-admin.js', array( 'jquery' ), $this->version, false );
+		if(preg_match('/(?i)msie [7-9]/', $_SERVER['HTTP_USER_AGENT']))
+		{
+			wp_enqueue_script( 'console-polyfill', plugin_dir_url( __FILE__ ) . 'js/console-polyfill.js', array(), $this->version , false );
+			wp_enqueue_script( 'es5-shim', plugin_dir_url( __FILE__ ) . 'js/es5-shim.min.js', array(), $this->version , false );
+			wp_enqueue_script( 'html5shiv', plugin_dir_url( __FILE__ ) . 'js/html5shiv.min.js', array(), $this->version , false );
+		}
 
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/stackla-wp-admin.js', array( 'jquery' ), $this->version, false );
 	}
 
 }

@@ -27,6 +27,7 @@
             this.data = $wpMetabox.data('stackla');
             this.data.filters = this.tryJsonParse(this.data.filters);
             this.data.terms = this.tryJsonParse(this.data.terms);
+            this.data.widget = this.tryJsonParse(this.data.widget);
             this.validator = $wpMetabox.data('validator');
             this.handler = $wpMetabox.data('handler');
             this.token = $wpMetabox.data('token');

@@ -2,6 +2,8 @@
 {
     'use strict';
 
+    var WP_SAVE_CONTROLLER;
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
     {
         propTypes:
@@ -12,8 +14,10 @@
         {
             return {
                 wpPublishSelector:"#publish",
+                wpDraftSelector:'#save-post',
                 wpFormSelector:'#post',
                 wpFormTitleSelector:'#post #title',
+                overlay:'#jsx-metabox .overlay',
                 data:{},
                 dependencies:
                 {
@@ -28,17 +32,63 @@
                     title:false,
                     terms:[],
                     filters:[]
-                }
+                },
             }
+        },
+        /**
+        *   React method that runs when the component is mounted to the DOM;
+        *   @return void;
+        */
+        componentDidMount:function()
+        {
+            this.addSaveHook();
+        },
+        /**
+        *   Applies the event catchers to the wp draft and publish buttons;
+        *   @return void;
+        */
+        addSaveHook:function()
+        {
+            var self = this;
+            var $metabox = $(stacklaWp.admin.config.wpMetabox);
+            var $body = $('html, body');
+
+            $('#save-post , #publish').one('click' , function(e)
+            {
+                e.preventDefault();
+
+                WP_SAVE_CONTROLLER = $(e.target);
+
+                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
+                { 
+                    self.compileData();
+                });
+            });
+        },
+        /**
+        *   Activates the ajax loader;
+        *   @return void;
+        */
+        activateLoader:function()
+        {
+            $(React.findDOMNode(this.refs.overlay)).addClass('display');
+        },
+        /**
+        *   Deactivates the ajax loader;
+        *   @return void;
+        */
+        deactivateLoader:function()
+        {
+            $(React.findDOMNode(this.refs.overlay)).removeClass('display');
         },
         /**
         *   Compiles the data from the view to be posted to the db;
         *   @param {e} event object;
         *   @return void;
         */
-        compileData:function(e)
+        compileData:function()
         {
-            e.preventDefault();
+            //e.preventDefault();
 
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
@@ -76,7 +126,6 @@
                 }
             };
 
-            console.log(data);
             this.validate(data);
         },
         /**
@@ -101,7 +150,7 @@
             }).done(function(response)
             {
                 $node.removeClass('validating');
-
+                
                 console.log("VALIDATE response \n");
                 console.log(response);
 
@@ -114,11 +163,13 @@
                     else
                     {
                         self.prepareErrors(response.errors);
+                        self.addSaveHook();
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('validating');
+                self.addSaveHook();
                 self.handleRequestError(error);
             });
         },
@@ -133,11 +184,10 @@
             var self = this;
             var $node = $(React.findDOMNode(this.refs.metabox));
             var $title = $(self.state.wpFormTitleSelector);
-            var $publish = $(self.state.wpPublishSelector);
-            var $form = $(self.state.wpFormSelector);
 
             if($node.hasClass('saving')) return;
 
+            self.activateLoader();
             $node.addClass('saving');
 
             $.ajax(
@@ -151,6 +201,7 @@
                 console.log("SAVE response \n");
                 console.log(response);
 
+                self.deactivateLoader();
                 $node.removeClass('saving');
                 
                 if(typeof response == 'object')
@@ -162,16 +213,18 @@
                             $title.val(data.title)
                         }
 
-                        $form.submit();
+                        WP_SAVE_CONTROLLER.trigger('click');
                     }
                     else
                     {
+                        self.addSaveHook();
                         self.prepareErrors(response.errors);
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('saving');
+                self.addSaveHook();
                 self.handleRequestError(error);
             });
         },
@@ -276,24 +329,42 @@
             if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false)
             {
                 return (
-                    <div className='auth-notification failure'>
-                        <p>
-                            {"You're not authorised to use this plugin instance."}
-                        </p>
-                        <a href={stacklaWp.admin.metabox.accessUri} onClick={this.setRedirectCookie}>
-                            {'Authorise with Stackla'}
-                        </a>
+                    <div className='auth-notification prompt'>
+                        <h3>
+                            Authorisation Required
+                        </h3>
+                        <ul>
+                            <li>
+                                {"You're WordPress account is not authorised to use this plugin instance. "}
+                                <a href={stacklaWp.admin.metabox.accessUri} onClick={this.setRedirectCookie}>
+                                    {'Authorise with Stackla'}
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 )
             }
 
             return (
                 <div className='jsx-metabox' ref='metabox'>
+                    <div className='overlay' ref='overlay'>
+                        <div className='loader' >
+                            <div className='logo'>
+                            <div className='message'> 
+                                Stacking your widget, please wait ...
+                            </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
                     <this.state.dependencies.RequestError ref='requestErrors' errors={this.state.errors.request} />
-                    <this.state.dependencies.WidgetTitle 
-                        initialTitle={stacklaWp.admin.metabox.data.title}
-                        ref='title'
-                    />
+                    <section className='title'>
+                        <this.state.dependencies.WidgetTitle 
+                            initialTitle={stacklaWp.admin.metabox.data.title}
+                            ref='title'
+                        />
+                    </section>
                     <section className='terms'>
                         <this.state.dependencies.WidgetTerms ref='terms' initialData={stacklaWp.admin.metabox.data.terms} />
                     </section>
@@ -303,8 +374,7 @@
                     <section className='config'>
                         <this.state.dependencies.Widget ref='widget' />
                     </section>
-                    <a href='#' className='wp-core-ui button button-primary' ref='saveMetabox' onClick={this.compileData}>Save</a>
-                    <span className='spinner'>{'Stacking...'}</span>
+
                 </div>
             );
         }

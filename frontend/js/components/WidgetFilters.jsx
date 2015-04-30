@@ -90,9 +90,11 @@
                 <div className='stackla-widget-filters'>
                     <header>
                         <h2>Create Filters</h2>
-                        <a href='#' className='button' onClick={this.add}>Add Filter</a>
                     </header>
                     {this.state.items}
+                    <div className='add-wrap'>
+                        <a href='#' className='button' onClick={this.add}>Add Filter</a>
+                    </div>
                 </div>
             );
         }

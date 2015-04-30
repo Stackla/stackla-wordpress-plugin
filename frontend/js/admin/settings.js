@@ -9,7 +9,14 @@
             settingsForm:'#stackla-settings-form',
             settingsFormFeedback:'#feedback',
             onSuccessMessage:'Your settings have been saved',
-            redirectCookieKey:'stacklaPluginAuthRedirect'
+            redirectCookieKey:'stacklaPluginAuthRedirect',
+            fields:
+            {
+                stack:'#stack',
+                client_id:'#client_id',
+                client_secret:'#client_secret',
+                callback:'#callback'
+            }
         },
         run:function()
         {
@@ -25,39 +32,45 @@
             var self = this;
             var $form = $(this.config.settingsForm);
             var $state = $form.data('state');
-            var $accessUri = $form.data('accessuri');
             
             $form.on('submit' , function(e)
             {
                 e.preventDefault();
                 
-                if($state == 'authenticated' && $accessUri !== '')
+                $('.error-message').removeClass('display');
+                $('.widefat').removeClass('error');
+
+                $.ajax(
                 {
-                    window.location = $accessUri;
-                }
-                else
+                    url:$form.attr('action'),
+                    method:'POST',
+                    data:$form.serialize(),
+                }).done(function(response)
                 {
-                    $.ajax(
+                    console.log(response);
+                    if(response !== '1')
                     {
-                        url:$form.attr('action'),
-                        method:'POST',
-                        data:$form.serialize(),
-                    }).done(function(response)
-                    {
-                        if(response !== '1')
+                        $.each(JSON.parse(response) , function(k , v)
                         {
-                            $(self.config.settingsFormFeedback).addClass('failure').html(response);
-                        }
-                        else
-                        {
-                            $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
-                            location.reload();
-                        }
-                    }).fail(function(xhr , status , error)
+                            var $field = $(self.config.fields[k]);
+                            var $error = $field.next('.error-message');
+
+                            if(v !== false)
+                            {
+                                $field.addClass('error');
+                                $error.addClass('display').text(v);
+                            }
+                        });
+                    }
+                    else
                     {
-                        $(self.config.settingsFormFeedback).addClass('failure').html(error);
-                    });
-                }
+                        $(self.config.settingsFormFeedback).removeClass('failure').addClass('success').html(self.config.onSuccessMessage);
+                        location.reload();
+                    }
+                }).fail(function(xhr , status , error)
+                {
+                    $(self.config.settingsFormFeedback).addClass('failure').html(error);
+                });
             });
         }
     };

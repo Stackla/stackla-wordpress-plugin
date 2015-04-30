@@ -74,9 +74,12 @@
                 <div className='stackla-widget-terms'>
                     <header>
                         <h2>Create Terms</h2>
-                        <a href='#' className='button' onClick={this.addTerm}>Add Term</a>
+                        
                     </header>
                     {this.state.items}
+                    <div className='add-wrap'>
+                        <a href='#' className='button' onClick={this.addTerm}>Add Another Term</a>
+                    </div>
                 </div>
             );
         }

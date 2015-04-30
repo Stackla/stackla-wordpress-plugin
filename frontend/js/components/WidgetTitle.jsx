@@ -29,11 +29,14 @@
                 <div className='stackla-block'>
                     <header>
                         <h2>
-                            The title for your stackla widget
+                            Create or Edit a Stackla Widget
                         </h2>
                     </header>
                     <div className={(this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}>
                         <fieldset className='widget-title'>
+                            <label>
+                                Widget Name
+                            </label>
                             <input 
                                 type='text' 
                                 className='widefat' 

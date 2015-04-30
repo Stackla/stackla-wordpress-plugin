@@ -5,6 +5,7 @@ var sass = require('gulp-sass');
 var minify = require('gulp-minify-css');
 var order = require('gulp-order');
 var react = require('gulp-react');
+var autoprefixer = require('gulp-autoprefixer');
 
 var pluginName = 'stackla-wp';
 var pluginAdminDirectory = '../app/wp-content/plugins/' + pluginName + '/admin';
@@ -73,6 +74,7 @@ gulp.task('adminScss' , function()
 {
     return gulp.src(paths.scss.admin.src)
     .pipe(sass())
+    .pipe(autoprefixer())
     .pipe(concat(pluginName + '-admin.css'))
     .pipe(minify())
     .pipe(gulp.dest(paths.scss.admin.dest));
@@ -82,6 +84,7 @@ gulp.task('publicScss' , function()
 {
     return gulp.src(paths.scss.public.src)
     .pipe(sass())
+    .pipe(autoprefixer())
     .pipe(concat(pluginName + '-public.css'))
     .pipe(minify())
     .pipe(gulp.dest(paths.scss.public.dest));

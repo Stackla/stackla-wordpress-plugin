@@ -154,6 +154,8 @@
         */
         render:function()
         {
+            var first = (this.props.id === 0) ? 'first ' : ''
+
             if(this.state.removed === true)
             {
                 return (
@@ -162,147 +164,147 @@
             }
 
             return (
-                <div className='stackla-block'>
+                <div className={first + 'stackla-block'}>
                     <div className={(this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}>
-                        <fieldset className='term-name'>
-                            <label>
-                                Filter name
-                            </label>
-                            <input 
-                                type='text' 
-                                className='widefat'
-                                value={this.state.name}
-                                onChange={this.handleNameChange}
-                            />
-                        </fieldset>
-                        <fieldset>
-                            <label>
-                                Network
-                            </label>
-                            <fieldset>
+                        <div className='stackla-widget-inner'>    
+                            <fieldset className='term-name'>
+                                <label>
+                                    Filter name
+                                </label>
                                 <input 
-                                    type='checkbox' 
-                                    value='twitter' 
-                                    defaultChecked={this.checkArrayValue('network' , 'twitter')}
-                                    onChange={this.handleNetworkCheck}
+                                    type='text' 
+                                    className='widefat'
+                                    value={this.state.name}
+                                    onChange={this.handleNameChange}
                                 />
-                                <label className='checkbox'>
-                                    Twitter
-                                </label>
                             </fieldset>
                             <fieldset>
-                                <input 
-                                    type='checkbox'
-                                    value='facebook'
-                                    defaultChecked={this.checkArrayValue('network' , 'facebook')}
-                                    onChange={this.handleNetworkCheck}
-                                />
-                                <label className='checkbox'>
-                                    Facebook
+                                <label>
+                                    Network
                                 </label>
+                                <fieldset>
+                                    <input 
+                                        type='checkbox' 
+                                        value='twitter' 
+                                        defaultChecked={this.checkArrayValue('network' , 'twitter')}
+                                        onChange={this.handleNetworkCheck}
+                                    />
+                                    <label className='checkbox'>
+                                        Twitter
+                                    </label>
+                                </fieldset>
+                                <fieldset>
+                                    <input 
+                                        type='checkbox'
+                                        value='facebook'
+                                        defaultChecked={this.checkArrayValue('network' , 'facebook')}
+                                        onChange={this.handleNetworkCheck}
+                                    />
+                                    <label className='checkbox'>
+                                        Facebook
+                                    </label>
+                                </fieldset>
+                                <fieldset>
+                                    <input 
+                                        type='checkbox'
+                                        value='instagram'
+                                        defaultChecked={this.checkArrayValue('network' , 'instagram')}
+                                        onChange={this.handleNetworkCheck}
+                                    />
+                                    <label className='checkbox'>
+                                        Instagram
+                                    </label>
+                                </fieldset>
+                                <fieldset>
+                                    <input
+                                        type='checkbox'
+                                        value='youtube' 
+                                        defaultChecked={this.checkArrayValue('network' , 'youtube')}
+                                        onChange={this.handleNetworkCheck}
+                                    />
+                                    <label className='checkbox'>
+                                        YouTube
+                                    </label>
+                                </fieldset>
                             </fieldset>
-                            <fieldset>
-                                <input 
-                                    type='checkbox'
-                                    value='instagram'
-                                    defaultChecked={this.checkArrayValue('network' , 'instagram')}
-                                    onChange={this.handleNetworkCheck}
-                                />
-                                <label className='checkbox'>
-                                    Instagram
+                             <fieldset>
+                                <label>
+                                    Media
                                 </label>
-                            </fieldset>
-                            <fieldset>
-                                <input
-                                    type='checkbox'
-                                    value='youtube' 
-                                    defaultChecked={this.checkArrayValue('network' , 'youtube')}
-                                    onChange={this.handleNetworkCheck}
-                                />
-                                <label className='checkbox'>
-                                    YouTube
+                                <fieldset>
+                                    <input 
+                                        type='checkbox' 
+                                        value='text' 
+                                        defaultChecked={this.checkArrayValue('media' , 'text')}
+                                        onChange={this.handleMediaCheck}/>
+                                    <label className='checkbox'>
+                                        Text-only
+                                    </label>
+                                </fieldset>
+                                <fieldset>
+                                    <input 
+                                        type='checkbox' 
+                                        value='image'
+                                        defaultChecked={this.checkArrayValue('media' , 'image')}
+                                        onChange={this.handleMediaCheck}/>
+                                    <label className='checkbox'>
+                                        Images
+                                    </label>
+                                </fieldset>
+                                <fieldset>
+                                    <input 
+                                        type='checkbox'
+                                        value='video'
+                                        defaultChecked={this.checkArrayValue('media' , 'video')}
+                                        onChange={this.handleMediaCheck}
+                                    />
+                                    <label className='checkbox'>
+                                        Video
+                                    </label>
+                                </fieldset>
+                             </fieldset>
+                             <fieldset>
+                                <label>
+                                    Sorting
                                 </label>
-                            </fieldset>
-                        </fieldset>
-                         <fieldset>
-                            <label>
-                                Media
-                            </label>
-                            <fieldset>
-                                <input 
-                                    type='checkbox' 
-                                    value='text' 
-                                    defaultChecked={this.checkArrayValue('media' , 'text')}
-                                    onChange={this.handleMediaCheck}/>
-                                <label className='checkbox'>
-                                    Text-only
-                                </label>
-                            </fieldset>
-                            <fieldset>
-                                <input 
-                                    type='checkbox' 
-                                    value='image'
-                                    defaultChecked={this.checkArrayValue('media' , 'image')}
-                                    onChange={this.handleMediaCheck}/>
-                                <label className='checkbox'>
-                                    Images
-                                </label>
-                            </fieldset>
-                            <fieldset>
-                                <input 
-                                    type='checkbox'
-                                    value='video'
-                                    defaultChecked={this.checkArrayValue('media' , 'video')}
-                                    onChange={this.handleMediaCheck}
-                                />
-                                <label className='checkbox'>
-                                    Video
-                                </label>
-                            </fieldset>
-                         </fieldset>
-                         <fieldset>
-                            <label>
-                                Sorting
-                            </label>
-                            <select value={this.state.sorting} onChange={this.handleSortingChange}>
-                                <option value='latest'>
-                                    Latest
-                                </option>
-                                <option value='greatest'>
-                                    Greatest
-                                </option>
-                                <option value='votes'>
-                                    Votes
-                                </option>
-                            </select>
-                         </fieldset>
-                         <div className={(this.props.showRemove) ? '' : 'hide'}>
-                            <a 
-                                className='button remove-filter'
-                                onClick={this.handleRemoveFilter}
-                            >
-                                Remove <b>{this.state.name}</b>
-                            </a>
-                        </div>
-                     </div>
-                     <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
-                        <ul>
-                            <li className={(this.state.errors.name) ? '' : 'hide'}>
-                                {(this.state.errors.name) ? this.state.errors.name : ''}
-                            </li>
-                            <li className={(this.state.errors.media) ? '' : 'hide'}>
-                                {(this.state.errors.media) ? this.state.errors.media : ''}
-                            </li>
-                            <li className={(this.state.errors.network) ? '' : 'hide'}>
-                                {(this.state.errors.network) ? this.state.errors.network : ''}
-                            </li>
-                            <li className={(this.state.errors.sorting) ? '' : 'hide'}>
-                                {(this.state.errors.sorting) ? this.state.errors.sorting : ''}
-                            </li>
-                            <li className={(this.state.errors.sdk) ? '' : 'hide'}>
-                                {(this.state.errors.sdk) ? this.state.errors.sdk : ''}
-                            </li>
-                        </ul>
+                                <select value={this.state.sorting} onChange={this.handleSortingChange}>
+                                    <option value='latest'>
+                                        Latest
+                                    </option>
+                                    <option value='greatest'>
+                                        Greatest
+                                    </option>
+                                    <option value='votes'>
+                                        Votes
+                                    </option>
+                                </select>
+                             </fieldset>
+                             <div className={(this.props.showRemove) ? '' : 'hide'}>
+                                <a className='remove-filter' onClick={this.handleRemoveFilter}>
+                                    Remove <b>{this.state.name}</b>
+                                </a>
+                            </div>
+                            <div className={(this.state.errors === false) ? 'hide' : 'stackla-error-message'}>
+                                <ul>
+                                    <li className={(this.state.errors.name) ? '' : 'hide'}>
+                                        {(this.state.errors.name) ? this.state.errors.name : ''}
+                                    </li>
+                                    <li className={(this.state.errors.media) ? '' : 'hide'}>
+                                        {(this.state.errors.media) ? this.state.errors.media : ''}
+                                    </li>
+                                    <li className={(this.state.errors.network) ? '' : 'hide'}>
+                                        {(this.state.errors.network) ? this.state.errors.network : ''}
+                                    </li>
+                                    <li className={(this.state.errors.sorting) ? '' : 'hide'}>
+                                        {(this.state.errors.sorting) ? this.state.errors.sorting : ''}
+                                    </li>
+                                    <li className={(this.state.errors.sdk) ? '' : 'hide'}>
+                                        {(this.state.errors.sdk) ? this.state.errors.sdk : ''}
+                                    </li>
+                                </ul>
+                             </div>
+                         </div>
+                         
                      </div>
                  </div>
             );

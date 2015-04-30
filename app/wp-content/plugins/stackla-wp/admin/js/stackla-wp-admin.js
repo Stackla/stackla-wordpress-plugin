@@ -30427,6 +30427,8 @@ if (!Array.prototype.indexOf) {
 {
     'use strict';
 
+    var WP_SAVE_CONTROLLER;
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
     {displayName: "Metabox",
         propTypes:
@@ -30437,8 +30439,10 @@ if (!Array.prototype.indexOf) {
         {
             return {
                 wpPublishSelector:"#publish",
+                wpDraftSelector:'#save-post',
                 wpFormSelector:'#post',
                 wpFormTitleSelector:'#post #title',
+                overlay:'#jsx-metabox .overlay',
                 data:{},
                 dependencies:
                 {
@@ -30453,17 +30457,63 @@ if (!Array.prototype.indexOf) {
                     title:false,
                     terms:[],
                     filters:[]
-                }
+                },
             }
+        },
+        /**
+        *   React method that runs when the component is mounted to the DOM;
+        *   @return void;
+        */
+        componentDidMount:function()
+        {
+            this.addSaveHook();
+        },
+        /**
+        *   Applies the event catchers to the wp draft and publish buttons;
+        *   @return void;
+        */
+        addSaveHook:function()
+        {
+            var self = this;
+            var $metabox = $(stacklaWp.admin.config.wpMetabox);
+            var $body = $('html, body');
+
+            $('#save-post , #publish').one('click' , function(e)
+            {
+                e.preventDefault();
+
+                WP_SAVE_CONTROLLER = $(e.target);
+
+                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
+                { 
+                    self.compileData();
+                });
+            });
+        },
+        /**
+        *   Activates the ajax loader;
+        *   @return void;
+        */
+        activateLoader:function()
+        {
+            $(React.findDOMNode(this.refs.overlay)).addClass('display');
+        },
+        /**
+        *   Deactivates the ajax loader;
+        *   @return void;
+        */
+        deactivateLoader:function()
+        {
+            $(React.findDOMNode(this.refs.overlay)).removeClass('display');
         },
         /**
         *   Compiles the data from the view to be posted to the db;
         *   @param {e} event object;
         *   @return void;
         */
-        compileData:function(e)
+        compileData:function()
         {
-            e.preventDefault();
+            //e.preventDefault();
 
             var termsRefs = this.refs.terms.refs;
             var filtersRefs = this.refs.filters.refs;
@@ -30500,7 +30550,7 @@ if (!Array.prototype.indexOf) {
                     style:widgetConfig.style
                 }
             };
-            //console.log(data)
+
             this.validate(data);
         },
         /**
@@ -30525,7 +30575,7 @@ if (!Array.prototype.indexOf) {
             }).done(function(response)
             {
                 $node.removeClass('validating');
-
+                
                 console.log("VALIDATE response \n");
                 console.log(response);
 
@@ -30538,11 +30588,13 @@ if (!Array.prototype.indexOf) {
                     else
                     {
                         self.prepareErrors(response.errors);
+                        self.addSaveHook();
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('validating');
+                self.addSaveHook();
                 self.handleRequestError(error);
             });
         },
@@ -30557,11 +30609,10 @@ if (!Array.prototype.indexOf) {
             var self = this;
             var $node = $(React.findDOMNode(this.refs.metabox));
             var $title = $(self.state.wpFormTitleSelector);
-            var $publish = $(self.state.wpPublishSelector);
-            var $form = $(self.state.wpFormSelector);
 
             if($node.hasClass('saving')) return;
 
+            self.activateLoader();
             $node.addClass('saving');
 
             $.ajax(
@@ -30575,6 +30626,7 @@ if (!Array.prototype.indexOf) {
                 console.log("SAVE response \n");
                 console.log(response);
 
+                self.deactivateLoader();
                 $node.removeClass('saving');
                 
                 if(typeof response == 'object')
@@ -30586,16 +30638,18 @@ if (!Array.prototype.indexOf) {
                             $title.val(data.title)
                         }
 
-                        $form.submit();
+                        WP_SAVE_CONTROLLER.trigger('click');
                     }
                     else
                     {
+                        self.addSaveHook();
                         self.prepareErrors(response.errors);
                     }
                 }
             }).fail(function(xhr , status , error)
             {
                 $node.removeClass('saving');
+                self.addSaveHook();
                 self.handleRequestError(error);
             });
         },
@@ -30718,6 +30772,17 @@ if (!Array.prototype.indexOf) {
 
             return (
                 React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
+                    React.createElement("div", {className: "overlay", ref: "overlay"}, 
+                        React.createElement("div", {className: "loader"}, 
+                            React.createElement("div", {className: "logo"}, 
+                            React.createElement("div", {className: "message"}, 
+                                "Stacking your widget, please wait ..."
+                            )
+                            )
+                            
+                        )
+                        
+                    ), 
                     React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
                     React.createElement("section", {className: "title"}, 
                         React.createElement(this.state.dependencies.WidgetTitle, {
@@ -30733,9 +30798,8 @@ if (!Array.prototype.indexOf) {
                     ), 
                     React.createElement("section", {className: "config"}, 
                         React.createElement(this.state.dependencies.Widget, {ref: "widget"})
-                    ), 
-                    React.createElement("a", {href: "#", className: "wp-core-ui button button-primary", ref: "saveMetabox", onClick: this.compileData}, "Save"), 
-                    React.createElement("span", {className: "spinner"}, 'Stacking...')
+                    )
+
                 )
             );
         }
@@ -31297,6 +31361,17 @@ if (!Array.prototype.indexOf) {
                         'Fluid Vertical',
                         'Fluid Horizontal'
                     ]
+                },
+                descriptions:
+                [
+                    'Amet nisi duis magna integer in, parturient rhoncus mid a turpis adipiscing, sit pellentesque, pulvinar',
+                    'Velit, et auctor. Lundium enim pulvinar nec parturient rhoncus a! Rhoncus platea dapibus vel duis parturient quis cras dis amet placerat risus adipiscing',
+                    'Liquam elit, magna eu, magnis magna ultricies, mauris velit! Scelerisque turpis, a, risus! Dis, lorem ut a'
+                ],
+                messages:
+                {
+                    'clone': 'Choose the widget you wish to copy',
+                    'derive': 'Choose the widget you wish to reuse'
                 }
             }
         },
@@ -31347,55 +31422,73 @@ if (!Array.prototype.indexOf) {
             return (
                 React.createElement("div", null, 
                     React.createElement("div", {ref: "types"}, 
-                    
-                        this.state.options.types.map(function(option , i)
-                        {
-                            return  React.createElement("fieldset", {key: i}, 
-                                        React.createElement("input", {
-                                            ref: option, 
-                                            type: "radio", 
-                                            value: option, 
-                                            name: "type", 
-                                            onChange: self.handleTypeChange, 
-                                            defaultChecked: self.getDefaultChecked(option , 'type')}
-                                        ), 
-                                        self.state.labels.types[i]
-                                    )
-                        })
-                    
-                    ), 
-                    React.createElement("div", {ref: "widgets", className: (self.state.displayWidgets) ? '' : 'hide'}, 
-                        React.createElement("select", {
-                            onChange: this.handleWidgetCopyChange, 
-                            defaultValue: (this.props.initialData) ? this.props.initialData.copyId : ''}, 
-                            React.createElement("option", {value: ""}), 
+                        React.createElement("fieldset", null, 
+                        React.createElement("label", null, 
+                            "Choose your Stackla Widget Type"
+                        ), 
                             
-                                Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
+                                this.state.options.types.map(function(option , i)
                                 {
-                                    return  React.createElement("option", {value: key, key: key}, 
-                                                stacklaWp.admin.metabox.widgets[key]
+                                    return  React.createElement("div", {className: "widget-types", key: i}, 
+                                                React.createElement("input", {
+                                                    ref: option, 
+                                                    type: "radio", 
+                                                    value: option, 
+                                                    name: "type", 
+                                                    onChange: self.handleTypeChange, 
+                                                    defaultChecked: self.getDefaultChecked(option , 'type')}
+                                                ), 
+                                                self.state.labels.types[i], 
+                                                React.createElement("p", null, 
+                                                    self.state.descriptions[i]
+                                                )
                                             )
                                 })
                             
                         )
                     ), 
-                    React.createElement("div", {ref: "styles", className: (self.state.displayStyles) ? '' : 'hide'}, 
-                    
-                        this.state.options.styles.map(function(option , i)
-                        {
-                            return  React.createElement("fieldset", {key: i}, 
-                                        React.createElement("input", {
-                                            type: "radio", 
-                                            ref: option, 
-                                            name: "style", 
-                                            onChange: self.handleStyleChange, 
-                                            value: option, 
-                                            defaultChecked: self.getDefaultChecked(option , 'style')}
-                                        ), 
-                                        self.state.labels.styles[i]
-                                    )
-                        })
-                    
+                    React.createElement("div", {ref: "widgets", className: (self.state.displayWidgets) ? 'widget-choices' : 'hide'}, 
+                        React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                (this.state.type !== 'new') ? this.state.messages[this.state.type] : ''
+                            ), 
+                            React.createElement("select", {
+                                onChange: this.handleWidgetCopyChange, 
+                                defaultValue: (this.props.initialData) ? this.props.initialData.copyId : ''}, 
+                                React.createElement("option", {value: ""}), 
+                                
+                                    Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
+                                    {
+                                        return  React.createElement("option", {value: key, key: key}, 
+                                                    stacklaWp.admin.metabox.widgets[key]
+                                                )
+                                    })
+                                
+                            )
+                        )
+                    ), 
+                    React.createElement("div", {ref: "styles", className: (self.state.displayStyles) ? 'widget-styles' : 'hide'}, 
+                        React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                "Choose your Stackla Widget Style"
+                            ), 
+                            
+                                this.state.options.styles.map(function(option , i)
+                                {
+                                    return  React.createElement("div", {key: i}, 
+                                                React.createElement("input", {
+                                                    type: "radio", 
+                                                    ref: option, 
+                                                    name: "style", 
+                                                    onChange: self.handleStyleChange, 
+                                                    value: option, 
+                                                    defaultChecked: self.getDefaultChecked(option , 'style')}
+                                                ), 
+                                                self.state.labels.styles[i]
+                                            )
+                                })
+                            
+                        )
                     )
                 )
             );

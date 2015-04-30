@@ -32,7 +32,8 @@
                     </header>
                     <div className={(this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}>
                         <this.state.dependencies.WidgetConfig 
-                            ref='config' 
+                            ref='config'
+                            initialData={stacklaWp.admin.metabox.data.widget}
                         />
                     </div>
                     <div className={(this.state.error) ? 'stackla-error-message' : 'hide'}>
