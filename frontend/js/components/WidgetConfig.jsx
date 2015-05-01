@@ -118,7 +118,7 @@
         render:function()
         {
             var self = this;
-            console.log(this.state);
+
             return (
                 <div>
                     <div ref='types'>
@@ -126,7 +126,7 @@
                         <label>
                             Choose your Stackla Widget Action
                         </label>
-                            <div className={'widget-types'}>
+                            <div className={(self.state.id == '') ? 'hide' : 'widget-types'}>
                                 <input 
                                     ref='update'
                                     type='radio'
