@@ -14,6 +14,6 @@
     data-validator="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox-validator.php"
     data-handler="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox.php"
     data-accessuri="<?php echo $access_uri ?>"
-    data-token="<?php echo ($access_token) ? $access_token : '' ?>"
+    data-token="<?php echo ($access_token) ? '1' : '' ?>"
     data-widgets='<?php echo $widgets_json; ?>'
 ></div>

@@ -35,7 +35,6 @@ class Stackla_WP_Activator {
         global $wpdb;
 
         self::create_settings_table($wpdb);
-        //self::set_callback_uri($wpdb);
 	}
 
     /**
@@ -57,16 +56,4 @@ class Stackla_WP_Activator {
 
         $wpdb->query($statement);
     }
-
-    // private static function set_callback_uri($wpdb)
-    // {
-    //     $row = $wpdb->get_row("SELECT * FROM self::$settings_table" , OBJECT);
-    //     $wpdb->update(self::$settings_table,
-    //         array('stackla_callback_uri' => admin_url('admin.php?page=stackla')),
-    //         array('id' => $row->id),
-    //         array('%s')
-    //     );
-    // }
-
-
 }
