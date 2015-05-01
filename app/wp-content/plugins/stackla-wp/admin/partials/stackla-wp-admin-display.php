@@ -12,7 +12,8 @@
  * @subpackage Stackla_WP/admin/partials
  */
     $stackla_wp_settings = new Stackla_WP_Settings;
-
+    $remover = new Stackla_WP_Remover();
+    $remover->remove_metabox_widget(509);
     $settings = array(
         "current" => $stackla_wp_settings->get_user_settings(),
         "post_type_options" => $stackla_wp_settings->get_post_type_options(),

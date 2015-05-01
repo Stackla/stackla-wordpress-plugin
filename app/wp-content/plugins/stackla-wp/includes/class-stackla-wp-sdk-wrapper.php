@@ -40,6 +40,11 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     public static $auth_host = "https://api.qa.stackla.com/api/";
     public static $stack_host = "https://my.qa.stackla.com/api/";
 
+    /**
+    *   -- CONSTRUCTOR --
+    *   Sets the user's settings & token, then tries to perform setup;
+    *   @return void;
+    */
     public function __construct()
     {
         $settings = new Stackla_WP_Settings;
@@ -68,6 +73,10 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         return json_encode(array('errors' => $this->errors , 'result' => '0'));
     }
 
+    /**
+    *   Tries to set up the SDK wrapper;
+    *   @return void;
+    */
     protected function setup()
     {
         if($this->user_settings === false)
@@ -87,6 +96,11 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $this->stack = new Stackla\Api\Stack($this->credentials, self::$stack_host, $this->stack_name);
     }
 
+    /**
+    *   Validates a terms array item;
+    *   @param array    $term   a terms array item;
+    *   @return boolean false || true   false if the term is invalid true if it is valid;
+    */
     public function validate_term($term)
     {
         if(Stackla_WP_Metabox_Validator::validate_string($term['name']) === false) return false;
@@ -100,11 +114,18 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         return true;
     }
 
+    /**
+    *   Validates a filters array item;
+    *   @param array    $filter a filters array item;
+    *   @return boolean false || true   false if invalid, true if valid;
+    */
     public function validate_filter($filter)
     {
         if(Stackla_WP_Metabox_Validator::validate_string($filter['name']) === false) return false;
 
         if(Stackla_WP_Metabox_Validator::validate_string($filter['sorting']) === false) return false;
+
+        return true;
     }
 
     /**
@@ -131,6 +152,11 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         return array_values($array);
     }
 
+    /**
+    *   Pushes a tag to Stackla;
+    *   @param $name    string  the name of the tag;
+    *   @return object || boolean   $tag || false   Stackla Tag object if successful, false on fail;
+    */
     public function push_tag($name)
     {
         $tag;
@@ -403,6 +429,10 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         return $parsed;
     }
 
+    /**
+    *   Validates the SDK wrapper requests;
+    *   @return boolean false if invalid, true if valid;
+    */
     public function validate()
     {
         if($this->errors['request'] !== false)
@@ -432,5 +462,81 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         }
 
         return true;
+    }
+
+    /**
+    *   Removes a Stackla Tag;
+    *   @param int  $id the stackla tag id;
+    *   @return void;
+    */
+    public function remove_tag($id)
+    {
+        $tag = $this->stack->instance('Tag', $id , false);
+
+        try
+        {
+            $tag->delete();
+        }
+        catch(Exception $e)
+        {
+
+        }
+    }
+
+    /**
+    *   Removes a Stackla Term;
+    *   @param int  $id the stackla term id;
+    *   @return void;
+    */
+    public function remove_term($id)
+    {
+        $term = $this->stack->instance('Term', $id, false);
+
+        try 
+        {
+            $term->delete();
+        }
+        catch(Exception $e)
+        {
+
+        }
+    }
+
+    /**
+    *   Removes a Stackla Filter;
+    *   @param int  $id the stackla filter id;
+    *   @return void;
+    */
+    public function remove_filter($id)
+    {
+        $filter = $this->stack->instance('Filter', $id, false);
+
+        try
+        {
+            $filter->delete();
+        }
+        catch(Exception $e)
+        {
+
+        }
+    }
+
+    /**
+    *   Removes a Stackla Widget;
+    *   @param int  $id the stackla widget id;
+    *   @return void;
+    */
+    public function remove_widget($id)
+    {
+        $widget = $this->stack->instance('Widget', $id, false);
+
+        try
+        {
+            $widget->delete();
+        }
+        catch(Exception $e)
+        {
+
+        }
     }
 }

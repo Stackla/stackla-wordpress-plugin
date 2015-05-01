@@ -33,31 +33,7 @@ class Stackla_WP_Metaboxes
             $this->add_metabox($post_type);
         }
     }
-
-    public function save_metabox($post_id)
-    {
-        $post = get_post($post_id);
-
-        if(!isset($_POST['stackla_for_wordpress_nonce']))
-        {
-            //todo - verify the wp nonce;
-            return $post_id;
-        }
-
-        $meta_key = 'stackla-widget-title';
-        $new_meta_value = $_POST['stackla-widget-title'];
-        $current_meta_value = get_post_meta($post_id , $meta_key , true);
-
-        if($current_meta_value)
-        {
-            update_post_meta($post_id , $meta_key , $new_meta_value);
-        }
-        else
-        {
-            add_post_meta($post_id , $meta_key , $new_meta_value);
-        }
-    }
-
+    
     public function render_metabox($object , $box)
     {
         include($this->view);

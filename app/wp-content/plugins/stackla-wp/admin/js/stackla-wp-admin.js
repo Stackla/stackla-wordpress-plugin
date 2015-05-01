@@ -31324,16 +31324,16 @@ if (!Array.prototype.indexOf) {
             return {
                 id:(this.props.initialData !== false) ? this.props.initialData.id : '',
                 copyId:(this.props.initialData !== false) ? this.props.initialData.copyId : '',
-                type:(this.props.initialData !== false) ? this.props.initialData.type : 'new',
+                type:
+                (this.props.initialData !== false && this.props.initialData.id !== '') 
+                ? this.props.initialData.type
+                : 'new',
                 style:(this.props.initialData !== false) ? this.props.initialData.style : 'fluid',
                 displayStyles:
                 (this.props.initialData !== false && this.props.initialData.type == 'derive')
                 ? false 
                 : true,
-                displayWidgets:
-                (this.props.initialData !== false && this.props.initialData.type !== 'new')
-                ? true
-                : false,
+                displayWidgets:false,
                 options:
                 {
                     types:
@@ -31350,9 +31350,10 @@ if (!Array.prototype.indexOf) {
                 },
                 labels:
                 {
+                    update:'Update your existing Stackla Widget',
                     types:
                     [
-                        'Create/Update a new/existing Stackla Widget',
+                        'Create a new Stackla Widget',
                         'Copy an existing Stackla Widget',
                         'Reuse an existing Stackla Widget'
                     ],
@@ -31362,6 +31363,7 @@ if (!Array.prototype.indexOf) {
                         'Fluid Horizontal'
                     ]
                 },
+                updateDescription:'Amet nisi duis magna integer in, parturient rhoncus mid a turpis adipiscing, sit pellentesque, pulvinar',
                 descriptions:
                 [
                     'Amet nisi duis magna integer in, parturient rhoncus mid a turpis adipiscing, sit pellentesque, pulvinar',
@@ -31402,6 +31404,10 @@ if (!Array.prototype.indexOf) {
         },
         getDefaultChecked:function(option , key)
         {
+            if(key == 'type')
+            {
+                if(this.state.id !== '') return false;
+            }
             return (this.state[key] == option) ? true : false;
         },
         getDefaultSelected:function()
@@ -31410,22 +31416,43 @@ if (!Array.prototype.indexOf) {
         },
         setWidgetsDisplayState:function(type)
         {
-            return (type == 'new') ? false : true;
+            return (type == 'new' || this.state.id !== '') ? false : true;
         },
         setStyleDisplayState:function(type)
         {
+            if(this.props.initialData !== false && this.props.initialData.type == 'derive')
+            {
+                return false;
+            }
             return (type == 'derive') ? false : true;
         },
         render:function()
         {
             var self = this;
+            console.log(this.state);
             return (
                 React.createElement("div", null, 
                     React.createElement("div", {ref: "types"}, 
                         React.createElement("fieldset", null, 
                         React.createElement("label", null, 
-                            "Choose your Stackla Widget Type"
+                            "Choose your Stackla Widget Action"
                         ), 
+                            React.createElement("div", {className: 'widget-types'}, 
+                                React.createElement("input", {
+                                    ref: "update", 
+                                    type: "radio", 
+                                    value: "update", 
+                                    name: "type", 
+                                    onChange: self.handleTypeChange, 
+                                    defaultChecked: (this.state.id !== '') ? true : false}
+                                ), 
+                                React.createElement("span", null, 
+                                    self.state.labels.update
+                                ), 
+                                React.createElement("p", null, 
+                                    self.state.updateDescription
+                                )
+                            ), 
                             
                                 this.state.options.types.map(function(option , i)
                                 {

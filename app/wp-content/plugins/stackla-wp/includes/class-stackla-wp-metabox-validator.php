@@ -34,7 +34,7 @@ class Stackla_WP_Metabox_Validator {
     /**
     *   -- CONSTRUCTOR --
     *   Sets the data the validator validates;
-    *   @param {$data} the data to validate;
+    *   @param array    $data   the data to validate;
     *   @return void;
     */
     public function __construct($data)
@@ -47,7 +47,7 @@ class Stackla_WP_Metabox_Validator {
 
     /**
     *   Validates a string;
-    *   @param {$var} a string;
+    *   @param string   $var    a string to be validated;
     *   @return boolean;
     */
     public static function validate_string($var)
@@ -57,7 +57,7 @@ class Stackla_WP_Metabox_Validator {
 
     /**
     *   Validates an array;
-    *   @param {$var} an array;
+    *   @param array    $var    an array to be validated;
     *   @return boolean;
     */
     public static function validate_array($var)

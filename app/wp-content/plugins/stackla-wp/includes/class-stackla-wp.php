@@ -142,6 +142,11 @@ class Stackla_WP {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-metabox.php';
 
+		/**
+		 * The class responsible for handling the removal of both wordpress and stackla data
+		 * of the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-stackla-wp-remover.php';
 
 		/**
 		 * The class responsible for handling the custom metaboxes
@@ -194,11 +199,13 @@ class Stackla_WP {
 
 		$plugin_admin = new Stackla_WP_Admin( $this->get_plugin_name(), $this->get_version() );
 		$metaboxes = new Stackla_WP_Metaboxes;
+		$remover = new Stackla_WP_Remover;
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action('admin_menu' , $plugin_admin , 'add_settings_page');
 		$this->loader->add_action('add_meta_boxes' , $metaboxes , 'setup_metaboxes');
+		$this->loader->add_action('delete_post' , $remover , 'remove_metabox_widget');
 	}
 
 	/**

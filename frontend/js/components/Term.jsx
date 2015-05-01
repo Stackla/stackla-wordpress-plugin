@@ -159,9 +159,9 @@
             return split[1];
         },
         /**
-        *   About;
-        *   @param {};
-        *   @return void;
+        *   Checks the option ref against the set termDelimited value;
+        *   @param string   {ref}   a React DOMNode reference;
+        *   @return boolean;
         */
         checkTermValueOption:function(ref)
         {
@@ -170,9 +170,9 @@
             return false;
         },
         /**
-        *   About;
-        *   @param {};
-        *   @return void;
+        *   Gets the default term value by checking a delimited string against the current termDelimited value;
+        *   @param string   {delimited} a network-termType format hyphenated string
+        *   @return string;
         */
         getDefaultTermValue:function(delimited)
         {
@@ -180,6 +180,10 @@
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
+        /**
+        *   Renders a Term component;
+        *   @return React component;
+        */
         render:function()
         {
             var self = this;

@@ -15,6 +15,20 @@ require_once('class-stackla-wp-sdk-wrapper.php');
 
 class Stackla_WP_Settings 
 {
+    /**
+    *   @var    $tabls                  string  the custom stackla settings table name;
+    *   @var    $wpdb                   object  wordpress database object;
+    *   @var    $user_id                int     the current wordpress user's id;
+    *   @var    $user_has_settings      boolean user has settings true || false;
+    *   @var    $stackla_stack          string  the user's stack name;
+    *   @var    $stackla_client_id      string  the plugin instance's client id;
+    *   @var    $stackla_client_secret  string  the plugin instance's client secret;
+    *   @var    $stackla_callback_uri   string  the plugin instance's callback uri;
+    *   @var    $stackla_post_types     array   the post types the user has selected to display the metabox on;
+    *   @var    $exclude_options        array   an array of post types to exclude from the choices;
+    *   @var    $errors                 array   settings errors array;
+    */
+
     private $table;
     private $wpdb;
     private $user_id;
@@ -184,7 +198,6 @@ class Stackla_WP_Settings
     *   @param  array    $data   an array of validated POST data;
     *   @return void;
     */
-
     public function save($data)
     {
         $validated = $this->validate_data($data);

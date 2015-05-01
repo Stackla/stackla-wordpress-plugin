@@ -149,7 +149,7 @@
             return false;
         },
         /**
-        *   Renders a filter component;
+        *   Renders a Filter component;
         *   @return React component;
         */
         render:function()
