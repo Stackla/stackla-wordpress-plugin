@@ -37,8 +37,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     public  $tag = false;
     public  $errors = array();
 
-    public static $auth_host = "https://api.qa.stackla.com/api/";
-    public static $stack_host = "https://my.qa.stackla.com/api/";
+    public static $host = "https://api.stackla.com/api/";
 
     /**
     *   -- CONSTRUCTOR --
@@ -92,8 +91,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             throw new Exception('User is not authorized with Stackla');
         }
 
-        $this->credentials = new Stackla\Core\Credentials(self::$auth_host , $this->token , $this->stack_name);
-        $this->stack = new Stackla\Api\Stack($this->credentials, self::$stack_host, $this->stack_name);
+        $this->credentials = new Stackla\Core\Credentials(self::$host , $this->token , $this->stack_name);
+        $this->stack = new Stackla\Api\Stack($this->credentials, self::$host, $this->stack_name);
     }
 
     /**
@@ -173,10 +172,10 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         }
 
         $deslashed = stripslashes($name);
-        
+
         $tag->tag = $deslashed;
         $tag->slug = $deslashed;
-        
+
         try
         {
             if(Stackla_WP_Metabox_Validator::validate_string($this->existing_tag_id))
@@ -197,7 +196,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $this->errors['title'] = implode(', ' , $tag->getErrors());
             return false;
         }
-        
+
     }
 
     /**
@@ -267,7 +266,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                 $error = array('sdk' => implode(', ' , $term->getErrors()));
             }
 
-            $this->errors['terms'][$t['id']] = $error;            
+            $this->errors['terms'][$t['id']] = $error;
         }
 
         return $this->flush($terms);
@@ -348,7 +347,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $filter_id = $filter['filterId'];
 
         if(Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === true)
-        { 
+        {
             $parent = $this->stack->instance('Widget' , (int) $options['copyId'] , false);
 
             if(Stackla_WP_Metabox_Validator::validate_string($options['id']) === true)
@@ -388,7 +387,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         try
         {
             if(
-                Stackla_WP_Metabox_Validator::validate_string($options['id']) === false 
+                Stackla_WP_Metabox_Validator::validate_string($options['id']) === false
                 && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === false
             )
             {
@@ -492,7 +491,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     {
         $term = $this->stack->instance('Term', $id, false);
 
-        try 
+        try
         {
             $term->delete();
         }
