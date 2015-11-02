@@ -8,8 +8,8 @@ var react = require('gulp-react');
 var autoprefixer = require('gulp-autoprefixer');
 
 var pluginName = 'stackla-wp';
-var pluginAdminDirectory = '../app/wp-content/plugins/' + pluginName + '/admin';
-var pluginPublicDirectory = '../app/wp-content/plugins/' + pluginName + '/public';
+var pluginAdminDirectory = '../admin';
+var pluginPublicDirectory = '../public';
 
 var paths =
 {

@@ -1,0 +1,5 @@
+{
+    "require": {
+        "stackla/stackla-php-sdk": "1.*"
+    }
+}
