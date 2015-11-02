@@ -13,7 +13,7 @@ require_once('class-stackla-wp-activator.php');
 require_once('class-stackla-wp-metabox-validator.php');
 require_once('class-stackla-wp-sdk-wrapper.php');
 
-class Stackla_WP_Settings 
+class Stackla_WP_Settings
 {
     /**
     *   @var    $tabls                  string  the custom stackla settings table name;
@@ -347,7 +347,7 @@ class Stackla_WP_Settings
             return false;
         }
 
-        return new Stackla\Core\Credentials(Stackla_WP_SDK_Wrapper::$auth_host , null , $current['stackla_stack']);
+        return new Stackla\Core\Credentials(Stackla_WP_SDK_Wrapper::$host, null , $current['stackla_stack']);
     }
 
     /**
