@@ -12,9 +12,9 @@
 class Stackla_WP_Metabox_Validator {
 
     private $data;
-    protected $allowed_networks = ['twitter' , 'facebook' , 'instagram' , 'youtube'];
-    protected $allowed_media = ['text' , 'image' , 'video'];
-    protected $allowed_sorting = ['latest' , 'greatest' , 'votes'];
+    protected $allowed_networks = array('twitter' , 'facebook' , 'instagram' , 'youtube');
+    protected $allowed_media = array('text' , 'image' , 'video');
+    protected $allowed_sorting = array('latest' , 'greatest' , 'votes');
     protected $error_title = "You must set a widget title";
     protected $error_terms = "You must define at least one term";
     protected $error_filters = "You must define at least one filter";
@@ -233,7 +233,7 @@ class Stackla_WP_Metabox_Validator {
         }
 
         if(
-            count($this->data['terms']) !== count($this->errors['terms']) || 
+            count($this->data['terms']) !== count($this->errors['terms']) ||
             count($this->data['filters']) !== count($this->errors['filters'])
         )
         {
