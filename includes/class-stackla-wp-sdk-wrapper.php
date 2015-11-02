@@ -37,7 +37,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     public  $tag = false;
     public  $errors = array();
 
-    public static $host = "https://api.stackla.com/api/";
+    public $host = "https://api.stackla.com/api/";
 
     /**
     *   -- CONSTRUCTOR --
