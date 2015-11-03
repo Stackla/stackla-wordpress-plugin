@@ -23,7 +23,6 @@ class Stackla_WP_Settings
     *   @var    $stackla_stack          string  the user's stack name;
     *   @var    $stackla_client_id      string  the plugin instance's client id;
     *   @var    $stackla_client_secret  string  the plugin instance's client secret;
-    *   @var    $stackla_callback_uri   string  the plugin instance's callback uri;
     *   @var    $stackla_post_types     array   the post types the user has selected to display the metabox on;
     *   @var    $exclude_options        array   an array of post types to exclude from the choices;
     *   @var    $errors                 array   settings errors array;
@@ -36,7 +35,6 @@ class Stackla_WP_Settings
     private $stackla_stack;
     private $stackla_client_id;
     private $stackla_client_secret;
-    private $stackla_callback_uri;
     private $stackla_post_types = false;
     protected static $exclude_options = array(
         'attachment'
@@ -140,15 +138,6 @@ class Stackla_WP_Settings
             $this->stackla_client_secret = $data['client_secret'];
         }
 
-        if(!Stackla_WP_Metabox_Validator::validate_string($data['callback']))
-        {
-            $this->errors['callback'] = 'You must submit a valid callback URI';
-        }
-        else
-        {
-            $this->stackla_callback_uri = $data['callback'];
-        }
-
         foreach($this->errors as $k => $v)
         {
             if($v !== false)
@@ -222,7 +211,6 @@ class Stackla_WP_Settings
                         'stackla_stack' => $this->stackla_stack,
                         'stackla_client_id' => $this->stackla_client_id,
                         'stackla_client_secret' => $this->stackla_client_secret,
-                        'stackla_callback_uri' => $this->stackla_callback_uri,
                         'stackla_post_types' => $this->stackla_post_types
                     ),
                     array(
@@ -252,7 +240,6 @@ class Stackla_WP_Settings
                         'stackla_stack' => $this->stackla_stack,
                         'stackla_client_id' => $this->stackla_client_id,
                         'stackla_client_secret' => $this->stackla_client_secret,
-                        'stackla_callback_uri' => $this->stackla_callback_uri,
                         'stackla_post_types' => $this->stackla_post_types
                     ),
                     array(
@@ -370,13 +357,10 @@ class Stackla_WP_Settings
         {
             return false;
         }
-        elseif(Stackla_WP_Metabox_Validator::validate_string($current['stackla_callback_uri']) === false)
-        {
-            return false;
-        }
 
+        $callback_url = admin_url('admin.php?page=stackla');
         $credentials = $this->get_credentials();
-        $access_uri = $credentials->getAccessUri($current['stackla_client_id'], $current['stackla_client_secret'],  $current['stackla_callback_uri']);
+        $access_uri = $credentials->getAccessUri($current['stackla_client_id'], $current['stackla_client_secret'], $callback_url);
 
         return $access_uri;
     }

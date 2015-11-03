@@ -30,7 +30,7 @@ class Stackla_WP_Activator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function activate() 
+	public static function activate()
     {
         global $wpdb;
 
@@ -50,7 +50,6 @@ class Stackla_WP_Activator {
         `stackla_stack` TEXT NOT NULL ,
         `stackla_client_id` TEXT NOT NULL ,
         `stackla_client_secret` TEXT NOT NULL ,
-        `stackla_callback_uri` TEXT NOT NULL ,
         `stackla_post_types` TEXT NOT NULL
         ) ENGINE = InnoDB ;";
 

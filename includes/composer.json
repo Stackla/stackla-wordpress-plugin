@@ -1,5 +1,6 @@
 {
     "require": {
+        "symfony/yaml": "*",
         "stackla/stackla-php-sdk": "1.*"
     }
 }

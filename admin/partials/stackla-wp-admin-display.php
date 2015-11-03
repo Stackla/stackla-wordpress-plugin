@@ -19,11 +19,13 @@
         "post_type_options" => $stackla_wp_settings->get_post_type_options(),
         "post_types" => false
     );
+    /** @var Stackla\Core\Credentials $credentials */
     $credentials = $stackla_wp_settings->get_credentials();
     $access_uri = $stackla_wp_settings->get_access_uri();
     $access_token = $stackla_wp_settings->get_user_access_token();
     $token_response = false;
     $token_saved = false;
+    $callback_url = admin_url('admin.php?page=stackla');
 
     if(is_array($settings['current']))
     {
@@ -41,18 +43,20 @@
                 $settings['current']['stackla_client_id'],
                 $settings['current']['stackla_client_secret'],
                 $_GET['code'],
-                $settings['current']['stackla_callback_uri']
+                $callback_url
             );
             if($token_response)
             {
                 $access_token = $credentials->token;
                 $token_saved = $stackla_wp_settings->save_access_token($access_token);
+                wp_redirect($callback_url);
+                exit();
             }
         }
         catch(Exception $e)
         {
             echo $e->getMessage();
-        }        
+        }
     }
 
     if($access_uri === false)
@@ -72,7 +76,7 @@
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
         <div class='wrap'>
             <h2>Stackla For WordPress</h2>
-            <?php 
+            <?php
                 if($state == 'init'):
             ?>
                 <div class='auth-notification prompt'>
@@ -82,11 +86,11 @@
                     </li>
                     <!--
                     <li>
-                        Your WordPress Account is not authorised with Stackla. 
+                        Your WordPress Account is not authorised with Stackla.
                     </li>
                     -->
                 </div>
-            <?php  
+            <?php
                 elseif($state == 'authenticated'):
             ?>
                 <div class='auth-notification prompt'>
@@ -95,25 +99,25 @@
                         Your WordPress Account is not authorised with Stackla. <a href="<?php echo ($access_uri) ? $access_uri : ''; ?>">Authorise</a>
                     </li>
                 </div>
-            <?php  
+            <?php
                 else:
             ?>
                 <div class='auth-notification success'>
                     <h3>
                         Authorisation Successful
-                    </h3>   
+                    </h3>
                     <ul>
                         <li>Plugin instance authorised with Stackla</li>
                         <li>WordPress account authorised with Stackla</li>
                     </ul>
                 </div>
-            <?php  
+            <?php
                 endif;
             ?>
-            <form 
-                id='stackla-settings-form' 
-                class='settings-form' 
-                method='POST' 
+            <form
+                id='stackla-settings-form'
+                class='settings-form'
+                method='POST'
                 action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php"
                 data-accessuri=""
                 data-state="<?php echo $state?>"
@@ -143,17 +147,17 @@
                     <label>
                         Your callback URI
                     </label>
-                    <input type='text' class='widefat' name='callback' id='callback' value="<?php echo ($settings['current']) ? $settings['current']['stackla_callback_uri'] : ''; ?>">
+                    <input type='text' class='widefat' name='callback' id='callback' readonly="readonly" value="<?php echo $callback_url; ?>">
                     <div class='error-message'></div>
                 </fieldset>
                 <p>
                     Display Stackla Custom Fields on
                 </p>
-                <?php 
-                    foreach($settings['post_type_options'] as $option): 
+                <?php
+                    foreach($settings['post_type_options'] as $option):
                 ?>
                     <fieldset>
-                        <?php  
+                        <?php
                             ($settings['post_types'] && in_array($option , $settings['post_types'])) ? $checked = 'checked' : $checked = '';
                         ?>
                         <input type='checkbox' name='types[]' <?php echo $checked ?> value="<?php echo $option ?>">
@@ -161,8 +165,8 @@
                             <?php echo $option ?>s
                         </label>
                     </fieldset>
-                <?php 
-                    endforeach; 
+                <?php
+                    endforeach;
                 ?>
                 <input type='submit' value='Save' class='button'>
             </form>

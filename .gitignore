@@ -2,6 +2,7 @@ node_modules
 includes/vendor
 .DS_Store
 
+config.yml
 composer.lock
 *.zip
 *.psd

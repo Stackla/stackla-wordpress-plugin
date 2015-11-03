@@ -9,6 +9,7 @@
  *  @author     Rohan Deshpande <rohan.deshpande@stackla.com>
  */
 
+use Symfony\Component\Yaml\Yaml;
 require_once('class-stackla-wp-metabox.php');
 
 class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
@@ -31,13 +32,12 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     private $token = false;
     private $stack_name = false;
     private $stack = false;
-    private $widget_default_filter = false;
     private $filter_objects = array();
 
     public  $tag = false;
     public  $errors = array();
 
-    public $host = "https://api.stackla.com/api/";
+    public static $host = "https://api.stackla.com/api/";
 
     /**
     *   -- CONSTRUCTOR --
@@ -55,6 +55,14 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $this->errors['terms'] = array();
         $this->errors['filters'] = array();
         $this->errors['widget'] = false;
+
+        $configFile = dirname(__DIR__) . '/config.yml';
+        if (is_readable($configFile)) {
+            $config = Yaml::parse(file_get_contents($configFile));
+            if (isset($config['stackla']) && isset($config['stackla']['host'])) {
+                self::$host = $config['stackla']['host'];
+            }
+        }
 
         try
         {
