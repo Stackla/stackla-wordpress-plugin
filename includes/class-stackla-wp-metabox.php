@@ -14,7 +14,7 @@
 
 require_once('class-stackla-wp-activator.php');
 
-class Stackla_WP_Metabox 
+class Stackla_WP_Metabox
 {
     /**
     *   @var    $data                   array   an array of the post's stackla post meta;
@@ -45,7 +45,7 @@ class Stackla_WP_Metabox
     *   @return void;
     */
     public function __construct($id)
-    {        
+    {
         $this->id = $id;
 
         self::$data = array(

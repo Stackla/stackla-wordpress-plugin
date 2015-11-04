@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 require_once('class-stackla-wp-metabox.php');
 require_once('class-stackla-wp-sdk-wrapper.php');
@@ -16,7 +16,6 @@ class Stackla_WP_Remover
         $metabox = new Stackla_WP_Metabox($post_id);
         $sdk = new Stackla_WP_SDK_Wrapper;
         $data = $metabox->get_data();
-        $metabox->clear();
 
         foreach($data as $k => $v)
         {
@@ -64,5 +63,7 @@ class Stackla_WP_Remover
                 break;
             }
         }
+
+        $metabox->clear();
     }
 }

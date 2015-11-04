@@ -98,14 +98,14 @@ class Stackla_WP {
 		/**
 		 * Autoload the Stackla PHP SDK dependencies;
 		 */
-		
+
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/vendor/autoload.php';
 
 		/**
 		*   Utility functions;
 		*/
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/U.php';
-		
+
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
@@ -205,7 +205,7 @@ class Stackla_WP {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action('admin_menu' , $plugin_admin , 'add_settings_page');
 		$this->loader->add_action('add_meta_boxes' , $metaboxes , 'setup_metaboxes');
-		$this->loader->add_action('delete_post' , $remover , 'remove_metabox_widget');
+		$this->loader->add_action('before_delete_post' , $remover , 'remove_metabox_widget');
 	}
 
 	/**
