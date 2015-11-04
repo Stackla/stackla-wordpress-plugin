@@ -342,7 +342,7 @@
     {displayName: "Metabox",
         propTypes:
         {
-        
+
         },
         getInitialState:function()
         {
@@ -393,8 +393,8 @@
 
                 WP_SAVE_CONTROLLER = $(e.target);
 
-                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function() 
-                { 
+                $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function()
+                {
                     self.compileData();
                 });
             });
@@ -433,7 +433,7 @@
 
             $.each(termsRefs , function(key , value)
             {
-                var state = $.extend({} , value.state); 
+                var state = $.extend({} , value.state);
                 terms.push(state);
             });
 
@@ -448,7 +448,6 @@
             data =
             {
                 'postId':stacklaWp.admin.metabox.postId,
-                'title':this.refs.title.state.value,
                 'terms':terms,
                 'filters':filters,
                 'widget':
@@ -467,41 +466,33 @@
         *   @param {data} the compiled data from the view;
         *   @return void;
         */
-        validate:function(data)
-        {
+        validate: function(data) {
             var self = this;
             var $node = $(React.findDOMNode(this.refs.metabox));
 
             if($node.hasClass('validating')) return;
-            $node.addClass('validating');       
+            $node.addClass('validating');
 
-            $.ajax(
-            {
-                url:stacklaWp.admin.metabox.validator,
+            $.ajax({
+                url: stacklaWp.admin.metabox.validator,
                 type:'POST',
                 dataType:'json',
                 data:data
-            }).done(function(response)
-            {
+            }).done(function(response) {
                 $node.removeClass('validating');
-                
+
                 console.log("VALIDATE response \n");
                 console.log(response);
 
-                if(typeof response == 'object')
-                {
-                    if(response.result == '1')
-                    {
+                if (typeof response == 'object') {
+                    if (response.result == '1') {
                         self.save(data);
-                    }
-                    else
-                    {
+                    } else {
                         self.prepareErrors(response.errors);
                         self.addSaveHook();
                     }
                 }
-            }).fail(function(xhr , status , error)
-            {
+            }).fail(function(xhr , status , error) {
                 $node.removeClass('validating');
                 self.addSaveHook();
                 self.handleRequestError(error);
@@ -513,50 +504,43 @@
         *   @param {data} object containing the data to save;
         *   @return void;
         */
-        save:function(data)
-        {
+        save: function(data) {
             var self = this;
             var $node = $(React.findDOMNode(this.refs.metabox));
             var $title = $(self.state.wpFormTitleSelector);
+
+            console.log('FTW');
 
             if($node.hasClass('saving')) return;
 
             self.activateLoader();
             $node.addClass('saving');
 
-            $.ajax(
-            {
+            $.ajax({
                 url:stacklaWp.admin.metabox.handler,
                 type:'POST',
                 dataType:'json',
                 data:data
-            }).done(function(response)
-            {
+            }).done(function(response) {
                 console.log("SAVE response \n");
                 console.log(response);
 
                 self.deactivateLoader();
                 $node.removeClass('saving');
-                
-                if(typeof response == 'object')
-                {
-                    if(response.result == '1')
-                    {
-                        if($title.val() == '')
-                        {
+
+                if (typeof response == 'object') {
+                    if (response.result == '1') {
+                        if ($title.val() == '') {
                             $title.val(data.title)
                         }
 
                         WP_SAVE_CONTROLLER.trigger('click');
-                    }
-                    else
-                    {
+                    } else {
                         self.addSaveHook();
                         self.prepareErrors(response.errors);
                     }
                 }
-            }).fail(function(xhr , status , error)
-            {
+            }).fail(function(xhr , status , error) {
                 $node.removeClass('saving');
                 self.addSaveHook();
                 self.handleRequestError(error);
@@ -567,30 +551,25 @@
         *   @param {errors} an object containing errors;
         *   @return void;
         */
-        prepareErrors:function(errors)
-        {
+        prepareErrors: function(errors) {
             var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
             var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
             var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
             var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
 
-            if(termsErrors)
-            {
+            if (termsErrors) {
                 this.funnelErrors(termsErrors , this.refs.terms.refs);
             }
 
-            if(filtersErrors)
-            {
+            if (filtersErrors) {
                 this.funnelErrors(filtersErrors , this.refs.filters.refs);
             }
 
-            if(titleErrors)
-            {
+            if (titleErrors) {
                 this.refs.title.setState({error:errors.title});
             }
 
-            if(widgetErrors)
-            {
+            if (widgetErrors) {
                 this.refs.widget.setState({error:errors.widget});
             }
         },
@@ -600,29 +579,21 @@
         *   @param {refs} the dom nodes to funnel the errors to;
         *   @return void;
         */
-        funnelErrors:function(errors , refs)
-        {
+        funnelErrors: function(errors , refs) {
             if(!errors || typeof errors == 'undefined') return;
 
-            if(typeof errors == 'object')
-            {
-                $.each(errors , function(index , item)
-                {
-                    refs[index].setState(
-                    {
+            if(typeof errors == 'object') {
+                $.each(errors , function(index , item) {
+                    refs[index].setState({
                         errors:errors[index]
                     })
                 });
-            }
-            else if(typeof errors == 'array')
-            {
+            } else if(typeof errors == 'array') {
                 var length = errors.length;
                 var i;
 
-                for(i = 0 ; i < length ; i ++)
-                {
-                    refs[i].setState(
-                    {
+                for(i = 0 ; i < length ; i ++) {
+                    refs[i].setState({
                         errors:errors[i]
                     });
                 }
@@ -658,10 +629,8 @@
         *   Renders the Metabox component;
         *   @return React component;
         */
-        render:function()
-        {
-            if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false)
-            {
+        render:function() {
+            if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
                 return (
                     React.createElement("div", {className: "auth-notification prompt"}, 
                         React.createElement("h3", null, 
@@ -688,17 +657,19 @@
                                 "Stacking your widget, please wait ..."
                             )
                             )
-                            
+
                         )
-                        
+
                     ), 
                     React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
-                    React.createElement("section", {className: "title"}, 
-                        React.createElement(this.state.dependencies.WidgetTitle, {
-                            initialTitle: stacklaWp.admin.metabox.data.title, 
-                            ref: "title"}
-                        )
-                    ), 
+                    /*
+                    <section className='title'>
+                        <this.state.dependencies.WidgetTitle
+                            initialTitle={stacklaWp.admin.metabox.data.title}
+                            ref='title'
+                        />
+                    </section>
+                    */
                     React.createElement("section", {className: "terms"}, 
                         React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms", initialData: stacklaWp.admin.metabox.data.terms})
                     ), 
@@ -750,7 +721,7 @@
 /*
     !! NOTE !!
 
-    There are some outdated naming conventions here as this code was written a bit before the SDK was complete. 
+    There are some outdated naming conventions here as this code was written a bit before the SDK was complete.
     Here's a rough key mapping how they match up to their counterparts in the SDK:
 
     this.state.term == term->type
@@ -949,12 +920,14 @@
                 React.createElement("div", {className: first + ' stackla-block'}, 
                     React.createElement("div", {className: (this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}, 
                         React.createElement("div", {className: "stackla-widget-inner"}, 
-                            React.createElement("fieldset", {className: "term-name"}, 
-                                React.createElement("label", null, 
-                                    "Term name"
-                                ), 
-                                React.createElement("input", {type: "text", className: "widefat", ref: "termName", defaultValue: this.state.name, onChange: this.handleNameChange})
-                            ), 
+                            /*
+                            <fieldset className='term-name'>
+                                <label>
+                                    Term name
+                                </label>
+                                <input type='text' className='widefat' ref='termName' defaultValue={this.state.name} onChange={this.handleNameChange}/>
+                            </fieldset>
+                            */
                             React.createElement("fieldset", null, 
                                 React.createElement("label", null, 
                                     "Choose a network"
@@ -982,18 +955,10 @@
                                     "Choose a type"
                                 ), 
                                 
-                                    stacklaWp.admin.config.networks.map(function(network , i)
-                                    {
-                                        if(self.checkTypeSelected(network , self.props[network]) !== '')
-                                        {
-                                            return  React.createElement("div", {key: i, className: (self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}, 
-                                                    
-                                                        self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
-                                                    
-                                                    )
-                                        }
-                                        else
-                                        {
+                                    stacklaWp.admin.config.networks.map(function(network , i) {
+                                        if(self.checkTypeSelected(network , self.props[network]) !== '') {
+                                            return  React.createElement("div", {key: i, className: (self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'},  self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network])) )
+                                        } else {
                                             return  React.createElement("select", {
                                                         className: (self.displayNetworkTypeOptions(network)) ? '' : 'hide', 
                                                         defaultValue: self.checkTypeSelected(network , self.props[network]), 
@@ -1004,19 +969,17 @@
                                                     }, 
                                                         React.createElement("option", {value: ""}), 
                                                         
-                                                            self.props[network].map(function(option , j)
-                                                            {
+                                                            self.props[network].map(function(option , j) {
                                                                 return  React.createElement("option", {
                                                                             key: option + j, 
-                                                                            value: network + '-' + option
-                                                                        }, 
+                                                                            value: network + '-' + option}, 
                                                                             option
                                                                         )
                                                             })
                                                         
                                                     )
                                         }
-                                        
+
                                     })
                                 
                             ), 
@@ -1176,6 +1139,7 @@
         }
     });
 }(window));
+
 (function()
 {
     'use strict';

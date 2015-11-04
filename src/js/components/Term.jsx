@@ -1,7 +1,7 @@
 /*
     !! NOTE !!
 
-    There are some outdated naming conventions here as this code was written a bit before the SDK was complete. 
+    There are some outdated naming conventions here as this code was written a bit before the SDK was complete.
     Here's a rough key mapping how they match up to their counterparts in the SDK:
 
     this.state.term == term->type
@@ -200,12 +200,14 @@
                 <div className={first + ' stackla-block'}>
                     <div className={(this.state.errors === false) ? 'stackla-widget-section' : 'stackla-widget-section stackla-widget-error'}>
                         <div className='stackla-widget-inner'>
+                            {/*
                             <fieldset className='term-name'>
                                 <label>
                                     Term name
                                 </label>
                                 <input type='text' className='widefat' ref='termName' defaultValue={this.state.name} onChange={this.handleNameChange}/>
                             </fieldset>
+                            */}
                             <fieldset>
                                 <label>
                                     Choose a network
@@ -213,10 +215,10 @@
                                 <div className={(this.state.network !== '') ? 'term-network-set' : 'hide'}>
                                     {this.state.network}
                                 </div>
-                                <select 
-                                    ref='termNetwork' 
+                                <select
+                                    ref='termNetwork'
                                     onChange={this.handleNetworkChange}
-                                    className={(this.state.network !== '') ? 'hide' : ''} 
+                                    className={(this.state.network !== '') ? 'hide' : ''}
                                     defaultValue={this.state.network}
                                 >
                                     <option value=''></option>
@@ -233,21 +235,13 @@
                                     Choose a type
                                 </label>
                                 {
-                                    stacklaWp.admin.config.networks.map(function(network , i)
-                                    {
-                                        if(self.checkTypeSelected(network , self.props[network]) !== '')
-                                        {
-                                            return  <div key={i} className={(self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}>
-                                                    {
-                                                        self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network]))
-                                                    }
-                                                    </div>
-                                        }
-                                        else
-                                        {
-                                            return  <select 
-                                                        className={(self.displayNetworkTypeOptions(network)) ? '' : 'hide'} 
-                                                        defaultValue={self.checkTypeSelected(network , self.props[network])} 
+                                    stacklaWp.admin.config.networks.map(function(network , i) {
+                                        if(self.checkTypeSelected(network , self.props[network]) !== '') {
+                                            return  <div key={i} className={(self.displayNetworkTypeOptions(network)) ? 'term-type-set' : 'hide'}>{ self.removeTypeDelimiter(self.checkTypeSelected(network , self.props[network])) }</div>
+                                        } else {
+                                            return  <select
+                                                        className={(self.displayNetworkTypeOptions(network)) ? '' : 'hide'}
+                                                        defaultValue={self.checkTypeSelected(network , self.props[network])}
                                                         ref={network + i}
                                                         onClick={self.checkTermSet}
                                                         onChange={self.handleTypeChange}
@@ -255,25 +249,23 @@
                                                     >
                                                         <option value=''></option>
                                                         {
-                                                            self.props[network].map(function(option , j)
-                                                            {
+                                                            self.props[network].map(function(option , j) {
                                                                 return  <option
                                                                             key={option + j}
-                                                                            value={network + '-' + option}
-                                                                        >
+                                                                            value={network + '-' + option}>
                                                                             {option}
                                                                         </option>
                                                             })
                                                         }
                                                     </select>
                                         }
-                                        
+
                                     })
                                 }
                             </fieldset>
                             <fieldset ref='termValue' className='term-values'>
-                                <fieldset 
-                                    ref='twitter-user' 
+                                <fieldset
+                                    ref='twitter-user'
                                     className={(this.checkTermValueOption('twitter-user')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
@@ -282,15 +274,15 @@
                                     <span className='decorator'>
                                         @
                                     </span>
-                                    <input 
+                                    <input
                                         type='text'
                                         defaultValue={this.getDefaultTermValue('twitter-user')}
                                         ref='twitter-user-value'
-                                        maxLength='15' 
+                                        maxLength='15'
                                         onChange={this.handleTermValueChange}/>
                                 </fieldset>
-                                <fieldset 
-                                    ref='twitter-hashtag' 
+                                <fieldset
+                                    ref='twitter-hashtag'
                                     className={(this.checkTermValueOption('twitter-hashtag')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
@@ -299,7 +291,7 @@
                                     <span className='decorator'>
                                         #
                                     </span>
-                                    <input 
+                                    <input
                                         type='text'
                                         maxLength='129'
                                         defaultValue={this.getDefaultTermValue('twitter-hashtag')}
@@ -307,35 +299,35 @@
                                         onChange={this.handleTermValueChange}
                                     />
                                 </fieldset>
-                                <fieldset 
-                                    ref='facebook-page' 
+                                <fieldset
+                                    ref='facebook-page'
                                     className={(this.checkTermValueOption('facebook-page')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
                                         Facebook Page URL or Facebook Page Name
                                     </label>
-                                    <input 
+                                    <input
                                         type='text'
                                         defaultValue={this.getDefaultTermValue('facebook-page')}
                                         ref='facebook-page-value'
                                         onChange={this.handleTermValueChange}
                                     />
                                 </fieldset>
-                                <fieldset 
+                                <fieldset
                                     ref='facebook-search'
                                     className={(this.checkTermValueOption('facebook-search')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
                                         Facebook Search (Search for all these words)
                                     </label>
-                                    <input 
+                                    <input
                                         type='text'
                                         defaultValue={this.getDefaultTermValue('facebook-search')}
                                         ref='facebook-search-value'
                                         onChange={this.handleTermValueChange}/>
                                 </fieldset>
-                                <fieldset 
-                                    ref='instagram-user' 
+                                <fieldset
+                                    ref='instagram-user'
                                     className={(this.checkTermValueOption('instagram-user')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
@@ -344,15 +336,15 @@
                                     <span className='decorator'>
                                         @
                                     </span>
-                                    <input 
+                                    <input
                                         type='text'
                                         defaultValue={this.getDefaultTermValue('instagram-user')}
                                         ref='instagram-user-value'
                                         onChange={this.handleTermValueChange}
                                     />
                                 </fieldset>
-                                <fieldset 
-                                    ref='instagram-hashtag' 
+                                <fieldset
+                                    ref='instagram-hashtag'
                                     className={(this.checkTermValueOption('instagram-hashtag')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
@@ -361,37 +353,37 @@
                                     <span className='decorator'>
                                         #
                                     </span>
-                                    <input 
+                                    <input
                                         type='text'
                                         defaultValue={this.getDefaultTermValue('instagram-hashtag')}
                                         ref='instagram-hashtag-value'
                                         onChange={this.handleTermValueChange}/>
                                 </fieldset>
-                                <fieldset 
-                                    ref='youtube-user' 
+                                <fieldset
+                                    ref='youtube-user'
                                     className={(this.checkTermValueOption('youtube-user')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
                                         YouTube Username
                                     </label>
-                                    <input 
+                                    <input
                                         type='text'
                                         defaultValue={this.getDefaultTermValue('youtube-user')}
                                         ref='youtube-user-value'
                                         onChange={this.handleTermValueChange}
                                     />
                                 </fieldset>
-                                <fieldset 
-                                    ref='youtube-search' 
+                                <fieldset
+                                    ref='youtube-search'
                                     className={(this.checkTermValueOption('youtube-search')) ? 'hide display' : 'hide'}
                                 >
                                     <label>
                                         YouTube Search
                                     </label>
-                                    <input 
+                                    <input
                                         type='text'
                                         defaultValue={this.getDefaultTermValue('youtube-search')}
-                                        ref='youtube-search-value' 
+                                        ref='youtube-search-value'
                                         onChange={this.handleTermValueChange}
                                     />
                                 </fieldset>

@@ -64,12 +64,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             }
         }
 
-        try
-        {
+        try {
             $this->setup();
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             $this->errors['request'] = $e->getMessage();
             return false;
         }
@@ -104,16 +101,14 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     */
     protected function setup()
     {
-        if($this->user_settings === false)
-        {
+        if($this->user_settings === false) {
             throw new Exception('Credentials cannot be set, user has no settings');
         }
 
         $this->stack_name = $this->user_settings['stackla_stack'];
         $this->existing_tag_id = parent::$data['tag_id'];
 
-        if(is_null($this->token) || strlen($this->token) <= 0)
-        {
+        if(is_null($this->token) || strlen($this->token) <= 0) {
             throw new Exception('User is not authorized with Stackla');
         }
 
@@ -128,8 +123,6 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     */
     public function validate_term($term)
     {
-        if(Stackla_WP_Metabox_Validator::validate_string($term['name']) === false) return false;
-
         if(Stackla_WP_Metabox_Validator::validate_string($term['network']) === false) return false;
 
         if(Stackla_WP_Metabox_Validator::validate_string($term['term']) === false) return false;
@@ -164,12 +157,10 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
         $length = count($array);
 
-        for($i = 0 ; $i < $length ; $i ++)
-        {
+        for($i = 0 ; $i < $length ; $i ++) {
             if(!isset($array[$i]['removed'])) continue;
 
-            if($array[$i]['removed'] === true || $array[$i]['removed'] === 'true')
-            {
+            if($array[$i]['removed'] === true || $array[$i]['removed'] === 'true') {
                 unset($array[$i]);
             }
         }
@@ -186,12 +177,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     {
         $tag;
 
-        if($this->existing_tag_id !== '')
-        {
+        if($this->existing_tag_id !== '') {
             $tag = $this->stack->instance('Tag' , $this->existing_tag_id);
-        }
-        else
-        {
+        } else {
             $tag = $this->stack->instance('Tag');
             $tag->type = Stackla\Api\Tag::TYPE_CONTENT;
             $tag->publicly_visible = Stackla\Api\Tag::VISIBLE;
@@ -202,23 +190,17 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $tag->tag = $deslashed;
         $tag->slug = $deslashed;
 
-        try
-        {
-            if(Stackla_WP_Metabox_Validator::validate_string($this->existing_tag_id))
-            {
+        try {
+            if(Stackla_WP_Metabox_Validator::validate_string($this->existing_tag_id)) {
                 $tag->update();
-            }
-            else
-            {
+            } else {
                 $tag->create();
             }
 
             $this->tag = $tag;
 
             return $tag;
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             $this->errors['title'] = implode(', ' , $tag->getErrors());
             return false;
         }
@@ -232,10 +214,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     *   @return $terms  array   the modified terms array for WP database insertion;
     */
 
-    public function push_terms($terms , $tag)
+    public function push_terms($terms , $tag, $prefix = null)
     {
-        if($this->tag === false)
-        {
+        if($this->tag === false) {
             throw new Error('Tag object not set');
         }
 
@@ -249,10 +230,11 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
             if($t['edited'] === false || $t['edited'] === 'false') continue;
 
-            if($this->validate_term($t) === false) continue;
+            if($this->validate_term($t) === false) {
+                $this->errors['terms'][$t['id']] = 'Invalid Term data';
+            };
 
-            if(Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true)
-            {
+            if(Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true) {
                 $term = $this->stack->instance('Term' , $t['termId']);
 
                 if($t['removed'] === 'true' || $t['removed'] === true)
@@ -260,13 +242,14 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                     $term->delete();
                     continue;
                 }
-            }
-            else
-            {
+            } else {
                 $term = $this->stack->instance('Term');
             }
 
-            $deslashed = stripslashes($t['name']);
+            $deslashed = sprintf("%s - %s - %s", $t['network'], $t['term'], $t['termValue']);
+            if ($prefix) {
+                $deslashed = $prefix . $deslashed;
+            }
 
             $term->name = $deslashed;
             $term->display_name = $deslashed;
@@ -274,22 +257,16 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $term->type = $t['term'];
             $term->term = $t['termValue'];
 
-            try
-            {
-                if(Stackla_WP_Metabox_Validator::validate_string($t['termId']))
-                {
+            try {
+                if(Stackla_WP_Metabox_Validator::validate_string($t['termId'])) {
                     $term->update();
-                }
-                else
-                {
+                } else {
                     $term->create();
                     $term->addTag($tag);
                     $terms[$i]['termId'] = $term->id;
                 }
-            }
-            catch(Exception $e)
-            {
-                $error = array('sdk' => implode(', ' , $term->getErrors()));
+            } catch(Exception $e) {
+                $error = array('sdk' => $e->getMessage());
             }
 
             $this->errors['terms'][$t['id']] = $error;
@@ -298,17 +275,15 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         return $this->flush($terms);
     }
 
-    public function push_filters($filters , $tag)
+    public function push_filters($filters , $tag, $prefix = null)
     {
-        if($this->tag === false)
-        {
+        if($this->tag === false) {
             throw new Error('Tag object not set');
         }
 
         $i = -1;
 
-        foreach($filters as $f)
-        {
+        foreach($filters as $f) {
             $i++;
             $filter;
             $error = false;
@@ -317,43 +292,33 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
             if($this->validate_filter($f) === false) continue;
 
-            if(Stackla_WP_Metabox_Validator::validate_string($f['filterId']) === true)
-            {
+            if(Stackla_WP_Metabox_Validator::validate_string($f['filterId']) === true) {
                 $filter = $this->stack->instance('Filter' , $f['filterId']);
 
-                if($f['removed'] === 'true' || $f['removed'] === true)
-                {
+                if($f['removed'] === 'true' || $f['removed'] === true) {
                     $filter->delete();
                     continue;
                 }
-            }
-            else
-            {
+            } else {
                 $filter = $this->stack->instance('Filter');
                 $filter->addTag($tag);
             }
 
-            $filter->name = stripslashes($f['name']);
+            $filter->name = $prefix . stripslashes($f['name']);
             $filter->networks  = $f['network'];
             $filter->media = $f['media'];
 
-            try
-            {
-                if(Stackla_WP_Metabox_Validator::validate_string($f['filterId']))
-                {
+            try {
+                if(Stackla_WP_Metabox_Validator::validate_string($f['filterId'])) {
                     $filter->update();
-                }
-                else
-                {
+                } else {
                     $filter->create();
                     $filters[$i]['filterId'] = $filter->id;
                 }
 
                 $this->filter_objects[] = $filter;
-            }
-            catch(Exception $e)
-            {
-                $error = array('sdk' => implode(', ' , $filter->getErrors()));
+            } catch(Exception $e) {
+                $error = array('sdk' => $e->getMessage());
             }
 
             $this->errors['filters'][$f['id']] = $error;
@@ -372,36 +337,27 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $widget;
         $filter_id = $filter['filterId'];
 
-        if(Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === true)
-        {
+        if(Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === true) {
             $parent = $this->stack->instance('Widget' , (int) $options['copyId'] , false);
 
-            if(Stackla_WP_Metabox_Validator::validate_string($options['id']) === true)
-            {
+            if(Stackla_WP_Metabox_Validator::validate_string($options['id']) === true) {
                 $old_widget = $this->stack->instance('Widget' , (int) $options['id'] , false);
                 $old_widget->delete();
             }
 
-            if($options['type'] == 'clone')
-            {
+            if($options['type'] == 'clone') {
                 $widget = $parent->duplicate();
                 $widget->type_style = $options['style'];
                 $options['id'] = $widget->id;
-            }
-            elseif($options['type'] == 'derive')
-            {
+            } elseif($options['type'] == 'derive') {
                 $widget = $parent->derive($filter_id , $name);
                 $options['id'] = $widget->id;
                 $options['embed'] = $widget->embed_code;
                 return $options;
             }
-        }
-        elseif(Stackla_WP_Metabox_Validator::validate_string($options['id']) === false)
-        {
+        } elseif(Stackla_WP_Metabox_Validator::validate_string($options['id']) === false) {
             $widget = $this->stack->instance('Widget');
-        }
-        else
-        {
+        } else {
             $widget = $this->stack->instance('Widget' , $options['id']);
         }
 
@@ -410,26 +366,20 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $widget->type_style = (isset($options['style'])) ? $options['style'] : \Stackla\Api\Widget::STYLE_VERTICAL_FLUID;
         $widget->filter_id = $filter_id;
 
-        try
-        {
+        try {
             if(
                 Stackla_WP_Metabox_Validator::validate_string($options['id']) === false
                 && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === false
-            )
-            {
+            ) {
                 $widget->create();
                 $options['id'] = $widget->id;
-            }
-            else
-            {
+            } else {
                 $widget->update();
             }
 
             $options['embed'] = $widget->embed_code;
-        }
-        catch(Exception $e)
-        {
-            $this->errors['widget'] = implode(', ' , $widget->getErrors());
+        } catch(Exception $e) {
+            $this->errors['widget'] = $e->getMessage();
             return false;
         }
 
@@ -460,28 +410,22 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     */
     public function validate()
     {
-        if($this->errors['request'] !== false)
-        {
+        if($this->errors['request'] !== false) {
             return false;
         }
 
-        if($this->errors['title'] !== false)
-        {
+        if($this->errors['title'] !== false) {
             return false;
         }
 
-        foreach($this->errors['terms'] as $k => $v)
-        {
-            if($v !== false)
-            {
+        foreach($this->errors['terms'] as $k => $v) {
+            if($v !== false) {
                 return false;
             }
         }
 
-        foreach($this->errors['filters'] as $k => $v)
-        {
-            if($v !== false)
-            {
+        foreach($this->errors['filters'] as $k => $v) {
+            if($v !== false) {
                 return false;
             }
         }
@@ -498,12 +442,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     {
         $tag = $this->stack->instance('Tag', $id , false);
 
-        try
-        {
+        try {
             $tag->delete();
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
 
         }
     }
@@ -517,12 +458,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     {
         $term = $this->stack->instance('Term', $id, false);
 
-        try
-        {
+        try {
             $term->delete();
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
 
         }
     }
@@ -536,12 +474,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     {
         $filter = $this->stack->instance('Filter', $id, false);
 
-        try
-        {
+        try {
             $filter->delete();
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
 
         }
     }
@@ -555,12 +490,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     {
         $widget = $this->stack->instance('Widget', $id, false);
 
-        try
-        {
+        try {
             $widget->delete();
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
 
         }
     }

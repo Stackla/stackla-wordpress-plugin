@@ -66,19 +66,6 @@ class Stackla_WP_Metabox_Validator {
     }
 
     /**
-    *   Validates the widget title field;
-    *   Pushes the result into the $this->errors array;
-    *   @return void;
-    */
-    protected function validate_widget_title()
-    {
-        if(self::validate_string($this->data['title']) === false)
-        {
-            $this->errors['title'] = $this->error_title;
-        }
-    }
-
-    /**
     *   Validates the widget's terms;
     *   Pushes the result into the $this->errors array;
     *   @return void;
@@ -88,7 +75,6 @@ class Stackla_WP_Metabox_Validator {
         foreach($this->data['terms'] as $term)
         {
             $this->errors['terms'][$term['id']] = array(
-                'name' => false,
                 'network' => false,
                 'term' => false,
                 'termValue' => false
@@ -100,11 +86,6 @@ class Stackla_WP_Metabox_Validator {
             {
                 $this->errors['terms'][$term['id']] = false;
                 continue;
-            }
-
-            if(self::validate_string($term['name']) === false)
-            {
-                $this->errors['terms'][$term['id']]['name'] = $this->error_term_name;
             }
 
             if(self::validate_string($term['network']) === false)
@@ -128,7 +109,6 @@ class Stackla_WP_Metabox_Validator {
             }
 
             if(
-                $this->errors['terms'][$term['id']]['name'] === false &&
                 $this->errors['terms'][$term['id']]['network'] === false &&
                 $this->errors['terms'][$term['id']]['term'] === false &&
                 $this->errors['terms'][$term['id']]['termValue'] === false
@@ -218,7 +198,6 @@ class Stackla_WP_Metabox_Validator {
     */
     public function validate()
     {
-        $this->validate_widget_title();
         $this->validate_widget_terms();
         $this->validate_widget_filters();
 
