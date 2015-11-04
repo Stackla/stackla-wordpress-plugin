@@ -97,23 +97,26 @@ class Stackla_WP_Public {
 		$widget_data = json_decode($data['widget']);
 		$widget_id = $widget_data->id;
 
-		echo	"<div class='stackla-widget-wrapper' data-widgetid='$widget_id'>";
-		echo 		"<nav class='stackla-widget-nav'>";
-		echo 			"<ul class='stackla-widget-filters'>";
+        $html = "";
+		$html .=	"<div class='stackla-widget-wrapper' data-widgetid='$widget_id'>";
+		$html .= 		"<nav class='stackla-widget-nav'>";
+		$html .= 			"<ul class='stackla-widget-filters'>";
 
 		foreach($filters as $filter)
 		{
-			echo			"<li class='stackla-widget-filter'>";
-			echo 				"<a href='#' class='stackla-widget-anchor' data-filter='$filter->filterId'>$filter->name</a>";
-			echo			"</li>";
+			$html .=			"<li class='stackla-widget-filter'>";
+			$html .= 				"<a href='#' class='stackla-widget-anchor' data-filter='$filter->filterId'>$filter->name</a>";
+			$html .=			"</li>";
 		}
 
-		echo 			"</ul>";
-		echo 		"</nav>";
+		$html .= 			"</ul>";
+		$html .= 		"</nav>";
 
-		
-		echo 		$data['embed'];
-		echo 	"</div>";
+
+		$html .= 		$data['embed'];
+		$html .= 	"</div>";
+
+        return $html;
 	}
 
 	public function register_widget_shortcode()
