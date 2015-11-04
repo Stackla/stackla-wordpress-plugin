@@ -47,7 +47,7 @@ class Stackla_WP_Admin {
 	 * @param      string    $plugin_name       The name of this plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	
+
 	public function __construct( $plugin_name , $version ) {
 
 		$this->plugin_name = $plugin_name;
@@ -78,7 +78,7 @@ class Stackla_WP_Admin {
 	public function add_settings_page()
 	{
 		add_menu_page(
-			'Stackla', 
+			'Stackla',
 			'Stackla',
 			'manage_options',
 			'stackla',
@@ -95,6 +95,34 @@ class Stackla_WP_Admin {
 
 	public function render_settings_page()
 	{
+        $stackla_wp_settings = new Stackla_WP_Settings;
+        $settings = array(
+            "current" => $stackla_wp_settings->get_user_settings(),
+            "post_type_options" => $stackla_wp_settings->get_post_type_options(),
+            "post_types" => false
+        );
+        $access_token = $stackla_wp_settings->get_user_access_token();
+        $access_uri = $stackla_wp_settings->get_access_uri();
+        $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
+
+        if(is_array($settings['current']) && isset($settings['current']['stackla_post_types']))
+        {
+            $settings['post_types'] = explode("," , $settings['current']['stackla_post_types']);
+        }
+
+        if($access_uri === false)
+        {
+            $state = 'init';
+        }
+        elseif($access_uri !== false && $access_token === false)
+        {
+            $state = 'authenticated';
+        }
+        else
+        {
+            $state = 'authorized';
+        }
+
 		include('partials/stackla-wp-admin-display.php');
 	}
 

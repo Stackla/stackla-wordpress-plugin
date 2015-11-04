@@ -31896,11 +31896,11 @@ if (!Array.prototype.indexOf) {
             var self = this;
             var $form = $(this.config.settingsForm);
             var $state = $form.data('state');
-            
+
             $form.on('submit' , function(e)
             {
                 e.preventDefault();
-                
+
                 $('.error-message').removeClass('display');
                 $('.widefat').removeClass('error');
 
@@ -31936,9 +31936,24 @@ if (!Array.prototype.indexOf) {
                     $(self.config.settingsFormFeedback).addClass('failure').html(error);
                 });
             });
+
+            // Regenerate token
+            $('#js-regenerate-token').click(function(e){
+                var $this = $(this);
+                window.location = $this.attr('data-url');
+            });
+
+            // Revoke token
+            $('#js-revoke-token').click(function(e){
+                var $this = $(this);
+                $.post($this.attr('data-url'), {'revoke-token': 1}, function(r) {
+                    window.location.reload();
+                });
+            });
         }
     };
 }(window));
+
 $(function()
 {
     stacklaWp.admin.settings.run();

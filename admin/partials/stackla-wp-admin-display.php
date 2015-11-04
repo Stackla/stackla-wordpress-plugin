@@ -11,66 +11,6 @@
  * @package    Stackla_WP
  * @subpackage Stackla_WP/admin/partials
  */
-    $stackla_wp_settings = new Stackla_WP_Settings;
-    $remover = new Stackla_WP_Remover();
-    $remover->remove_metabox_widget(509);
-    $settings = array(
-        "current" => $stackla_wp_settings->get_user_settings(),
-        "post_type_options" => $stackla_wp_settings->get_post_type_options(),
-        "post_types" => false
-    );
-    /** @var Stackla\Core\Credentials $credentials */
-    $credentials = $stackla_wp_settings->get_credentials();
-    $access_uri = $stackla_wp_settings->get_access_uri();
-    $access_token = $stackla_wp_settings->get_user_access_token();
-    $token_response = false;
-    $token_saved = false;
-    $callback_url = admin_url('admin.php?page=stackla');
-
-    if(is_array($settings['current']))
-    {
-        if(isset($settings['current']['stackla_post_types']))
-        {
-            $settings['post_types'] = explode("," , $settings['current']['stackla_post_types']);
-        }
-    }
-
-    if(isset($_GET['code']) && $credentials !== false && $settings['current'] !== false)
-    {
-        try
-        {
-            $token_response = $credentials->generateToken(
-                $settings['current']['stackla_client_id'],
-                $settings['current']['stackla_client_secret'],
-                $_GET['code'],
-                $callback_url
-            );
-            if($token_response)
-            {
-                $access_token = $credentials->token;
-                $token_saved = $stackla_wp_settings->save_access_token($access_token);
-                wp_redirect($callback_url);
-                exit();
-            }
-        }
-        catch(Exception $e)
-        {
-            echo $e->getMessage();
-        }
-    }
-
-    if($access_uri === false)
-    {
-        $state = 'init';
-    }
-    elseif($access_uri !== false && $access_token === false)
-    {
-        $state = 'authenticated';
-    }
-    else
-    {
-        $state = 'authorized';
-    }
 ?>
 <div id='wpbody'>
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
@@ -169,6 +109,18 @@
                     endforeach;
                 ?>
                 <input type='submit' value='Save' class='button'>
+                <?php if ($state == 'authorized') : ?>
+                <input type='button'
+                    id="js-revoke-token"
+                    value='Revoke token'
+                    class='button'
+                    data-url="<?php echo $callback_url ?>">
+                <input type='button'
+                    id="js-regenerate-token"
+                    value='Regenerate token'
+                    class='button'
+                    data-url="<?php echo $access_uri ?>">
+                <?php endif; ?>
             </form>
             <div id='feedback'></div>
         </div>

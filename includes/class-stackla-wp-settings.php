@@ -197,7 +197,6 @@ class Stackla_WP_Settings
             return;
         }
 
-        $this->clear_access_tokens();
         $this->set_user_has_settings();
 
         if($this->user_has_settings)
@@ -334,7 +333,7 @@ class Stackla_WP_Settings
             return false;
         }
 
-        return new Stackla\Core\Credentials(Stackla_WP_SDK_Wrapper::$host, null , $current['stackla_stack']);
+        return new Stackla\Core\Credentials(Stackla_WP_SDK_Wrapper::getHost(), null , $current['stackla_stack']);
     }
 
     /**
@@ -358,10 +357,16 @@ class Stackla_WP_Settings
             return false;
         }
 
-        $callback_url = admin_url('admin.php?page=stackla');
+        $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
         $credentials = $this->get_credentials();
         $access_uri = $credentials->getAccessUri($current['stackla_client_id'], $current['stackla_client_secret'], $callback_url);
 
         return $access_uri;
+    }
+
+    public function log($str)
+    {
+        $date = date("Y-m-d h:i:s");
+        file_put_contents('/tmp/stackla-wp.log', sprintf("[%s] %s\n", $date, $str), FILE_APPEND);
     }
 }

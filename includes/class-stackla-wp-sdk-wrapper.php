@@ -75,6 +75,24 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         }
     }
 
+    public static function getHost()
+    {
+        $configFile = dirname(__DIR__) . '/config.yml';
+        if (is_readable($configFile)) {
+            $config = Yaml::parse(file_get_contents($configFile));
+            if (isset($config['stackla']) && isset($config['stackla']['host'])) {
+                self::$host = $config['stackla']['host'];
+            }
+        }
+
+        return self::$host;
+    }
+
+    public static function getCallbackUrl()
+    {
+        return plugin_dir_url(__FILE__) . "admin/callback-url.php";
+    }
+
     public function get_errors()
     {
         return json_encode(array('errors' => $this->errors , 'result' => '0'));
