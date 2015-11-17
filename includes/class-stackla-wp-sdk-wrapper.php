@@ -4,9 +4,9 @@
  * Wrapper for the Stackla PHP SDK;
  *
  *
- *  @package    Stackla_WP
- *  @subpackage Stackla_WP/includes
- *  @author     Rohan Deshpande <rohan.deshpande@stackla.com>
+ * @package    Stackla_WP
+ * @subpackage Stackla_WP/includes
+ * @author     Stackla <tech@stackla.com>
  */
 
 use Symfony\Component\Yaml\Yaml;

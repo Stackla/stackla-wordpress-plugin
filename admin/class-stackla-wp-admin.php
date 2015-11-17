@@ -18,7 +18,7 @@
  *
  * @package    Stackla_WP
  * @subpackage Stackla_WP/admin
- * @author     Your Name <email@example.com>
+ * @author     Stackla <tech@stackla.com>
  */
 class Stackla_WP_Admin {
 
@@ -108,6 +108,16 @@ class Stackla_WP_Admin {
         }
         $access_uri = $stackla_wp_settings->get_access_uri();
         $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
+
+        $enableAuthorize = false;
+        if (
+            !empty($settings['current']) &&
+            !empty($settings['current']['stackla_stack']) &&
+            !empty($settings['current']['stackla_client_id']) &&
+            !empty($settings['current']['stackla_client_secret'])
+           ) {
+            $enableAuthorize = true;
+        }
 
         if(is_array($settings['current']) && isset($settings['current']['stackla_post_types']))
         {

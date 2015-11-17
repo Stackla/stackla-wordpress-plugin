@@ -18,7 +18,7 @@
  *
  * @package    Stackla_WP
  * @subpackage Stackla_WP/public
- * @author     Your Name <email@example.com>
+ * @author     Stackla <tech@stackla.com>
  */
 class Stackla_WP_Public {
 

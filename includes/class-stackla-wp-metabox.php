@@ -4,12 +4,12 @@
  * Fetch and save metabox data;
  *
  *
- *  @package    Stackla_WP
- *  @subpackage Stackla_WP/includes
- *  @author     Rohan Deshpande <rohan.deshpande@stackla.com>
- *  @see        https://codex.wordpress.org/Function_Reference/get_post_meta
- *  @see        https://codex.wordpress.org/Function_Reference/add_post_meta
- *  @see        https://codex.wordpress.org/Function_Reference/update_post_meta
+ * @package    Stackla_WP
+ * @subpackage Stackla_WP/includes
+ * @author     Stackla <tech@stackla.com>
+ * @see        https://codex.wordpress.org/Function_Reference/get_post_meta
+ * @see        https://codex.wordpress.org/Function_Reference/add_post_meta
+ * @see        https://codex.wordpress.org/Function_Reference/update_post_meta
  */
 
 require_once('class-stackla-wp-activator.php');

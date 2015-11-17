@@ -22,7 +22,7 @@
  * @since      1.0.0
  * @package    Stackla_WP
  * @subpackage Stackla_WP/includes
- * @author     Your Name <email@example.com>
+ * @author     Stackla <tech@stackla.com>
  */
 class Stackla_WP_i18n {
 

@@ -18,7 +18,7 @@
  * @since      1.0.0
  * @package    Stackla_WP
  * @subpackage Stackla_WP/includes
- * @author     Rohan Deshpande <rohan.deshpande@stackla.com>
+ * @author     Stackla <tech@stackla.com>
  */
 class Stackla_WP_Activator {
 

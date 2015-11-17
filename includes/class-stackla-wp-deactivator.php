@@ -18,7 +18,7 @@
  * @since      1.0.0
  * @package    Stackla_WP
  * @subpackage Stackla_WP/includes
- * @author     Your Name <email@example.com>
+ * @author     Stackla <tech@stackla.com>
  */
 
 require_once('class-stackla-wp-activator.php');
@@ -34,8 +34,6 @@ class Stackla_WP_Deactivator {
 	 */
 	public static function deactivate()
     {
-        if(WP_DEBUG === false) return;
-
         global $wpdb;
 
         $tables = array(
@@ -43,7 +41,7 @@ class Stackla_WP_Deactivator {
         );
 
         // Clean postmeta data related to stackla data
-        $sql = "DELETE FROM {$wpdb->postmeta} pm WHERE pm.meta_key like 'stackla_wp_%';";
+        $sql = "DELETE FROM {$wpdb->postmeta} WHERE meta_key like 'stackla_wp_%';";
         $wpdb->query($sql);
 
         foreach($tables as $table)
