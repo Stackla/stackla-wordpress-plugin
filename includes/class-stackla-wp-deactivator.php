@@ -32,15 +32,19 @@ class Stackla_WP_Deactivator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function deactivate() 
+	public static function deactivate()
     {
         if(WP_DEBUG === false) return;
 
         global $wpdb;
-        
+
         $tables = array(
             Stackla_WP_Activator::$settings_table
         );
+
+        // Clean postmeta data related to stackla data
+        $sql = "DELETE FROM {$wpdb->postmeta} pm WHERE pm.meta_key like 'stackla_wp_%';";
+        $wpdb->query($sql);
 
         foreach($tables as $table)
         {
