@@ -18,6 +18,7 @@
             <h1 class="stacklaAdmin-header">Stackla For WordPress</h1>
 
             <?php
+            if ($enableAuthorize) :
                 if($state == 'init'):
             ?>
                 <div class='auth-notification prompt'>
@@ -43,12 +44,12 @@
                         Authorization Successful
                     </h3>
                     <ul>
-                        <li>Plugin instance authorized with Stackla</li>
-                        <li>WordPress account authorized with Stackla</li>
+                        <li>Your WordPress account is authorized with Stackla</li>
                     </ul>
                 </div>
             <?php
                 endif;
+            endif;
             ?>
             <form
                 id='stackla-settings-form'
@@ -113,7 +114,11 @@
                             }
                     ?>
                         <label class="input-checkbox">
-                            <input type='checkbox' name='types[]' <?php echo $typeChecked ?> value="<?php echo $option ?>">
+                            <input
+                                type='checkbox' name='types[]'
+                                <?php echo $typeChecked ?>
+                                <?php echo $enableAuthorize ? '' : 'disabled' ?>
+                                value="<?php echo $option ?>">
                             <?php echo ucfirst($option) ?>s
                         </label>
                     <?php endforeach; ?>
@@ -136,12 +141,14 @@
                             id="js-regenerate-token"
                             value='Reauthorize'
                             class='button button-primary button-large'
+                            <?php echo $enableAuthorize ? '' : 'disabled' ?>
                             data-url="<?php echo $access_uri ?>">
                         <?php else: ?>
                         <input type='button'
                             id="js-regenerate-token"
                             value='Authorize'
                             class='button button-primary button-large'
+                            <?php echo $enableAuthorize ? '' : 'disabled' ?>
                             data-url="<?php echo $access_uri ?>">
                         <?php endif; ?>
                     </div>
