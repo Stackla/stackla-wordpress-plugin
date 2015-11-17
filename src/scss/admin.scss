@@ -1,42 +1,10 @@
-@import 'reset';
 @import 'vars';
-@import 'mixins';
-
-.stackla-post-type{
-    display: inline-block;
-    min-width: 200px;
-    max-width: 200px;
-    overflow: hidden;
-}
 
 #adminmenu .wp-menu-image img {
     padding:5px 0 0;
 }
 
-.settings-form {
-    p {
-        margin-bottom:$layout-margin-s;
-    }
-    fieldset {
-        margin-bottom:$layout-margin-s;
-
-        label , input {
-            vertical-align: top;
-        }
-    }
-
-    input[type='text'] {
-        padding:5px;
-    }
-
-    input[type='checkbox'] {
-        margin:0;
-        margin-right:3px;
-    }
-}
-
 #feedback , .auth-notification {
-
     padding:$layout-margin-s;
     margin-top:$layout-margin-s;
 }
@@ -47,6 +15,7 @@
         margin-bottom:10px;
         font-weight: bold;
         padding:0!important;
+        margin: 0;
     }
     margin:$layout-margin-s 0 $layout-margin-s 0;
 }
@@ -68,7 +37,6 @@
 }
 
 #feedback.failure, .auth-notification.failure {
-
     h3 {
         color: red;
     }
@@ -109,12 +77,64 @@
     display: block;
 }
 
-.stackla-admin-setting{
-    .header{
-        background-image: url(../img/poweredByLogo.png);
+.stacklaAdmin{
+    &-header{
+        background-image: url(../img/powered-by-stackla.svg);
+        background-size: auto 34px;
         background-position-x: calc(100% - 10px);
         background-position-y: center;
         background-repeat: no-repeat;
+    }
+
+    p{
+        font-style: normal;
+        margin-bottom: 1em;
+    }
+    section{
+        display: block;
+        padding: 1em 0;
+         h2{
+            margin-top: 0;
+         }
+    }
+
+    .input-group{
+        padding: 0.25em 0;
+        margin-bottom: 1em;
+        &:last-child{
+            margin-bottom: 0;
+        }
+        label{
+            font-size: 1.2em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 0.5em;
+            &.input-checkbox{
+                display: block;
+                font-weight: normal;
+                font-size: 1em;
+            }
+        }
+        input{
+            padding: 0.75em 1em;
+        }
+        p{
+            margin: 0;
+            padding: 0;
+        }
+    }
+    .button-danger{
+        background: #ba0000;
+        border-color: #aa0000 #990000 #900;
+        box-shadow: 0 1px 0 #900;
+        color: #fff;
+        text-decoration: none;
+        text-shadow: 0 -1px 1px #900,1px 0 1px #900,0 1px 1px #900,-1px 0 1px #900;
+        &:hover{
+            background: #ca0000;
+            border-color: #aa0000 #990000 #900;
+            color: #fff;
+        }
     }
 }
 
@@ -128,6 +148,7 @@
         margin-top:0 !important;
     }
 }
+
 #stackla-metabox {
     fieldset {
         margin-bottom:0;

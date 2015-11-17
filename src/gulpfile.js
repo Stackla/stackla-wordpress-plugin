@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var livereload = require('gulp-livereload');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-sass');
@@ -11,67 +12,63 @@ var pluginName = 'stackla-wp';
 var pluginAdminDirectory = '../admin';
 var pluginPublicDirectory = '../public';
 
-var paths =
-{
-    'reactComponents':
-    {
+var paths = {
+    'reactComponents': {
         src:'js/components/**/*.jsx',
         dest:'js/compiled/',
         watch:'js/components/**/*.jsx'
     },
-    'reactViews':
-    {
+    'reactViews': {
         src:'js/views/*.jsx',
         dest:'js/compiled/'
     },
-    'scss':
-    {
-        'admin':
-        {
+    'css': {
+        'admin': {
+            'watch':[pluginAdminDirectory + '/css/*.css']
+        },
+        'public': {
+            'watch':[pluginPublicDirectory + '/css/*.css']
+        }
+    },
+    'scss': {
+        'admin': {
             'watch':['scss/*.scss'],
             'src':['scss/admin.scss'],
             'dest':pluginAdminDirectory + '/css/'
         },
-        'public':
-        {
+        'public': {
             'watch':['scss/*.scss'],
             'src':['scss/public.scss'],
             'dest':pluginPublicDirectory + '/css/'
         }
     },
-    'js':
-    {
-        'admin':
-        {
+    'js': {
+        'admin': {
             'src':['js/**/*.js' , '!**/public/**'],
             'dest':pluginAdminDirectory + '/js/'
         },
-        'public':
-        {
+        'public': {
             'src':['js/lib/jquery-1.11.1.js' , 'js/app.js' , 'js/public/**/*.js'],
             'dest':pluginPublicDirectory + '/js/'
         }
     },
 };
 
-gulp.task('reactComponents' , function()
-{
+gulp.task('reactComponents' , function() {
     return gulp.src(paths.reactComponents.src)
     .pipe(concat('components.js'))
     .pipe(react())
     .pipe(gulp.dest(paths.reactComponents.dest));
 });
 
-gulp.task('reactViews' , function()
-{
+gulp.task('reactViews' , function() {
     return gulp.src(paths.reactViews.src)
     .pipe(concat('views.js'))
     .pipe(react())
     .pipe(gulp.dest(paths.reactViews.dest));
 });
 
-gulp.task('adminScss' , function()
-{
+gulp.task('adminScss' , function() {
     return gulp.src(paths.scss.admin.src)
     .pipe(sass())
     .pipe(autoprefixer())
@@ -80,8 +77,7 @@ gulp.task('adminScss' , function()
     .pipe(gulp.dest(paths.scss.admin.dest));
 });
 
-gulp.task('publicScss' , function()
-{
+gulp.task('publicScss' , function() {
     return gulp.src(paths.scss.public.src)
     .pipe(sass())
     .pipe(autoprefixer())
@@ -90,8 +86,7 @@ gulp.task('publicScss' , function()
     .pipe(gulp.dest(paths.scss.public.dest));
 });
 
-gulp.task('adminJs' , function()
-{
+gulp.task('adminJs' , function() {
     return gulp.src(paths.js.admin.src)
     .pipe(order([
         'lib/jquery-1.11.1.js',
@@ -111,16 +106,15 @@ gulp.task('adminJs' , function()
     .pipe(gulp.dest(paths.js.admin.dest));
 });
 
-gulp.task('publicJs' , function()
-{
+gulp.task('publicJs' , function() {
     return gulp.src(paths.js.public.src)
     .pipe(concat(pluginName + '-public.js'))
     //.pipe(uglify())
     .pipe(gulp.dest(paths.js.public.dest));
 });
 
-gulp.task('watch' , function()
-{
+gulp.task('watch' , function() {
+    livereload.listen();
     gulp.watch(
     [
         paths.scss.admin.watch,
@@ -136,6 +130,8 @@ gulp.task('watch' , function()
         'adminJs',
         'publicJs'
     ]);
+    gulp.watch(paths.css.admin.watch).on('change', livereload.changed);
+    gulp.watch(paths.css.public.watch).on('change', livereload.changed);
 });
 
 gulp.task('default' , ['watch' , 'reactComponents' , 'reactViews',  'adminScss' , 'adminJs']);
