@@ -1,3 +1,4 @@
+@import 'reset';
 @import 'vars';
 
 #adminmenu .wp-menu-image img {
@@ -250,9 +251,10 @@
         .spinner {display:inline-block;}
     }
     .stackla-widget-section {
+        border: 1px solid $color-widget-block-bg;
+        background-color: $color-widget-block-bg;
+        margin-bottom: 10px;
         padding: 20px 20px 10px;
-        border:1px solid $color-widget-block-bg;
-        background-color:$color-widget-block-bg;
         fieldset {
             vertical-align: top;
             display: inline-block;
@@ -350,6 +352,101 @@
 
         select {
             text-transform: capitalize;
+        }
+    }
+    .stackla-filter{
+        &-default{
+            display: inline-block;
+        }
+        &-wrapper{
+            background: white;
+            display: inline-block;
+            padding: 10px 20px;
+        }
+    }
+    .stackla-widget{
+        &Style, &Type{
+            width: 150px;
+            height: 120px;
+            display: inline-block;
+            text-align: center;
+            &:before{
+                content: "";
+                display: inline-block;
+                height: 80px;
+                width: 100%;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-size: auto 100%;
+            }
+            &-wrapper{
+                padding-top: 10px;
+            }
+            input{
+                margin-right: 0;
+            }
+            span{
+                display: block;
+            }
+        }
+        &Style{
+            &-base_waterfall{
+                &:before{
+                    background-image: url(../img/styles/base_waterfall.png)
+                }
+            }
+            &-base_carousel{
+                &:before{
+                    background-image: url(../img/styles/base_carousel.png)
+                }
+            }
+            &-base_billboard{
+                &:before{
+                    background-image: url(../img/styles/base_billboard.png)
+                }
+            }
+            &-base_feed{
+                &:before{
+                    background-image: url(../img/styles/base_feed.png)
+                }
+            }
+            &-base_slideshow{
+                &:before{
+                    background-image: url(../img/styles/base_slideshow.png)
+                }
+            }
+        }
+        &Type{
+            &-new{
+                &:before{
+                    background-image: url(../img/types/new.png)
+                }
+                &.on{
+                    &:before{
+                        background-image: url(../img/types/new-on.png)
+                    }
+                }
+            }
+            &-clone{
+                &:before{
+                    background-image: url(../img/types/clone.png)
+                }
+                &.on{
+                    &:before{
+                        background-image: url(../img/types/clone-on.png)
+                    }
+                }
+            }
+            &-derive{
+                &:before{
+                    background-image: url(../img/types/derive.png)
+                }
+                &.on{
+                    &:before{
+                        background-image: url(../img/types/derive-on.png)
+                    }
+                }
+            }
         }
     }
     .stackla-block:last-child {

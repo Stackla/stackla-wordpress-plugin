@@ -35,6 +35,8 @@ class Stackla_WP_Metabox
     public static $filters_meta_key = "stackla_wp_filters";
     public static $tag_meta_key = "stackla_wp_tag";
     public static $tag_id_meta_key = "stackla_wp_tag_id";
+    public static $filter_id_meta_key = "stackla_wp_filter_id";
+    public static $media_type_meta_key = "stackla_wp_media_type";
     public static $widget_meta_key = "stackla_wp_widget";
     public static $widget_embed_meta_key = "stackla_wp_widget_embed";
 
@@ -54,6 +56,8 @@ class Stackla_WP_Metabox
             "filters" => get_post_meta($this->id , self::$filters_meta_key , true),
             "tag" => get_post_meta($this->id , self::$tag_meta_key , true),
             "tag_id" => get_post_meta($this->id , self::$tag_id_meta_key , true),
+            "filter_id" => get_post_meta($this->id , self::$filter_id_meta_key , true),
+            "media_type" => json_decode(get_post_meta($this->id , self::$media_type_meta_key , true), true),
             "widget" => get_post_meta($this->id , self::$widget_meta_key , true)
         );
     }
@@ -87,42 +91,15 @@ class Stackla_WP_Metabox
     }
 
     /**
-    *   Sets the data of the metabox;
-    *   @param  array   $new        the new data to be saved;
-    *   @return array   $results    the results of the save;
-    */
-    public function set_data($new)
-    {
-        $results = array();
-
-        foreach(self::$data as $k => $v)
-        {
-            switch($k)
-            {
-                case "terms":
-                    $this->set_stackla_wp_terms($new['terms']);
-                break;
-                case "filters":
-                    $this->set_stackla_wp_filters($new['filters']);
-                break;
-            }
-        }
-
-        return $results;
-    }
-
-    /**
     *   Sets the stackla tag data into the postmeta table for $this->id;
     *   @param object   $tag    a Stackla Tag object;
     *   @return void;
     */
     public function set_stackla_wp_tag(Stackla\Api\Tag $tag)
     {
-        delete_post_meta($this->id , self::$tag_meta_key);
-        add_post_meta($this->id , self::$tag_meta_key , $tag->tag);
+        update_post_meta($this->id , self::$tag_meta_key , $tag->tag);
 
-        delete_post_meta($this->id , self::$tag_id_meta_key);
-        add_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
+        update_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
     }
 
     /**
@@ -132,8 +109,30 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_title($title)
     {
-        delete_post_meta($this->id , self::$title_meta_key);
-        add_post_meta($this->id , self::$title_meta_key , $title);
+        update_post_meta($this->id , self::$title_meta_key , $title);
+    }
+
+    /**
+    *   Sets the stackla tag data into the postmeta table for $this->id;
+    *   @param object   $tag    a Stackla Tag object;
+    *   @return void;
+    */
+    public function set_stackla_wp_defaultFilter(Stackla\Api\Filter $filter)
+    {
+        update_post_meta($this->id , self::$filter_id_meta_key, $filter->id);
+    }
+
+    /**
+    *   Sets the stackla tag data into the postmeta table for $this->id;
+    *   @param object   $tag    a Stackla Tag object;
+    *   @return void;
+    */
+    public function set_stackla_wp_defaultFilterMedia($filterMedia)
+    {
+        if (gettype($filterMedia) !== 'array') {
+            $filterMedia = array();
+        }
+        update_post_meta($this->id , self::$media_type_meta_key, $this->set_json($filterMedia));
     }
 
     /**
@@ -143,8 +142,7 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_terms($terms)
     {
-        delete_post_meta($this->id , self::$terms_meta_key);
-        add_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
+        update_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
     }
 
     /**
@@ -154,8 +152,7 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_filters($filters)
     {
-        delete_post_meta($this->id , self::$filters_meta_key);
-        add_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
+        update_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
     }
 
     /**
@@ -172,11 +169,9 @@ class Stackla_WP_Metabox
             'type' => $widget['type']
         );
 
-        delete_post_meta($this->id , self::$widget_meta_key);
-        add_post_meta($this->id , self::$widget_meta_key , $this->set_json($data));
+        update_post_meta($this->id , self::$widget_meta_key , $this->set_json($data));
 
-        delete_post_meta($this->id , self::$widget_embed_meta_key);
-        add_post_meta($this->id , self::$widget_embed_meta_key , $widget['embed']);
+        update_post_meta($this->id , self::$widget_embed_meta_key , $widget['embed']);
     }
 
     public function clear()

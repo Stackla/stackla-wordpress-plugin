@@ -248,6 +248,7 @@ class Stackla_WP_Settings
         }
 
         try {
+            $post_types = !empty($this->stackla_post_types) ? json_encode($this->stackla_post_types) : '';
             $this->wpdb->query("TRUNCATE TABLE $this->table");
             $this->wpdb->insert(
                 $this->table,
@@ -255,7 +256,7 @@ class Stackla_WP_Settings
                     'stackla_stack' => $this->stackla_stack,
                     'stackla_client_id' => $this->stackla_client_id,
                     'stackla_client_secret' => $this->stackla_client_secret,
-                    'stackla_post_types' => json_encode($this->stackla_post_types)
+                    'stackla_post_types' => $post_types
                 ),
                 array(
                     '%s',

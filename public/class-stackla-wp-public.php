@@ -63,7 +63,7 @@ class Stackla_WP_Public {
 			'tag' => get_post_meta($post_id , Stackla_WP_Metabox::$tag_meta_key , true),
 			'tag_id' => get_post_meta($post_id , Stackla_WP_Metabox::$tag_id_meta_key , true),
 			'terms' => get_post_meta($post_id , Stackla_WP_Metabox::$terms_meta_key , true),
-			'filters' => get_post_meta($post_id , Stackla_WP_Metabox::$filters_meta_key , true),
+			// 'filters' => get_post_meta($post_id , Stackla_WP_Metabox::$filters_meta_key , true),
 			'embed' => get_post_meta($post_id , Stackla_WP_Metabox::$widget_embed_meta_key , true),
 			'widget' => get_post_meta($post_id , Stackla_WP_Metabox::$widget_meta_key , true)
 		);
@@ -74,13 +74,13 @@ class Stackla_WP_Public {
 			return;
 		}
 
-		$filters = json_decode($data['filters']);
+		// $filters = json_decode($data['filters']);
 
-		if(Stackla_WP_Metabox_Validator::validate_array($filters) === false)
-		{
-			echo 'You don\'t seem to have a Stackla Filter set, please try saving your Stackla For WordPress metabox for this post again.' ;
-			return;
-		}
+		// if(Stackla_WP_Metabox_Validator::validate_array($filters) === false)
+		// {
+		//     echo 'You don\'t seem to have a Stackla Filter set, please try saving your Stackla For WordPress metabox for this post again.' ;
+		//     return;
+		// }
 
 		if(Stackla_WP_Metabox_Validator::validate_string($data['embed']) === false)
 		{
@@ -99,18 +99,18 @@ class Stackla_WP_Public {
 
         $html = "";
 		$html .=	"<div class='stackla-widget-wrapper' data-widgetid='$widget_id'>";
-		$html .= 		"<nav class='stackla-widget-nav'>";
-		$html .= 			"<ul class='stackla-widget-filters'>";
+		// $html .= 		"<nav class='stackla-widget-nav'>";
+		// $html .= 			"<ul class='stackla-widget-filters'>";
 
-		foreach($filters as $filter)
-		{
-			$html .=			"<li class='stackla-widget-filter'>";
-			$html .= 				"<a href='#' class='stackla-widget-anchor' data-filter='$filter->filterId'>$filter->name</a>";
-			$html .=			"</li>";
-		}
+		// foreach($filters as $filter)
+		// {
+		//     $html .=			"<li class='stackla-widget-filter'>";
+		//     $html .= 				"<a href='#' class='stackla-widget-anchor' data-filter='$filter->filterId'>$filter->name</a>";
+		//     $html .=			"</li>";
+		// }
 
-		$html .= 			"</ul>";
-		$html .= 		"</nav>";
+		// $html .= 			"</ul>";
+		// $html .= 		"</nav>";
 
 
 		$html .= 		$data['embed'];

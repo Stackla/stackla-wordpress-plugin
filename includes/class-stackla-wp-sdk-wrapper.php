@@ -17,6 +17,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     /**
     *   @var    $user_settings      array   array of existing user settings;
     *   @var    $existing_tag_id    string  existing postmeta stackla tag id;
+    *   @var    $existing_filter_id string  existing postmeta stackla filter id;
     *   @var    $credentials        object  stackla credentials object;
     *   @var    $token              string  the user's access token;
     *   @var    $stack_name         string  the user's stack name;
@@ -28,6 +29,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
     private $user_settings = false;
     private $existing_tag_id = false;
+    private $existing_filter_id = false;
     private $credentials = false;
     private $token = false;
     private $stack_name = false;
@@ -37,6 +39,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     public  $tag = false;
     public  $errors = array();
 
+    public static $media = array('text', 'image', 'video');
     public static $host = "https://api.stackla.com/api/";
 
     /**
@@ -107,6 +110,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
         $this->stack_name = $this->user_settings['stackla_stack'];
         $this->existing_tag_id = parent::$data['tag_id'];
+        $this->existing_filter_id = parent::$data['filter_id'];
 
         if(is_null($this->token) || strlen($this->token) <= 0) {
             throw new Exception('User is not authorized with Stackla');
@@ -212,10 +216,48 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
             return $tag;
         } catch(Exception $e) {
-            $this->errors['title'] = implode(', ' , $tag->getErrors());
+            $this->errors['title'] = $e->getMessage();
             return false;
         }
 
+    }
+
+    /**
+     * Pushes a default filter to Stackla if not exist;
+     * @param $name    string  the name of the tag;
+     * @return object || boolean   $tag || false   Stackla Tag object if successful, false on fail;
+     */
+    public function prepareDefaultFilter($tag, $name, $media)
+    {
+        $filter;
+
+        if($this->existing_filter_id !== '') {
+            $filter = $this->stack->instance('filter' , $this->existing_filter_id);
+        } else {
+            $filter = $this->stack->instance('filter');
+            $filter->addTag($tag);
+        }
+
+        $filter->name = $name . " - Latest";
+
+        $diff = array();
+        if (gettype($media) == 'array') {
+            $diff = array_intersect($media, self::$media);
+        }
+        $filter->media = $diff;
+
+        try {
+            if(Stackla_WP_Metabox_Validator::validate_string($this->existing_filter_id)) {
+                $filter->update();
+            } else {
+                $filter->create();
+            }
+
+            return $filter;
+        } catch(Exception $e) {
+            $this->errors['default-filter'] = $e->getMessage();
+            return false;
+        }
     }
 
     /**
@@ -349,19 +391,26 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     public function push_widget($name , $filter , $options, $oldWidget)
     {
         $widget;
-        $filter_id = $filter['filterId'];
+        $filter_id = $filter->id;
 
         if (gettype($oldWidget) == 'array') {
             $diff = array_diff($options, $oldWidget);
         }
 
+        if ($diff) {
+            if(Stackla_WP_Metabox_Validator::validate_string($options['id']) === true) {
+                try {
+                    $old_widget = $this->stack->instance('Widget' , (int) $options['id'] , false);
+                    $old_widget->delete();
+                } catch (Exception $e) {
+
+                }
+                $options['id'] = null;
+            }
+        }
+
         if($diff && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === true) {
             $parent = $this->stack->instance('Widget' , (int) $options['copyId'] , false);
-
-            if(Stackla_WP_Metabox_Validator::validate_string($options['id']) === true) {
-                $old_widget = $this->stack->instance('Widget' , (int) $options['id'] , false);
-                $old_widget->delete();
-            }
 
             if($options['type'] == 'clone') {
                 $widget = $parent->duplicate();
@@ -380,14 +429,13 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         }
 
         $widget->name = stripslashes($name);
-        $widget->type = \Stackla\Api\Widget::TYPE_FLUID;
-        $widget->type_style = (isset($options['style'])) ? $options['style'] : \Stackla\Api\Widget::STYLE_VERTICAL_FLUID;
+        $widget->type_style = (isset($options['style'])) ? $options['style'] : \Stackla\Api\Widget::STYLE_BASE_WATERFALL;
         $widget->filter_id = $filter_id;
 
         try {
             if(
                 Stackla_WP_Metabox_Validator::validate_string($options['id']) === false
-                && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === false
+                // && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === false
             ) {
                 $widget->create();
                 $options['id'] = $widget->id;
@@ -397,6 +445,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
             $options['embed'] = $widget->embed_code;
         } catch(Exception $e) {
+            // $this->errors['widget'] = "Sorry, something happened while saving the widget config";
             $this->errors['widget'] = $e->getMessage();
             return false;
         }

@@ -63,7 +63,7 @@
                     <h2>Step 1: Configure Stackla</h2>
 
                     <p>Before you can configure WordPress, you need to first configure Stackla.</p>
-                    <p>Copy the 'Callback URL' below and paste it in the relavan field in the WordPress plugin configuration screen in Stackla.</p>
+                    <p>Copy the 'Callback URL' below and paste it in the relevant field in the WordPress plugin configuration screen in Stackla.</p>
 
                     <div class="input-group">
                         <label for="callback">Callback URL</label>

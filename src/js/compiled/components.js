@@ -368,6 +368,29 @@
 
     var WP_SAVE_CONTROLLER;
 
+    function arr_diff (a1, a2) {
+
+        var a = [], diff = [];
+
+        for (var i = 0; i < a1.length; i++) {
+            a[a1[i]] = true;
+        }
+
+        for (var i = 0; i < a2.length; i++) {
+            if (a[a2[i]]) {
+                delete a[a2[i]];
+            } else {
+                a[a2[i]] = true;
+            }
+        }
+
+        for (var k in a) {
+            diff.push(k);
+        }
+
+        return diff;
+    };
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
     {displayName: "Metabox",
         propTypes:
@@ -376,26 +399,27 @@
         },
         getInitialState:function()
         {
+            var data = stacklaWp.admin && stacklaWp.admin.metabox && stacklaWp.admin.metabox.data ? stacklaWp.admin.metabox.data : {},
+                mediaType= data.media_type && typeof data.media_type == 'object' ? data.media_type : ['text', 'image', 'video', 'html'];
+
             return {
                 wpPublishSelector:"#publish",
                 wpDraftSelector:'#save-post',
                 wpFormSelector:'#post',
                 wpFormTitleSelector:'#post #title',
                 overlay:'#jsx-metabox .overlay',
-                data:{},
-                dependencies:
-                {
+                data: data,
+                mediaType: mediaType,
+                dependencies: {
                     RequestError:stacklaWp.admin.components.RequestError,
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
-                    WidgetFilters:stacklaWp.admin.components.WidgetFilters,
                     Widget:stacklaWp.admin.components.Widget
                 },
                 errors:
                 {
                     title:false,
                     terms:[],
-                    filters:[]
                 },
             }
         },
@@ -457,39 +481,31 @@
             //e.preventDefault();
 
             var termsRefs = this.refs.terms.refs;
-            var filtersRefs = this.refs.filters.refs;
             var widgetConfig = $.extend({} , this.refs.widget.refs.config.state);
             var terms = [];
-            var filters = [];
             var data = {};
 
-            $.each(termsRefs , function(key , value)
-            {
+            $.each(termsRefs , function(key , value) {
                 var state = $.extend({} , value.state);
                 terms.push(state);
             });
 
-            $.each(filtersRefs , function(key , value)
-            {
-                var state = $.extend({} , value.state);
-                if(!state.network.length) state.network = stacklaWp.admin.config.networks;
-                if(!state.media.length) state.media = stacklaWp.admin.config.media;
-                filters.push(state);
-            });
-
-            data =
-            {
-                'postId':stacklaWp.admin.metabox.postId,
-                'terms':terms,
-                'filters':filters,
-                'widget':
-                {
-                    id:widgetConfig.id,
-                    copyId:widgetConfig.copyId,
-                    type:widgetConfig.type,
-                    style:widgetConfig.style
-                }
+            data = {
+                'postId': stacklaWp.admin.metabox.postId,
+                'terms': terms,
+                'widget': {
+                    id: widgetConfig.id,
+                    copyId: widgetConfig.copyId,
+                    type: widgetConfig.type,
+                    style: widgetConfig.style
+                },
+                'media_type': this.state.mediaType
             };
+
+            // console.log('Previous Data', this.state.data);
+            // console.log('Current Data', data);
+
+            // return;
 
             this.validate(data);
         },
@@ -560,6 +576,18 @@
                                 $title.val(data.title)
                             }
 
+                            var keyId, valId;
+                            if (response.data) {
+                                for (var key in response.data) {
+                                    if ($('input[value='+key+']').length) {
+                                        keyId = $('input[value='+key+']').attr('id');
+                                        valId = keyId.replace(/\-key$/,'-value');
+                                        $('#'+valId).val(response.data[key]);
+                                    } else {
+                                        console.log('notexist', key);
+                                    }
+                                }
+                            }
                             WP_SAVE_CONTROLLER.trigger('click');
                         } else {
                             self.addSaveHook();
@@ -580,7 +608,7 @@
         */
         prepareErrors: function(errors) {
             var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
-            var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
+            var mediaTypeErrors = (typeof errors.media_type!== 'undefined') ? errors.media_type: false;
             var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
             var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
 
@@ -588,12 +616,12 @@
                 this.funnelErrors(termsErrors , this.refs.terms.refs);
             }
 
-            if (filtersErrors) {
-                this.funnelErrors(filtersErrors , this.refs.filters.refs);
-            }
-
             if (titleErrors) {
                 this.refs.title.setState({error:errors.title});
+            }
+
+            if (mediaTypeErrors) {
+                this.setState({mediaTypeError:errors.title});
             }
 
             if (widgetErrors) {
@@ -651,11 +679,19 @@
             window.location = $target.attr('href');
             return;
         },
+        handleFilterChange: function(e) {
+            var target = $(e.currentTarget);
+            var diff = [];
+
+            diff = arr_diff([target.val()], this.state.mediaType.length ? this.state.mediaType: []);
+            this.setState({'mediaType' : diff});
+        },
         /**
         *   Renders the Metabox component;
         *   @return React component;
         */
         render:function() {
+            var that = this;
             var authentication, authenticated = true, widget;
 
             if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
@@ -676,8 +712,45 @@
                     )
                 )
             }
+            var readonly = authenticated ? false : true;
 
-            if (authenticated || stacklaWp.admin.metabox.data.terms && stacklaWp.admin.metabox.data.filters) {
+            var defaultFilterOptions = [{value: 'text', name: 'Text'}, {value: 'image', name: 'Image'}, {value: 'video', name: 'Video'}, {value: 'html', name: 'HTML'}].map(function(option, i) {
+
+                var checked = false;
+
+                if (that.state.mediaType.indexOf(option.value) > -1) {
+                    checked = true;
+                }
+
+                return (
+                    React.createElement("fieldset", null, 
+                        React.createElement("label", {className: "checkbox"}, 
+                            React.createElement("input", {
+                                type: "checkbox", 
+                                value: option.value, 
+                                checked: checked, 
+                                disabled: readonly, 
+                                onChange: that.handleFilterChange}), 
+                            option.name
+                        )
+                    )
+                );
+            });
+
+            var defaultFilter = (
+                React.createElement("div", {ref: "filter", className: "stackla-filter"}, 
+                    React.createElement("header", null, 
+                        React.createElement("h2", null, "Media types")
+                    ), 
+                    React.createElement("div", {className: "stackla-block"}, 
+                        React.createElement("div", {className: "stackla-widget-section"}, 
+                            defaultFilterOptions
+                        )
+                    )
+                )
+            );
+
+            if (authenticated || this.state.data.terms) {
                 widget = (
                     React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
                         React.createElement("div", {className: "overlay", ref: "overlay"}, 
@@ -692,10 +765,10 @@
                         ), 
                         React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
                         React.createElement("section", {className: "terms"}, 
-                            React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms", initialData: stacklaWp.admin.metabox.data.terms, readonly: authenticated ? false : true})
+                            React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms", initialData: this.state.data.terms, readonly: authenticated ? false : true})
                         ), 
-                        React.createElement("section", {className: "filters"}, 
-                            React.createElement(this.state.dependencies.WidgetFilters, {ref: "filters", initialData: stacklaWp.admin.metabox.data.filters, readonly: authenticated ? false : true})
+                        React.createElement("section", null, 
+                            defaultFilter
                         ), 
                         React.createElement("section", {className: "config"}, 
                             React.createElement(this.state.dependencies.Widget, {ref: "widget", readonly: authenticated ? false : true})
@@ -1184,19 +1257,14 @@
                 React.createElement("div", {className: "stackla-block"}, 
                     React.createElement("header", null, 
                         React.createElement("h2", null, 
-                            "Look and Feel"
+                            "Create Widget"
                         )
                     ), 
-                    React.createElement("div", {className: (this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}, 
-                        React.createElement(this.state.dependencies.WidgetConfig, {
-                            ref: "config", 
-                            readonly: this.props.readonly, 
-                            initialData: stacklaWp.admin.metabox.data.widget}
-                        )
-                    ), 
-                    React.createElement("div", {className: (this.state.error) ? 'stackla-error-message' : 'hide'}, 
-                        React.createElement(this.state.dependencies.InputError, {errorMessage: this.state.error})
-                    )
+                    React.createElement(this.state.dependencies.WidgetConfig, {
+                        ref: "config", 
+                        showError: this.state.error, 
+                        readonly: this.props.readonly, 
+                        initialData: stacklaWp.admin.metabox.data.widget})
                 )
             );
         }
@@ -1211,6 +1279,7 @@
     {displayName: "WidgetConfig",
         propTypes: {
             initialData: React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
+            showError: false,
             readonly: false
         },
         getInitialState: function() {
@@ -1218,42 +1287,51 @@
                 id: (this.props.initialData !== false) ? this.props.initialData.id : '',
                 copyId: (this.props.initialData !== false) ? this.props.initialData.copyId : '',
                 type: (this.props.initialData !== false && this.props.initialData.id !== '') ? this.props.initialData.type : 'new',
-                style: (this.props.initialData !== false) ? this.props.initialData.style : 'fluid',
+                style: (this.props.initialData !== false) ? this.props.initialData.style : 'base_waterfall',
                 displayStyles: (this.props.initialData !== false && this.props.initialData.type == 'derive') ? false : true,
                 displayWidgets: false,
-                options: {
-                    types: [
-                        {
-                            name: 'new',
-                            label: 'Create a new Stackla Widget',
-                            description: 'Create a completely new Widget instance from scratch.'
-                        },
-                        {
-                            name: 'clone',
-                            label: 'Copy an existing Stackla Widget',
-                            description: 'Create a new widget, but use the settings from an existing widget. Changes made to this new widget will not affect the widget you are copying from, nor will changes to the widget you are copying from affect this new one.'
-                        },
-                        {
-                            name: 'derive',
-                            label: 'Reuse an existing Stackla Widget',
-                            description: 'Use an existing widget as a base for the new one, but change the content that is displayed through it. Changes made to display settings of the existing widget will affect the display of this new one.'
-                        }
-                    ],
-                    styles: [
-                        {
-                            name: 'fluid',
-                            label: 'Fluid Vertical'
-                        },
-                        {
-                            name: 'horizontal-fluid',
-                            label: 'Fluid Horizontal'
-                        }
-                    ]
+                types: {
+                    'new': {
+                        name: 'new',
+                        label: 'New widget',
+                        subtitle: 'Choose your widget type',
+                        description: ''
+                    },
+                    'clone': {
+                        name: 'clone',
+                        label: 'Clone widget',
+                        subtitle: 'Choose the existing widget to clone',
+                        description: 'Ypur new widget will start witht he settings and styling of the widget you clone. Changes you make will only apply to this widget.'
+                    },
+                    'derive': {
+                        name: 'derive',
+                        label: 'Child widget',
+                        subtitle: 'Choose a parent widget for this child',
+                        description: 'Apply the styling and configuration of an existing widget to this child widget. Any changes you make to the parent widget will be reflected in this child.'
+                    }
                 },
-                messages: {
-                    'clone': 'Choose the widget you wish to copy',
-                    'derive': 'Choose the widget you wish to reuse'
-                }
+                styles: [
+                    {
+                        name: 'base_waterfall',
+                        label: 'Waterfall'
+                    },
+                    {
+                        name: 'base_carousel',
+                        label: 'Carousel'
+                    },
+                    {
+                        name: 'base_billboard',
+                        label: 'Billboard'
+                    },
+                    {
+                        name: 'base_feed',
+                        label: 'Feed'
+                    },
+                    {
+                        name: 'base_slideshow',
+                        label: 'Slideshow'
+                    }
+                ]
             }
         },
         handleTypeChange: function(e) {
@@ -1302,59 +1380,75 @@
             var self = this;
 
             var readonly = this.props.readonly;
-            var widgetOptions = '';
-            var widgetStyle = (
-                React.createElement("div", {ref: "styles", className: 'widget-styles'}, 
-                    React.createElement("fieldset", null, 
-                        React.createElement("label", null, 
-                            "Choose your Stackla Widget Style"
-                        ), 
-                        
-                            this.state.options.styles.map(function(option , i) {
-                                return  React.createElement("div", {key: i}, 
-                                            React.createElement("input", {
-                                                type: "radio", 
-                                                ref: option.name, 
-                                                name: "style", 
-                                                onChange: self.handleStyleChange, 
-                                                value: option.name, 
-                                                disabled: readonly, 
-                                                defaultChecked: self.getDefaultChecked(option.name , 'style')}
-                                            ), 
-                                            option.label
-                                        )
-                            })
-                        
-                    )
-                )
-            );
-            var widgetList = (
-                React.createElement("div", {ref: "widgets", className: 'widget-choices'}, 
-                    React.createElement("fieldset", null, 
-                        React.createElement("label", null, 
-                            (this.state.type !== 'new') ? this.state.messages[this.state.type] : ''
-                        ), 
-                        React.createElement("select", {
-                            disabled: readonly, 
-                            onChange: this.handleWidgetCopyChange, 
-                            defaultValue: (this.props.initialData) ? this.props.initialData.copyId : ''}, 
-                            React.createElement("option", {value: ""}), 
-                            
-                                Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
-                                {
-                                    return  React.createElement("option", {value: key, key: key}, 
-                                                stacklaWp.admin.metabox.widgets[key]
-                                            )
-                                })
-                            
+            var widgetStyle = [];
+            var widgetOptions = [];
+            var defaultWidgetStyle ;
+
+            if (this.state.type) {
+                widgetStyle.push(
+                    React.createElement("div", null, 
+                        React.createElement("fieldset", null, 
+                            React.createElement("label", null, 
+                                "Step 2: ", this.state.types[this.state.type].subtitle
+                            )
                         )
                     )
-                )
-            )
-            var widgetOptions = [];
-            this.state.options.types.map(function(option , i) {
+                );
+
+                if (this.state.type == 'new') {
+                    defaultWidgetStyle = this.state.style ? this.state.style : this.state.styles[0].name;
+                    widgetStyle.push(
+                        React.createElement("div", {ref: "styles", className: "stackla-widgetStyle-wrapper"}, 
+                            this.state.types[this.state.type].description, 
+                            React.createElement("fieldset", null, 
+                                
+                                    this.state.styles.map(function(option , i) {
+                                        return  React.createElement("label", {key: i, className: "stackla-widgetStyle stackla-widgetStyle-" + option.name + (option.name == defaultWidgetStyle ? ' on' : '')}, 
+                                                    React.createElement("input", {
+                                                        type: "radio", 
+                                                        ref: option.name, 
+                                                        name: "style", 
+                                                        onChange: self.handleStyleChange, 
+                                                        value: option.name, 
+                                                        disabled: readonly, 
+                                                        defaultChecked: ( option.name == defaultWidgetStyle)}
+                                                    ), 
+                                                    option.label
+                                                )
+                                    })
+                                
+                            )
+                        )
+                    );
+                } else {
+                    widgetStyle.push(
+                        React.createElement("div", {ref: "widgets", className: "widget-choices"}, 
+                            React.createElement("fieldset", null, 
+                                React.createElement("select", {
+                                    disabled: readonly, 
+                                    onChange: this.handleWidgetCopyChange, 
+                                    defaultValue: (this.props.initialData) ? this.props.initialData.copyId : ''}, 
+                                    
+                                        Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
+                                        {
+                                            return  React.createElement("option", {value: key, key: key}, 
+                                                        stacklaWp.admin.metabox.widgets[key]
+                                                    )
+                                        })
+                                    
+                                )
+                            )
+                        )
+                    );
+                }
+            }
+
+            var defaultWidgetType = this.state.type ? this.state.type : 'new';
+            $.each(this.state.types, function(i) {
+                var option = this;
+                console.log('type', option.name, option.name == defaultWidgetType);
                 widgetOptions.push(
-                React.createElement("div", {className: "widget-types", key: i}, 
+                React.createElement("label", {className: 'stackla-widgetType stackla-widgetType-'+option.name + (option.name == defaultWidgetType ? ' on' : ''), key: i}, 
                     React.createElement("input", {
                         ref: option.name, 
                         type: "radio", 
@@ -1362,28 +1456,30 @@
                         name: "type", 
                         onChange: self.handleTypeChange, 
                         disabled: readonly, 
-                        defaultChecked: self.getDefaultChecked(option.name , 'type')}
+                        defaultChecked: (option.name == defaultWidgetType)}
                     ), 
-                    option.label, 
-                    React.createElement("p", null, 
-                        option.description
-                    ), 
-                    React.createElement("div", {className: "widget-type-style"}, 
-                    option.name == self.state.type && self.state.type !== 'new' ? widgetList : '', 
-                    option.name == self.state.type && self.state.type == 'new' ? widgetStyle : ''
-                    )
-                ));
+                    option.label
+                )
+                );
             })
 
             return (
                 React.createElement("div", null, 
-                    React.createElement("div", {ref: "types"}, 
+                    React.createElement("div", {ref: "types", className: "stackla-widget-section"}, 
                         React.createElement("fieldset", null, 
                             React.createElement("label", null, 
-                                "Choose your Stackla Widget Action"
+                                "Step 1: Choose your starting point"
                             ), 
-                            widgetOptions
+                            React.createElement("div", {className: "stackla-widgetType-wrapper"}, 
+                                widgetOptions
+                            )
                         )
+                    ), 
+                    React.createElement("div", {className: "stackla-widget-section"}, 
+                        widgetStyle
+                    ), 
+                    React.createElement("div", {className: (this.props.showError) ? 'stackla-error-message' : 'hide'}, 
+                        React.createElement(stacklaWp.admin.components.InputError, {errorMessage: this.props.showError})
                     )
                 )
             );

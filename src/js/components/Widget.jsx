@@ -27,19 +27,14 @@
                 <div className='stackla-block'>
                     <header>
                         <h2>
-                            Look and Feel
+                            Create Widget
                         </h2>
                     </header>
-                    <div className={(this.state.error) ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}>
-                        <this.state.dependencies.WidgetConfig
-                            ref='config'
-                            readonly={this.props.readonly}
-                            initialData={stacklaWp.admin.metabox.data.widget}
-                        />
-                    </div>
-                    <div className={(this.state.error) ? 'stackla-error-message' : 'hide'}>
-                        <this.state.dependencies.InputError errorMessage={this.state.error} />
-                    </div>
+                    <this.state.dependencies.WidgetConfig
+                        ref='config'
+                        showError={this.state.error}
+                        readonly={this.props.readonly}
+                        initialData={stacklaWp.admin.metabox.data.widget}/>
                 </div>
             );
         }

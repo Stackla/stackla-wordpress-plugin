@@ -4,6 +4,29 @@
 
     var WP_SAVE_CONTROLLER;
 
+    function arr_diff (a1, a2) {
+
+        var a = [], diff = [];
+
+        for (var i = 0; i < a1.length; i++) {
+            a[a1[i]] = true;
+        }
+
+        for (var i = 0; i < a2.length; i++) {
+            if (a[a2[i]]) {
+                delete a[a2[i]];
+            } else {
+                a[a2[i]] = true;
+            }
+        }
+
+        for (var k in a) {
+            diff.push(k);
+        }
+
+        return diff;
+    };
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
     {
         propTypes:
@@ -12,26 +35,27 @@
         },
         getInitialState:function()
         {
+            var data = stacklaWp.admin && stacklaWp.admin.metabox && stacklaWp.admin.metabox.data ? stacklaWp.admin.metabox.data : {},
+                mediaType= data.media_type && typeof data.media_type == 'object' ? data.media_type : ['text', 'image', 'video', 'html'];
+
             return {
                 wpPublishSelector:"#publish",
                 wpDraftSelector:'#save-post',
                 wpFormSelector:'#post',
                 wpFormTitleSelector:'#post #title',
                 overlay:'#jsx-metabox .overlay',
-                data:{},
-                dependencies:
-                {
+                data: data,
+                mediaType: mediaType,
+                dependencies: {
                     RequestError:stacklaWp.admin.components.RequestError,
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
                     WidgetTerms:stacklaWp.admin.components.WidgetTerms,
-                    WidgetFilters:stacklaWp.admin.components.WidgetFilters,
                     Widget:stacklaWp.admin.components.Widget
                 },
                 errors:
                 {
                     title:false,
                     terms:[],
-                    filters:[]
                 },
             }
         },
@@ -93,39 +117,31 @@
             //e.preventDefault();
 
             var termsRefs = this.refs.terms.refs;
-            var filtersRefs = this.refs.filters.refs;
             var widgetConfig = $.extend({} , this.refs.widget.refs.config.state);
             var terms = [];
-            var filters = [];
             var data = {};
 
-            $.each(termsRefs , function(key , value)
-            {
+            $.each(termsRefs , function(key , value) {
                 var state = $.extend({} , value.state);
                 terms.push(state);
             });
 
-            $.each(filtersRefs , function(key , value)
-            {
-                var state = $.extend({} , value.state);
-                if(!state.network.length) state.network = stacklaWp.admin.config.networks;
-                if(!state.media.length) state.media = stacklaWp.admin.config.media;
-                filters.push(state);
-            });
-
-            data =
-            {
-                'postId':stacklaWp.admin.metabox.postId,
-                'terms':terms,
-                'filters':filters,
-                'widget':
-                {
-                    id:widgetConfig.id,
-                    copyId:widgetConfig.copyId,
-                    type:widgetConfig.type,
-                    style:widgetConfig.style
-                }
+            data = {
+                'postId': stacklaWp.admin.metabox.postId,
+                'terms': terms,
+                'widget': {
+                    id: widgetConfig.id,
+                    copyId: widgetConfig.copyId,
+                    type: widgetConfig.type,
+                    style: widgetConfig.style
+                },
+                'media_type': this.state.mediaType
             };
+
+            // console.log('Previous Data', this.state.data);
+            // console.log('Current Data', data);
+
+            // return;
 
             this.validate(data);
         },
@@ -196,6 +212,18 @@
                                 $title.val(data.title)
                             }
 
+                            var keyId, valId;
+                            if (response.data) {
+                                for (var key in response.data) {
+                                    if ($('input[value='+key+']').length) {
+                                        keyId = $('input[value='+key+']').attr('id');
+                                        valId = keyId.replace(/\-key$/,'-value');
+                                        $('#'+valId).val(response.data[key]);
+                                    } else {
+                                        console.log('notexist', key);
+                                    }
+                                }
+                            }
                             WP_SAVE_CONTROLLER.trigger('click');
                         } else {
                             self.addSaveHook();
@@ -216,7 +244,7 @@
         */
         prepareErrors: function(errors) {
             var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
-            var filtersErrors = (typeof errors.filters !== 'undefined') ? errors.filters : false;
+            var mediaTypeErrors = (typeof errors.media_type!== 'undefined') ? errors.media_type: false;
             var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
             var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
 
@@ -224,12 +252,12 @@
                 this.funnelErrors(termsErrors , this.refs.terms.refs);
             }
 
-            if (filtersErrors) {
-                this.funnelErrors(filtersErrors , this.refs.filters.refs);
-            }
-
             if (titleErrors) {
                 this.refs.title.setState({error:errors.title});
+            }
+
+            if (mediaTypeErrors) {
+                this.setState({mediaTypeError:errors.title});
             }
 
             if (widgetErrors) {
@@ -287,11 +315,19 @@
             window.location = $target.attr('href');
             return;
         },
+        handleFilterChange: function(e) {
+            var target = $(e.currentTarget);
+            var diff = [];
+
+            diff = arr_diff([target.val()], this.state.mediaType.length ? this.state.mediaType: []);
+            this.setState({'mediaType' : diff});
+        },
         /**
         *   Renders the Metabox component;
         *   @return React component;
         */
         render:function() {
+            var that = this;
             var authentication, authenticated = true, widget;
 
             if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
@@ -312,8 +348,45 @@
                     </div>
                 )
             }
+            var readonly = authenticated ? false : true;
 
-            if (authenticated || stacklaWp.admin.metabox.data.terms && stacklaWp.admin.metabox.data.filters) {
+            var defaultFilterOptions = [{value: 'text', name: 'Text'}, {value: 'image', name: 'Image'}, {value: 'video', name: 'Video'}, {value: 'html', name: 'HTML'}].map(function(option, i) {
+
+                var checked = false;
+
+                if (that.state.mediaType.indexOf(option.value) > -1) {
+                    checked = true;
+                }
+
+                return (
+                    <fieldset>
+                        <label className='checkbox'>
+                            <input
+                                type='checkbox'
+                                value={option.value}
+                                checked={checked}
+                                disabled={readonly}
+                                onChange={that.handleFilterChange}/>
+                            {option.name}
+                        </label>
+                    </fieldset>
+                );
+            });
+
+            var defaultFilter = (
+                <div ref="filter" className='stackla-filter'>
+                    <header>
+                        <h2>Media types</h2>
+                    </header>
+                    <div className='stackla-block'>
+                        <div className='stackla-widget-section'>
+                            {defaultFilterOptions}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            if (authenticated || this.state.data.terms) {
                 widget = (
                     <div className='jsx-metabox' ref='metabox'>
                         <div className='overlay' ref='overlay'>
@@ -328,10 +401,10 @@
                         </div>
                         <this.state.dependencies.RequestError ref='requestErrors' errors={this.state.errors.request} />
                         <section className='terms'>
-                            <this.state.dependencies.WidgetTerms ref='terms' initialData={stacklaWp.admin.metabox.data.terms} readonly={authenticated ? false : true} />
+                            <this.state.dependencies.WidgetTerms ref='terms' initialData={this.state.data.terms} readonly={authenticated ? false : true} />
                         </section>
-                        <section className='filters'>
-                            <this.state.dependencies.WidgetFilters ref='filters' initialData={stacklaWp.admin.metabox.data.filters} readonly={authenticated ? false : true} />
+                        <section>
+                            {defaultFilter}
                         </section>
                         <section className='config'>
                             <this.state.dependencies.Widget ref='widget' readonly={authenticated ? false : true} />

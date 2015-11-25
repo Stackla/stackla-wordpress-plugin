@@ -27,7 +27,9 @@ class Stackla_WP_Metabox_Validator {
     protected $error_filter_network = "You must set a valid network name";
     protected $error_illegal_media = "The media type you've selected is not allowed";
     protected $error_filter_sorting = "You must enter a valid sorting method";
+    protected $error_media_type = "You must define at least one media type";
     protected $error_filter_illegal_sorting = "The sorting method you've selected is not allowed";
+    public $emptyTerm = true;
 
     public $errors = array();
 
@@ -41,6 +43,7 @@ class Stackla_WP_Metabox_Validator {
     {
         $this->data = $data;
         $this->errors['title'] = false;
+        $this->errors['media_type'] = false;
         $this->errors['terms'] = array();
         $this->errors['filters'] = array();
     }
@@ -63,6 +66,14 @@ class Stackla_WP_Metabox_Validator {
     public static function validate_array($var)
     {
         return (!is_array($var) || empty($var)) ? false : true;
+    }
+
+    protected function validate_media_type()
+    {
+        if (!isset($this->data['media_type']) || count($this->data['media_type']) < 1) {
+            $this->errors['media_type'] = $this->error_media_type;
+        }
+
     }
 
     /**
@@ -90,8 +101,11 @@ class Stackla_WP_Metabox_Validator {
 
             if(self::validate_string($term['network']) === false)
             {
-                $this->errors['terms'][$term['id']]['network'] = $this->error_network;
+                $this->errors['terms'][$term['id']] = false;
+                continue;
+                // $this->errors['terms'][$term['id']]['network'] = $this->error_network;
             }
+            $this->emptyTerm = false;
 
             if(!in_array($term['network'] , $this->allowed_networks))
             {
@@ -124,10 +138,8 @@ class Stackla_WP_Metabox_Validator {
     *   Pushes the result into the $this->errors array;
     *   @return void;
     */
-    protected function validate_widget_filters()
-    {
-        foreach($this->data['filters'] as $filter)
-        {
+    protected function validate_widget_filters() {
+        foreach($this->data['filters'] as $filter) {
             $this->errors['filters'][$filter['id']] = array(
                 'name' => false,
                 'network' => false,
@@ -137,46 +149,36 @@ class Stackla_WP_Metabox_Validator {
 
             //don't validate removed filters
 
-            if($filter['removed'] === true || $filter['removed'] === 'true')
-            {
+            if($filter['removed'] === true || $filter['removed'] === 'true') {
                 $this->errors['filters'][$filter['id']] = false;
                 continue;
             }
 
-            if(self::validate_string($filter['name']) === false)
-            {
+            if(self::validate_string($filter['name']) === false) {
                 $this->errors['filters'][$filter['id']]['name'] = $this->error_filter_name;
             }
 
-            if(isset($filter['media']) && self::validate_array($filter['media']))
-            {
-                foreach($filter['media'] as $media)
-                {
-                    if(!in_array($media , $this->allowed_media))
-                    {
+            if(isset($filter['media']) && self::validate_array($filter['media'])) {
+                foreach($filter['media'] as $media) {
+                    if(!in_array($media , $this->allowed_media)) {
                         $this->errors['filters'][$filter['id']]['media'] = $this->error_illegal_media;
                     }
                 }
             }
 
-            if(isset($filter['network']) && self::validate_array($filter['network']))
-            {
-                foreach($filter['network'] as $network)
-                {
-                    if(!in_array($network , $this->allowed_networks))
-                    {
+            if(isset($filter['network']) && self::validate_array($filter['network'])) {
+                foreach($filter['network'] as $network) {
+                    if(!in_array($network , $this->allowed_networks)) {
                         $this->errors['filters'][$filter['id']]['network'] = $this->error_illegal_network;
                     }
                 }
             }
 
-            if(self::validate_string($filter['sorting']) === false)
-            {
+            if(self::validate_string($filter['sorting']) === false) {
                 $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_sorting;
             }
 
-            if(!in_array($filter['sorting'] , $this->allowed_sorting))
-            {
+            if(!in_array($filter['sorting'] , $this->allowed_sorting)) {
                 $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_illegal_sorting;
             }
 
@@ -185,8 +187,7 @@ class Stackla_WP_Metabox_Validator {
                 $this->errors['filters'][$filter['id']]['network'] === false &&
                 $this->errors['filters'][$filter['id']]['media'] === false &&
                 $this->errors['filters'][$filter['id']]['sorting'] === false
-            )
-            {
+            ) {
                 $this->errors['filters'][$filter['id']] = false;
             }
         }
@@ -199,38 +200,27 @@ class Stackla_WP_Metabox_Validator {
     public function validate()
     {
         $this->validate_widget_terms();
-        $this->validate_widget_filters();
+        $this->validate_media_type();
+        // $this->validate_widget_filters();
 
-        if($this->errors['title'] !== false)
-        {
+        if ($this->errors['title'] !== false) {
             return false;
         }
 
-        if(empty($this->errors['terms']) || empty($this->errors['filters']))
-        {
+        if (!$this->emptyTerm && $this->errors['media_type'] !== false) {
             return false;
         }
 
-        if(
-            count($this->data['terms']) !== count($this->errors['terms']) ||
-            count($this->data['filters']) !== count($this->errors['filters'])
-        )
-        {
+        if (empty($this->errors['terms'])) {
             return false;
         }
 
-        foreach($this->errors['terms'] as $k => $v)
-        {
-            if($v !== false)
-            {
-                return false;
-            }
+        if (count($this->data['terms']) !== count($this->errors['terms'])) {
+            return false;
         }
 
-        foreach($this->errors['filters'] as $k => $v)
-        {
-            if($v !== false)
-            {
+        foreach ($this->errors['terms'] as $k => $v) {
+            if ($v !== false) {
                 return false;
             }
         }

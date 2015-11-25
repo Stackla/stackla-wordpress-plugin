@@ -6,6 +6,7 @@
     {
         propTypes: {
             initialData: React.PropTypes.oneOfType([React.PropTypes.object , React.PropTypes.bool]),
+            showError: false,
             readonly: false
         },
         getInitialState: function() {
@@ -13,42 +14,51 @@
                 id: (this.props.initialData !== false) ? this.props.initialData.id : '',
                 copyId: (this.props.initialData !== false) ? this.props.initialData.copyId : '',
                 type: (this.props.initialData !== false && this.props.initialData.id !== '') ? this.props.initialData.type : 'new',
-                style: (this.props.initialData !== false) ? this.props.initialData.style : 'fluid',
+                style: (this.props.initialData !== false) ? this.props.initialData.style : 'base_waterfall',
                 displayStyles: (this.props.initialData !== false && this.props.initialData.type == 'derive') ? false : true,
                 displayWidgets: false,
-                options: {
-                    types: [
-                        {
-                            name: 'new',
-                            label: 'Create a new Stackla Widget',
-                            description: 'Create a completely new Widget instance from scratch.'
-                        },
-                        {
-                            name: 'clone',
-                            label: 'Copy an existing Stackla Widget',
-                            description: 'Create a new widget, but use the settings from an existing widget. Changes made to this new widget will not affect the widget you are copying from, nor will changes to the widget you are copying from affect this new one.'
-                        },
-                        {
-                            name: 'derive',
-                            label: 'Reuse an existing Stackla Widget',
-                            description: 'Use an existing widget as a base for the new one, but change the content that is displayed through it. Changes made to display settings of the existing widget will affect the display of this new one.'
-                        }
-                    ],
-                    styles: [
-                        {
-                            name: 'fluid',
-                            label: 'Fluid Vertical'
-                        },
-                        {
-                            name: 'horizontal-fluid',
-                            label: 'Fluid Horizontal'
-                        }
-                    ]
+                types: {
+                    'new': {
+                        name: 'new',
+                        label: 'New widget',
+                        subtitle: 'Choose your widget type',
+                        description: ''
+                    },
+                    'clone': {
+                        name: 'clone',
+                        label: 'Clone widget',
+                        subtitle: 'Choose the existing widget to clone',
+                        description: 'Ypur new widget will start witht he settings and styling of the widget you clone. Changes you make will only apply to this widget.'
+                    },
+                    'derive': {
+                        name: 'derive',
+                        label: 'Child widget',
+                        subtitle: 'Choose a parent widget for this child',
+                        description: 'Apply the styling and configuration of an existing widget to this child widget. Any changes you make to the parent widget will be reflected in this child.'
+                    }
                 },
-                messages: {
-                    'clone': 'Choose the widget you wish to copy',
-                    'derive': 'Choose the widget you wish to reuse'
-                }
+                styles: [
+                    {
+                        name: 'base_waterfall',
+                        label: 'Waterfall'
+                    },
+                    {
+                        name: 'base_carousel',
+                        label: 'Carousel'
+                    },
+                    {
+                        name: 'base_billboard',
+                        label: 'Billboard'
+                    },
+                    {
+                        name: 'base_feed',
+                        label: 'Feed'
+                    },
+                    {
+                        name: 'base_slideshow',
+                        label: 'Slideshow'
+                    }
+                ]
             }
         },
         handleTypeChange: function(e) {
@@ -97,59 +107,75 @@
             var self = this;
 
             var readonly = this.props.readonly;
-            var widgetOptions = '';
-            var widgetStyle = (
-                <div ref='styles' className={'widget-styles'}>
-                    <fieldset>
-                        <label>
-                            Choose your Stackla Widget Style
-                        </label>
-                        {
-                            this.state.options.styles.map(function(option , i) {
-                                return  <div key={i}>
-                                            <input
-                                                type='radio'
-                                                ref={option.name}
-                                                name='style'
-                                                onChange={self.handleStyleChange}
-                                                value={option.name}
-                                                disabled={readonly}
-                                                defaultChecked={self.getDefaultChecked(option.name , 'style')}
-                                            />
-                                            {option.label}
-                                        </div>
-                            })
-                        }
-                    </fieldset>
-                </div>
-            );
-            var widgetList = (
-                <div ref='widgets' className={'widget-choices'}>
-                    <fieldset>
-                        <label>
-                            {(this.state.type !== 'new') ? this.state.messages[this.state.type] : ''}
-                        </label>
-                        <select
-                            disabled={readonly}
-                            onChange={this.handleWidgetCopyChange}
-                            defaultValue={(this.props.initialData) ? this.props.initialData.copyId : ''}>
-                            <option value=''></option>
-                            {
-                                Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
-                                {
-                                    return  <option value={key} key={key}>
-                                                {stacklaWp.admin.metabox.widgets[key]}
-                                            </option>
-                                })
-                            }
-                        </select>
-                    </fieldset>
-                </div>
-            )
+            var widgetStyle = [];
             var widgetOptions = [];
-            this.state.options.types.map(function(option , i) {
+            var defaultWidgetStyle ;
+
+            if (this.state.type) {
+                widgetStyle.push(
+                    <div>
+                        <fieldset>
+                            <label>
+                                Step 2: {this.state.types[this.state.type].subtitle}
+                            </label>
+                        </fieldset>
+                    </div>
+                );
+
+                if (this.state.type == 'new') {
+                    defaultWidgetStyle = this.state.style ? this.state.style : this.state.styles[0].name;
+                    widgetStyle.push(
+                        <div ref='styles' className='stackla-widgetStyle-wrapper'>
+                            {this.state.types[this.state.type].description}
+                            <fieldset>
+                                {
+                                    this.state.styles.map(function(option , i) {
+                                        return  <label key={i} className={"stackla-widgetStyle stackla-widgetStyle-" + option.name + (option.name == defaultWidgetStyle ? ' on' : '')}>
+                                                    <input
+                                                        type='radio'
+                                                        ref={option.name}
+                                                        name='style'
+                                                        onChange={self.handleStyleChange}
+                                                        value={option.name}
+                                                        disabled={readonly}
+                                                        defaultChecked={( option.name == defaultWidgetStyle )}
+                                                    />
+                                                    {option.label}
+                                                </label>
+                                    })
+                                }
+                            </fieldset>
+                        </div>
+                    );
+                } else {
+                    widgetStyle.push(
+                        <div ref='widgets' className='widget-choices'>
+                            <fieldset>
+                                <select
+                                    disabled={readonly}
+                                    onChange={this.handleWidgetCopyChange}
+                                    defaultValue={(this.props.initialData) ? this.props.initialData.copyId : ''}>
+                                    {
+                                        Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
+                                        {
+                                            return  <option value={key} key={key}>
+                                                        {stacklaWp.admin.metabox.widgets[key]}
+                                                    </option>
+                                        })
+                                    }
+                                </select>
+                            </fieldset>
+                        </div>
+                    );
+                }
+            }
+
+            var defaultWidgetType = this.state.type ? this.state.type : 'new';
+            $.each(this.state.types, function(i) {
+                var option = this;
+                console.log('type', option.name, option.name == defaultWidgetType);
                 widgetOptions.push(
-                <div className='widget-types' key={i} >
+                <label className={'stackla-widgetType stackla-widgetType-'+option.name + (option.name == defaultWidgetType ? ' on' : '')} key={i} >
                     <input
                         ref={option.name}
                         type='radio'
@@ -157,28 +183,30 @@
                         name='type'
                         onChange={self.handleTypeChange}
                         disabled={readonly}
-                        defaultChecked={self.getDefaultChecked(option.name , 'type')}
+                        defaultChecked={(option.name == defaultWidgetType)}
                     />
                     {option.label}
-                    <p>
-                        {option.description}
-                    </p>
-                    <div className="widget-type-style">
-                    {option.name == self.state.type && self.state.type !== 'new' ? widgetList : ''}
-                    {option.name == self.state.type && self.state.type == 'new' ? widgetStyle : ''}
-                    </div>
-                </div>);
+                </label>
+                );
             })
 
             return (
                 <div>
-                    <div ref='types'>
+                    <div ref='types' className="stackla-widget-section">
                         <fieldset>
                             <label>
-                                Choose your Stackla Widget Action
+                                Step 1: Choose your starting point
                             </label>
-                            {widgetOptions}
+                            <div className="stackla-widgetType-wrapper">
+                                {widgetOptions}
+                            </div>
                         </fieldset>
+                    </div>
+                    <div className="stackla-widget-section">
+                        {widgetStyle}
+                    </div>
+                    <div className={(this.props.showError) ? 'stackla-error-message' : 'hide'}>
+                        <stacklaWp.admin.components.InputError errorMessage={this.props.showError} />
                     </div>
                 </div>
             );
