@@ -11,7 +11,7 @@
     $terms = $_POST['terms'];
     // $filters = $_POST['filters'];
     $widget = $_POST['widget'];
-    $filterMedia = isset($_POST['filter_media']) ? $_POST['filter_media'] : array();
+    $mediaType = isset($_POST['media_type']) ? $_POST['media_type'] : array();
 
     $settings = new Stackla_WP_Settings();
     $validator = new Stackla_WP_Metabox_Validator($_POST);
@@ -38,14 +38,14 @@
         }
         $metabox->set_stackla_wp_tag($defaultTag);
 
-        $defaultFilter = $sdk->prepareDefaultFilter($defaultTag, $title . " - ", $filterMedia);
+        $defaultFilter = $sdk->prepareDefaultFilter($defaultTag, $title . " - ", $mediaType);
 
         if($defaultFilter === false && $defaultTag === false) {
             echo $sdk->get_errors();
             exit();
         }
         $metabox->set_stackla_wp_defaultFilter($defaultFilter);
-        $metabox->set_stackla_wp_defaultFilterMedia($filterMedia);
+        $metabox->set_stackla_wp_defaultFilterMedia($mediaType);
 
         $stackla_terms = $sdk->push_terms($terms , $defaultTag, $title . " - ");
         // $stackla_filters = $sdk->push_filters($filters , $defaultTag, $title . " - ");
@@ -60,7 +60,7 @@
 
         $responseData[Stackla_WP_Metabox::$terms_meta_key] = $metabox->set_json($stackla_terms);
         $responseData[Stackla_WP_Metabox::$filter_id_meta_key] = $defaultFilter->id;
-        $responseData[Stackla_WP_Metabox::$filter_media_meta_key] = $metabox->set_json($filterMedia);
+        $responseData[Stackla_WP_Metabox::$media_type_meta_key] = $metabox->set_json($mediaType);
         $responseData[Stackla_WP_Metabox::$widget_meta_key] = $metabox->set_json(array(
             'id' => $stackla_widget['id'],
             'copyId' => $stackla_widget['copyId'],

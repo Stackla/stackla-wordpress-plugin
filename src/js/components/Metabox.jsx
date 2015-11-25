@@ -46,6 +46,7 @@
                 overlay:'#jsx-metabox .overlay',
                 data: data,
                 mediaType: mediaType,
+                mediaTypeErrors: false,
                 dependencies: {
                     RequestError:stacklaWp.admin.components.RequestError,
                     WidgetTitle:stacklaWp.admin.components.WidgetTitle,
@@ -67,6 +68,52 @@
         {
             this.addSaveHook();
         },
+        sanitiseTermData: function(terms) {
+           var data = terms.map(function(term, i){
+                var obj = {};
+                $.each(term, function(i){
+                    obj[i] = this;
+                    switch (i) {
+                        case 'errors':
+                        case 'edited':
+                        case 'removed':
+                            obj[i] = this == 'false' ? false : true;
+                            break;
+                        case 'id':
+                            obj[i] = parseInt(this, 10);
+                            break;
+                    }
+                });
+                return obj;
+            });
+            return data;
+        },
+        isTermsIdentical: function(a, b) {
+            var identical = true;
+            if (a.length != b.length) {
+                identical = false;
+            }
+
+            if (identical) {
+                $.each(a, function(i){
+                    var termA = a[i];
+                    var termB = b[i];
+                    $.each(termA, function(j){
+                        var termAV = termA[j];
+                        var termBV = typeof termB[j] != 'undefined' ? termB[j] : null;
+                        if (termAV != termBV) {
+                            identical = false;
+                            return identical;
+                        }
+                    });
+
+                    if (!identical) {
+                        return false;
+                    }
+                });
+            }
+            return identical;
+        },
         /**
         *   Applies the event catchers to the wp draft and publish buttons;
         *   @return void;
@@ -83,11 +130,8 @@
                     e.preventDefault();
 
                     WP_SAVE_CONTROLLER = $(e.target);
-
-                    $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing', function()
-                    {
-                        self.compileData();
-                    });
+                    self.compileData();
+                    $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing');
                 });
             }
         },
@@ -126,6 +170,17 @@
                 terms.push(state);
             });
 
+            var sanitisedTerms = this.sanitiseTermData(this.state.data.terms);
+
+            if (this.isTermsIdentical(sanitisedTerms, terms) && this.state.data.media_type == this.state.mediaType && this.state.data.widget.style == widgetConfig.style){
+                WP_SAVE_CONTROLLER.trigger('click');
+                return;
+            }
+
+            if (!confirm("You are about to save Stackla widget data. This action will be applied to live widget. Are you still want to continue this action?")) {
+                return;
+            }
+
             data = {
                 'postId': stacklaWp.admin.metabox.postId,
                 'terms': terms,
@@ -137,11 +192,6 @@
                 },
                 'media_type': this.state.mediaType
             };
-
-            // console.log('Previous Data', this.state.data);
-            // console.log('Current Data', data);
-
-            // return;
 
             this.validate(data);
         },
@@ -257,7 +307,7 @@
             }
 
             if (mediaTypeErrors) {
-                this.setState({mediaTypeError:errors.title});
+                this.setState({mediaTypeErrors: mediaTypeErrors});
             }
 
             if (widgetErrors) {
@@ -373,15 +423,29 @@
                 );
             });
 
+            var defaultFilterErrors;
+            if (this.state.mediaTypeErrors) {
+                defaultFilterErrors = (
+                    <div className='stackla-error-message'>
+                        <ul>
+                            <li>
+                                {this.state.mediaTypeErrors}
+                            </li>
+                        </ul>
+                    </div>
+                );
+            }
+
             var defaultFilter = (
                 <div ref="filter" className='stackla-filter'>
                     <header>
                         <h2>Media types</h2>
                     </header>
                     <div className='stackla-block'>
-                        <div className='stackla-widget-section'>
+                        <div className={defaultFilterErrors ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}>
                             {defaultFilterOptions}
                         </div>
+                        {defaultFilterErrors}
                     </div>
                 </div>
             );
@@ -408,6 +472,9 @@
                         </section>
                         <section className='config'>
                             <this.state.dependencies.Widget ref='widget' readonly={authenticated ? false : true} />
+                        </section>
+                        <section>
+                            {defaultFilter}
                         </section>
                     </div>
                 )

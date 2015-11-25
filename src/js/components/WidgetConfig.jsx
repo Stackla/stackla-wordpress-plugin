@@ -173,7 +173,6 @@
             var defaultWidgetType = this.state.type ? this.state.type : 'new';
             $.each(this.state.types, function(i) {
                 var option = this;
-                console.log('type', option.name, option.name == defaultWidgetType);
                 widgetOptions.push(
                 <label className={'stackla-widgetType stackla-widgetType-'+option.name + (option.name == defaultWidgetType ? ' on' : '')} key={i} >
                     <input
@@ -202,7 +201,7 @@
                             </div>
                         </fieldset>
                     </div>
-                    <div className="stackla-widget-section">
+                    <div className={this.props.showError !== false ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}>
                         {widgetStyle}
                     </div>
                     <div className={(this.props.showError) ? 'stackla-error-message' : 'hide'}>
