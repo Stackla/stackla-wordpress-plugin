@@ -30758,9 +30758,9 @@ if (!Array.prototype.indexOf) {
                 this.funnelErrors(termsErrors , this.refs.terms.refs);
             }
 
-            if (titleErrors) {
-                this.refs.title.setState({error:errors.title});
-            }
+            // if (titleErrors) {
+            //     this.refs.title.setState({error:errors.title});
+            // }
 
             if (mediaTypeErrors) {
                 this.setState({mediaTypeErrors: mediaTypeErrors});
