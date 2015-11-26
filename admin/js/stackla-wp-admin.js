@@ -30524,6 +30524,7 @@ if (!Array.prototype.indexOf) {
             this.addSaveHook();
         },
         sanitiseTermData: function(terms) {
+           if (!terms) return null;
            var data = terms.map(function(term, i){
                 var obj = {};
                 $.each(term, function(i){
@@ -30545,7 +30546,7 @@ if (!Array.prototype.indexOf) {
         },
         isTermsIdentical: function(a, b) {
             var identical = true;
-            if (a.length != b.length) {
+            if (!a || a.length != b.length) {
                 identical = false;
             }
 
@@ -30927,9 +30928,6 @@ if (!Array.prototype.indexOf) {
                         ), 
                         React.createElement("section", {className: "config"}, 
                             React.createElement(this.state.dependencies.Widget, {ref: "widget", readonly: authenticated ? false : true})
-                        ), 
-                        React.createElement("section", null, 
-                            defaultFilter
                         )
                     )
                 )

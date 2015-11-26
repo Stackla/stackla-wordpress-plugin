@@ -69,6 +69,7 @@
             this.addSaveHook();
         },
         sanitiseTermData: function(terms) {
+           if (!terms) return null;
            var data = terms.map(function(term, i){
                 var obj = {};
                 $.each(term, function(i){
@@ -90,7 +91,7 @@
         },
         isTermsIdentical: function(a, b) {
             var identical = true;
-            if (a.length != b.length) {
+            if (!a || a.length != b.length) {
                 identical = false;
             }
 
@@ -472,9 +473,6 @@
                         </section>
                         <section className='config'>
                             <this.state.dependencies.Widget ref='widget' readonly={authenticated ? false : true} />
-                        </section>
-                        <section>
-                            {defaultFilter}
                         </section>
                     </div>
                 )

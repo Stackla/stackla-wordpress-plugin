@@ -76,10 +76,11 @@
                 <section>
                     <h2>Step 2: Configure WordPress</h2>
 
+                    <p>You can retrieve your Stack Shortname from the WordPress plugin configuration screen.</p>
+
                     <div class="input-group">
-                        <label for="stack">Stack shortname</label>
+                        <label for="stack">Stack Shortname</label>
                         <input type='text' class='widefat' name='stack' id='stack' value="<?php echo ($settings['current']) ? $settings['current']['stackla_stack'] : ''; ?>">
-                        <p class="description">You can retrieve your Stack shortname from the WordPress configuration settings page.</p>
                         <div class='error-message'></div>
                     </div>
 
