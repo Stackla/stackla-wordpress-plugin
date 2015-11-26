@@ -393,6 +393,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $widget;
         $filter_id = $filter->id;
 
+        $diff = true;
         if (gettype($oldWidget) == 'array') {
             $diff = array_diff($options, $oldWidget);
         }
