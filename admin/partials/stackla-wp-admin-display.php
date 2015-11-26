@@ -76,7 +76,7 @@
                 <section>
                     <h2>Step 2: Configure WordPress</h2>
 
-                    <p>You can retrieve your Stack Shortname from the WordPress plugin configuration screen.</p>
+                    <p>You can retrieve <b>these details</b> from the WordPress plugin configuration screen.</p>
 
                     <div class="input-group">
                         <label for="stack">Stack Shortname</label>

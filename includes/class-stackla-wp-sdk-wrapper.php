@@ -314,8 +314,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                 if(Stackla_WP_Metabox_Validator::validate_string($t['termId'])) {
                     $term->update();
                 } else {
-                    $term->create();
                     $term->addTag($tag);
+                    $term->create();
                     $terms[$i]['termId'] = $term->id;
                 }
             } catch(Exception $e) {
