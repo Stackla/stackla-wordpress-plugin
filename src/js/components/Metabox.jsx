@@ -482,6 +482,7 @@
                 <div>
                     {authentication}
                     {widget}
+                    <div className="powered-by-stackla"/>
                 </div>
             );
         }

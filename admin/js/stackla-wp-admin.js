@@ -30936,7 +30936,8 @@ if (!Array.prototype.indexOf) {
             return (
                 React.createElement("div", null, 
                     authentication, 
-                    widget
+                    widget, 
+                    React.createElement("div", {className: "powered-by-stackla"})
                 )
             );
         }
@@ -31587,7 +31588,7 @@ if (!Array.prototype.indexOf) {
                                     
                                         Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
                                         {
-                                            return  React.createElement("option", {value: key, key: key}, 
+                                            return  React.createElement("option", {value: key.replace('-', ''), key: key.replace('-', '')}, 
                                                         stacklaWp.admin.metabox.widgets[key]
                                                     )
                                         })

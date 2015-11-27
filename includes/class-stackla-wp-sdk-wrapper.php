@@ -197,7 +197,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         } else {
             $tag = $this->stack->instance('Tag');
             $tag->type = Stackla\Api\Tag::TYPE_CONTENT;
-            $tag->publicly_visible = Stackla\Api\Tag::VISIBLE;
+            $tag->publicly_visible = 0;
         }
 
         $deslashed = stripslashes($name);
@@ -413,15 +413,20 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         if($diff && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === true) {
             $parent = $this->stack->instance('Widget' , (int) $options['copyId'] , false);
 
-            if($options['type'] == 'clone') {
-                $widget = $parent->duplicate();
-                $widget->type_style = $options['style'];
-                $options['id'] = $widget->id;
-            } elseif($options['type'] == 'derive') {
-                $widget = $parent->derive($filter_id , $name);
-                $options['id'] = $widget->id;
-                $options['embed'] = $widget->embed_code;
-                return $options;
+            try{
+                if($options['type'] == 'clone') {
+                    $widget = $parent->duplicate();
+                    $options['id'] = $widget->id;
+                } elseif($options['type'] == 'derive') {
+                    $widget = $parent->derive($filter_id , $name);
+                    $options['id'] = $widget->id;
+                    $options['embed'] = $widget->embed_code;
+                    return $options;
+                }
+            } catch (Exception $e) {
+                $error = 'Unable to clone the widget, please make sure the widget is a valid widget';
+                $this->errors['widget'] = $error;
+                return false;
             }
         } elseif(Stackla_WP_Metabox_Validator::validate_string($options['id']) === false) {
             $widget = $this->stack->instance('Widget');
@@ -435,7 +440,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
         try {
             if(
-                Stackla_WP_Metabox_Validator::validate_string($options['id']) === false
+                !$widget->id
+                // Stackla_WP_Metabox_Validator::validate_string($options['id']) === false
                 // && Stackla_WP_Metabox_Validator::validate_string($options['copyId']) === false
             ) {
                 $widget->create();
@@ -466,8 +472,10 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
         foreach($widgets as $widget)
         {
-            $parsed[$widget->id] = $widget->name;
+            $parsed["-".$widget->id] = $widget->name;
         }
+
+        natcasesort($parsed);
 
         return $parsed;
     }

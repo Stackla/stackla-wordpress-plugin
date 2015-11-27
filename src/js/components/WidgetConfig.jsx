@@ -158,7 +158,7 @@
                                     {
                                         Object.keys(stacklaWp.admin.metabox.widgets).map(function(key)
                                         {
-                                            return  <option value={key} key={key}>
+                                            return  <option value={key.replace('-', '')} key={key.replace('-', '')}>
                                                         {stacklaWp.admin.metabox.widgets[key]}
                                                     </option>
                                         })
