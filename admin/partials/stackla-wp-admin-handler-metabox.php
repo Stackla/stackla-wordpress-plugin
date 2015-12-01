@@ -24,9 +24,8 @@
         $oldData = $metabox->get_data();
         $oldWidget = json_decode($oldData['widget'], 1);
 
-        if($sdk === false)
+        if ($sdk === false)
         {
-            echo $sdk->get_errors();
             exit();
         }
 
@@ -81,4 +80,3 @@
     }
     echo json_encode($response);
 
-?>

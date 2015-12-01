@@ -15,4 +15,3 @@
     } else {
         echo json_encode(array('errors' => $validator->errors, 'result' => '0'));
     }
-?>

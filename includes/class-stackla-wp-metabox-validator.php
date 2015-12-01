@@ -8,13 +8,13 @@
  * @subpackage Stackla_WP/includes
  * @author     Stackla <tech@stackla.com>
  */
-
-class Stackla_WP_Metabox_Validator {
+class Stackla_WP_Metabox_Validator
+{
 
     private $data;
-    protected $allowed_networks = array('twitter' , 'facebook' , 'instagram' , 'youtube');
-    protected $allowed_media = array('text' , 'image' , 'video');
-    protected $allowed_sorting = array('latest' , 'greatest' , 'votes');
+    protected $allowed_networks = array('twitter', 'facebook', 'instagram', 'youtube');
+    protected $allowed_media = array('text', 'image', 'video');
+    protected $allowed_sorting = array('latest', 'greatest', 'votes');
     protected $error_title = "You must set a widget title";
     protected $error_terms = "You must define at least one term";
     protected $error_filters = "You must define at least one filter";
@@ -34,11 +34,10 @@ class Stackla_WP_Metabox_Validator {
     public $errors = array();
 
     /**
-    *   -- CONSTRUCTOR --
-    *   Sets the data the validator validates;
-    *   @param array    $data   the data to validate;
-    *   @return void;
-    */
+     *   -- CONSTRUCTOR --
+     *   Sets the data the validator validates;
+     * @param array $data the data to validate;
+     */
     public function __construct($data)
     {
         $this->data = $data;
@@ -49,23 +48,23 @@ class Stackla_WP_Metabox_Validator {
     }
 
     /**
-    *   Validates a string;
-    *   @param string   $var    a string to be validated;
-    *   @return boolean;
-    */
+     *   Validates a string;
+     * @param string $var a string to be validated;
+     * @return bool
+     */
     public static function validate_string($var)
     {
-        return (!$var || $var === '' || strlen($var) <= 0 || !isset($var)) ? false : true;
+        return !(!$var || $var === '' || strlen($var) <= 0 || !isset($var));
     }
 
     /**
-    *   Validates an array;
-    *   @param array    $var    an array to be validated;
-    *   @return boolean;
-    */
+     *   Validates an array;
+     * @param array $var an array to be validated;
+     * @return bool
+     */
     public static function validate_array($var)
     {
-        return (!is_array($var) || empty($var)) ? false : true;
+        return !(!is_array($var) || empty($var));
     }
 
     protected function validate_media_type()
@@ -77,14 +76,12 @@ class Stackla_WP_Metabox_Validator {
     }
 
     /**
-    *   Validates the widget's terms;
-    *   Pushes the result into the $this->errors array;
-    *   @return void;
-    */
+     *   Validates the widget's terms;
+     *   Pushes the result into the $this->errors array;
+     */
     protected function validate_widget_terms()
     {
-        foreach($this->data['terms'] as $term)
-        {
+        foreach ($this->data['terms'] as $term) {
             $this->errors['terms'][$term['id']] = array(
                 'network' => false,
                 'term' => false,
@@ -93,53 +90,47 @@ class Stackla_WP_Metabox_Validator {
 
             //don't validate removed terms
 
-            if($term['removed'] === true || $term['removed'] === 'true')
-            {
+            if ($term['removed'] === true || $term['removed'] === 'true') {
                 $this->errors['terms'][$term['id']] = false;
                 continue;
             }
 
-            if(self::validate_string($term['network']) === false)
-            {
+            if (self::validate_string($term['network']) === false) {
                 $this->errors['terms'][$term['id']] = false;
                 continue;
                 // $this->errors['terms'][$term['id']]['network'] = $this->error_network;
             }
             $this->emptyTerm = false;
 
-            if(!in_array($term['network'] , $this->allowed_networks))
-            {
+            if (!in_array($term['network'], $this->allowed_networks)) {
                 $this->errors['terms'][$term['id']]['network'] = $this->error_illegal_network;
             }
 
-            if(self::validate_string($term['term']) === false)
-            {
+            if (self::validate_string($term['term']) === false) {
                 $this->errors['terms'][$term['id']]['term'] = $this->error_term_term;
             }
 
-            if(self::validate_string($term['termValue']) === false)
-            {
+            if (self::validate_string($term['termValue']) === false) {
                 $this->errors['terms'][$term['id']]['termValue'] = $this->error_term_value;
             }
 
-            if(
+            if (
                 $this->errors['terms'][$term['id']]['network'] === false &&
                 $this->errors['terms'][$term['id']]['term'] === false &&
                 $this->errors['terms'][$term['id']]['termValue'] === false
-            )
-            {
+            ) {
                 $this->errors['terms'][$term['id']] = false;
             }
         }
     }
 
     /**
-    *   Validates the widget's filters;
-    *   Pushes the result into the $this->errors array;
-    *   @return void;
-    */
-    protected function validate_widget_filters() {
-        foreach($this->data['filters'] as $filter) {
+     *   Validates the widget's filters;
+     *   Pushes the result into the $this->errors array;
+     */
+    protected function validate_widget_filters()
+    {
+        foreach ($this->data['filters'] as $filter) {
             $this->errors['filters'][$filter['id']] = array(
                 'name' => false,
                 'network' => false,
@@ -149,40 +140,40 @@ class Stackla_WP_Metabox_Validator {
 
             //don't validate removed filters
 
-            if($filter['removed'] === true || $filter['removed'] === 'true') {
+            if ($filter['removed'] === true || $filter['removed'] === 'true') {
                 $this->errors['filters'][$filter['id']] = false;
                 continue;
             }
 
-            if(self::validate_string($filter['name']) === false) {
+            if (self::validate_string($filter['name']) === false) {
                 $this->errors['filters'][$filter['id']]['name'] = $this->error_filter_name;
             }
 
-            if(isset($filter['media']) && self::validate_array($filter['media'])) {
-                foreach($filter['media'] as $media) {
-                    if(!in_array($media , $this->allowed_media)) {
+            if (isset($filter['media']) && self::validate_array($filter['media'])) {
+                foreach ($filter['media'] as $media) {
+                    if (!in_array($media, $this->allowed_media)) {
                         $this->errors['filters'][$filter['id']]['media'] = $this->error_illegal_media;
                     }
                 }
             }
 
-            if(isset($filter['network']) && self::validate_array($filter['network'])) {
-                foreach($filter['network'] as $network) {
-                    if(!in_array($network , $this->allowed_networks)) {
+            if (isset($filter['network']) && self::validate_array($filter['network'])) {
+                foreach ($filter['network'] as $network) {
+                    if (!in_array($network, $this->allowed_networks)) {
                         $this->errors['filters'][$filter['id']]['network'] = $this->error_illegal_network;
                     }
                 }
             }
 
-            if(self::validate_string($filter['sorting']) === false) {
+            if (self::validate_string($filter['sorting']) === false) {
                 $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_sorting;
             }
 
-            if(!in_array($filter['sorting'] , $this->allowed_sorting)) {
+            if (!in_array($filter['sorting'], $this->allowed_sorting)) {
                 $this->errors['filters'][$filter['id']]['sorting'] = $this->error_filter_illegal_sorting;
             }
 
-            if(
+            if (
                 $this->errors['filters'][$filter['id']]['name'] === false &&
                 $this->errors['filters'][$filter['id']]['network'] === false &&
                 $this->errors['filters'][$filter['id']]['media'] === false &&
@@ -194,9 +185,9 @@ class Stackla_WP_Metabox_Validator {
     }
 
     /**
-    *   Runs all validation methods; Determines if valid is true or false;
-    *   @return void;
-    */
+     *   Runs all validation methods; Determines if valid is true or false;
+     * @return bool
+     */
     public function validate()
     {
         $this->validate_widget_terms();
