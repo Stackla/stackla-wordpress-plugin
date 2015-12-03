@@ -57,8 +57,8 @@
                 }
             },
             /**
-             *   React method that runs when the component is mounted to the DOM;
-             *   @return void;
+             * React method that runs when the component is mounted to the DOM;
+             * @return void;
              */
             componentDidMount: function () {
                 this.addSaveHook();
@@ -110,8 +110,8 @@
                 return identical;
             },
             /**
-             *   Applies the event catchers to the wp draft and publish buttons;
-             *   @return void;
+             * Applies the event catchers to the wp draft and publish buttons;
+             * @return void;
              */
             addSaveHook: function () {
                 var self = this;
@@ -130,23 +130,23 @@
                 }
             },
             /**
-             *   Activates the ajax loader;
-             *   @return void;
+             * Activates the ajax loader;
+             * @return void;
              */
             activateLoader: function () {
                 $(React.findDOMNode(this.refs.overlay)).addClass('display');
             },
             /**
-             *   Deactivates the ajax loader;
-             *   @return void;
+             * Deactivates the ajax loader;
+             * @return void;
              */
             deactivateLoader: function () {
                 $(React.findDOMNode(this.refs.overlay)).removeClass('display');
             },
             /**
-             *   Compiles the data from the view to be posted to the db;
-             *   @param e event object;
-             *   @return void;
+             * Compiles the data from the view to be posted to the db;
+             * @param e event object;
+             * @return void;
              */
             compileData: function (e) {
                 //e.preventDefault();
@@ -186,9 +186,9 @@
                 this.validate(data);
             },
             /**
-             *   Validates the data from the view;
-             *   @param data the compiled data from the view;
-             *   @return void;
+             * Validates the data from the view;
+             * @param data the compiled data from the view;
+             * @return void;
              */
             validate: function (data) {
                 var self = this;
@@ -220,10 +220,10 @@
                 });
             },
             /**
-             *   Attempts to save the entered data;
-             *   The handler saves data to WordPress, then to Stackla and finally to WordPress once again
-             *   @param data object containing the data to save;
-             *   @return void;
+             * Attempts to save the entered data;
+             * The handler saves data to WordPress, then to Stackla and finally to WordPress once again
+             * @param data object containing the data to save;
+             * @return void;
              */
             save: function (data) {
                 var self = this;
@@ -281,9 +281,9 @@
                 }
             },
             /**
-             *   Checks to see if errors are defined and if so, funnels them;
-             *   @param errors an object containing errors;
-             *   @return void;
+             * Checks to see if errors are defined and if so, funnels them;
+             * @param errors an object containing errors;
+             * @return void;
              */
             prepareErrors: function (errors) {
                 var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
@@ -307,10 +307,10 @@
                 }
             },
             /**
-             *   Funnels errors to their correct dom nodes;
-             *   @param errors an errors object or array;
-             *   @param refs the dom nodes to funnel the errors to;
-             *   @return void;
+             * Funnels errors to their correct dom nodes;
+             * @param errors an errors object or array;
+             * @param refs the dom nodes to funnel the errors to;
+             * @return void;
              */
             funnelErrors: function (errors, refs) {
                 if (!errors || typeof errors == 'undefined') return;
@@ -333,9 +333,9 @@
                 }
             },
             /**
-             *   Handles request failure errors;
-             *   @param error the xhr error object;
-             *   @return void;
+             * Handles request failure errors;
+             * @param error the xhr error object;
+             * @return void;
              */
             handleRequestError: function (error) {
                 this.refs.requestErrors.setState(
@@ -344,9 +344,9 @@
                     });
             },
             /**
-             *   Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
-             *   @param e event object;
-             *   @return void;
+             * Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
+             * @param e event object;
+             * @return void;
              */
             setRedirectCookie: function (e) {
                 e.preventDefault();
@@ -361,8 +361,8 @@
                 this.setState({'mediaType': diff});
             },
             /**
-             *   Renders the Metabox component;
-             *   @return React component;
+             * Renders the Metabox component;
+             * @return React component;
              */
             render: function () {
                 var that = this;
