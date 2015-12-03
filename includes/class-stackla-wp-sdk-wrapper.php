@@ -317,49 +317,57 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             /** @var Stackla\Api\Term $term */
             $term = null;
             $error = false;
-
-            if (self::isFalse($t['edited'])) {
-                continue;
-            }
-
-            if ($this->validate_term($t) === false) {
-                $this->errors['terms'][$t['id']] = 'Invalid Term data';
-            };
-
             $isNew = false;
 
-            if (Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true) {
+            if (self::isFalse($t['edited'])) {
                 try {
-                    $term = $this->stack->instance('Term', $t['termId']);
-                    if (self::isTrue($t['removed'])) {
-                        $term->delete();
-                        continue;
-                    }
+                    // test if the term still exists, if not, an exception will
+                    // be thrown
+                    $this->stack->instance('Term', $t['termId']);
+                    continue;
                 } catch (Exception $e) {
-                    $message = $e->getMessage();
-                    if ($message === self::NOT_FOUND_EXCEPTION_MESSAGE) {
-                        if (self::isTrue($t['removed'])) {
-                            // the user actually wanted to delete it, and someone
-                            // else has already deleted it
-                            continue;
-                        } else {
-                            // if the term is not found, then it is probably
-                            // deleted because a wordpress user has no way to
-                            // recover from such errors, and the user do
-                            // actually want to have this term (otherwise the
-                            // user would have delete it), we should capture it
-                            // and create a new term instead.
-                            $term = $this->stack->instance('Term');
-                            $isNew = true;
-                        }
-                    } else {
-                        // some other not defined exception, rethrow
-                        throw $e;
-                    }
+                    // if term not exists, recreate it
+                    $term = $this->stack->instance('Term');
+                    $isNew = true;
                 }
             } else {
-                $term = $this->stack->instance('Term');
-                $isNew = true;
+                if ($this->validate_term($t) === false) {
+                    $this->errors['terms'][$t['id']] = 'Invalid Term data';
+                };
+
+                if (Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true) {
+                    try {
+                        $term = $this->stack->instance('Term', $t['termId']);
+                        if (self::isTrue($t['removed'])) {
+                            $term->delete();
+                            continue;
+                        }
+                    } catch (Exception $e) {
+                        $message = $e->getMessage();
+                        if ($message === self::NOT_FOUND_EXCEPTION_MESSAGE) {
+                            if (self::isTrue($t['removed'])) {
+                                // the user actually wanted to delete it, and someone
+                                // else has already deleted it
+                                continue;
+                            } else {
+                                // if the term is not found, then it is probably
+                                // deleted because a wordpress user has no way to
+                                // recover from such errors, and the user do
+                                // actually want to have this term (otherwise the
+                                // user would have delete it), we should capture it
+                                // and create a new term instead.
+                                $term = $this->stack->instance('Term');
+                                $isNew = true;
+                            }
+                        } else {
+                            // some other not defined exception, rethrow
+                            throw $e;
+                        }
+                    }
+                } else {
+                    $term = $this->stack->instance('Term');
+                    $isNew = true;
+                }
             }
 
             $name = sprintf("%s - %s - %s", $t['network'], $t['term'], $t['termValue']);
