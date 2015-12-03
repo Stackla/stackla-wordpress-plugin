@@ -28,12 +28,18 @@
         return diff;
     }
 
+    var RequestError, WidgetTerms, Widget;
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
         {
             propTypes: {},
             getInitialState: function () {
                 var data = stacklaWp.admin && stacklaWp.admin.metabox && stacklaWp.admin.metabox.data ? stacklaWp.admin.metabox.data : {},
                     mediaType = data.media_type && typeof data.media_type == 'object' ? data.media_type : ['text', 'image', 'video', 'html'];
+
+                RequestError = stacklaWp.admin.components.RequestError;
+                WidgetTerms = stacklaWp.admin.components.WidgetTerms;
+                Widget = stacklaWp.admin.components.Widget;
 
                 return {
                     wpPublishSelector: "#publish",
@@ -145,12 +151,9 @@
             },
             /**
              * Compiles the data from the view to be posted to the db;
-             * @param e event object;
              * @return void;
              */
-            compileData: function (e) {
-                //e.preventDefault();
-
+            compileData: function () {
                 var termsRefs = this.refs.terms.refs;
                 var widgetConfig = $.extend({}, this.refs.widget.refs.config.state);
                 var terms = [];
@@ -246,8 +249,8 @@
                         self.deactivateLoader();
                         $node.removeClass('saving');
 
-                        if (typeof response == 'object') {
-                            if (response.result == '1') {
+                        if (_.isObject(response)) {
+                            if (response.result === '1') {
                                 if ($title.val() == '') {
                                     $title.val(data.title)
                                 }
@@ -270,6 +273,11 @@
                                 WP_SAVE_CONTROLLER.trigger('click');
                             } else {
                                 self.addSaveHook();
+                                if (response.errors.title) {
+                                    // error title is not handled anywhere
+                                    // I'll treat it as network errors for now
+                                    self.handleRequestError(response.errors.title);
+                                }
                                 self.prepareErrors(response.errors);
                             }
                         }
@@ -286,23 +294,15 @@
              * @return void;
              */
             prepareErrors: function (errors) {
-                var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
-                var mediaTypeErrors = (typeof errors.media_type !== 'undefined') ? errors.media_type : false;
-                var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
-
-                if (termsErrors) {
-                    this.funnelErrors(termsErrors, this.refs.terms.refs);
+                if (errors.terms) {
+                    this.funnelErrors(errors.terms, this.refs.terms.refs);
                 }
 
-                // if (titleErrors) {
-                //     this.refs.title.setState({error:errors.title});
-                // }
-
-                if (mediaTypeErrors) {
-                    this.setState({mediaTypeErrors: mediaTypeErrors});
+                if (errors.media_type) {
+                    this.setState({mediaTypeErrors: errors.media_type});
                 }
 
-                if (widgetErrors) {
+                if (errors.widget) {
                     this.refs.widget.setState({error: errors.widget});
                 }
             },
@@ -338,10 +338,7 @@
              * @return void;
              */
             handleRequestError: function (error) {
-                this.refs.requestErrors.setState(
-                    {
-                        errorMessage: error.toString()
-                    });
+                this.refs.requestErrors.setState({errorMessage: error.toString()});
             },
             /**
              * Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
@@ -366,10 +363,11 @@
              */
             render: function () {
                 var that = this;
-                var authentication, authenticated = true, widget;
+                var authentication, widget;
 
-                if (window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
-                    authenticated = false;
+                var authenticated = !(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false);
+
+                if (!authenticated) {
                     authentication = (
                         <div className='auth-notification prompt'>
                             <h3>
@@ -458,15 +456,15 @@
 
                                 </div>
                             </div>
-                            <this.state.dependencies.RequestError ref='requestErrors' errors={this.state.errors.request}/>
+                            <RequestError ref='requestErrors' errors={this.state.errors.request}/>
                             <section className='terms'>
-                                <this.state.dependencies.WidgetTerms ref='terms' initialData={this.state.data.terms} readonly={!authenticated}/>
+                                <WidgetTerms ref='terms' initialData={this.state.data.terms} readonly={!authenticated}/>
                             </section>
                             <section>
                                 {defaultFilter}
                             </section>
                             <section className='config'>
-                                <this.state.dependencies.Widget ref='widget' readonly={!authenticated}/>
+                                <Widget ref='widget' readonly={!authenticated}/>
                             </section>
                         </div>
                     )

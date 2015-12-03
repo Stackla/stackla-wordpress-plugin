@@ -18,6 +18,8 @@ require_once('class-stackla-wp-metabox.php');
 
 class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 {
+    const NOT_FOUND_EXCEPTION_MESSAGE = 'Server return 404 error code. Invalid resource: Invalid resource specified or resource not found';
+
     /**
      * @var    $user_settings      array   array of existing user settings;
      * @var    $existing_tag_id    string  existing postmeta stackla tag id;
@@ -45,7 +47,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     public $errors = array();
 
     public static $media = array('text', 'image', 'video');
-    public static $host = "https://api.stackla.com/api/";
+    public static $host = "https://api.qa.stackla.com/api/";
 
     /**
      *   -- CONSTRUCTOR --
@@ -75,7 +77,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $this->setup();
         } catch (Exception $e) {
             $this->errors['request'] = $e->getMessage();
-            return false;
+            throw $e;
         }
     }
 
@@ -287,6 +289,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
      * @param null $prefix
      * @return array   the modified terms array for WP database insertion;
      * @throws Error
+     * @throws Exception
      */
     public function push_terms($terms, $tag, $prefix = null)
     {
@@ -302,7 +305,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $term = null;
             $error = false;
 
-            if ($t['edited'] === false || $t['edited'] === 'false') {
+            if (self::isFalse($t['edited'])) {
                 continue;
             }
 
@@ -311,11 +314,32 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             };
 
             if (Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true) {
-                $term = $this->stack->instance('Term', $t['termId']);
-
-                if ($t['removed'] === 'true' || $t['removed'] === true) {
-                    $term->delete();
-                    continue;
+                try {
+                    $term = $this->stack->instance('Term', $t['termId']);
+                    if (self::isTrue($t['removed'])) {
+                        $term->delete();
+                        continue;
+                    }
+                } catch (Exception $e) {
+                    $message = $e->getMessage();
+                    if ($message === self::NOT_FOUND_EXCEPTION_MESSAGE) {
+                        if (self::isTrue($t['removed'])) {
+                            // the user actually wanted to delete it, and someone
+                            // else has already deleted it
+                            continue;
+                        } else {
+                            // if the term is not found, then it is probably
+                            // deleted because a wordpress user has no way to
+                            // recover from such errors, and the user do
+                            // actually want to have this term (otherwise the
+                            // user would have delete it), we should capture it
+                            // and create a new term instead.
+                            $term = $this->stack->instance('Term');
+                        }
+                    } else {
+                        // some other not defined exception, rethrow
+                        throw $e;
+                    }
                 }
             } else {
                 $term = $this->stack->instance('Term');
@@ -596,5 +620,15 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         } catch (Exception $e) {
 
         }
+    }
+
+    public static function isTrue($bool)
+    {
+        return $bool === true || $bool === 'true';
+    }
+
+    public static function isFalse($bool)
+    {
+        return $bool === false || $bool === 'false';
     }
 }
