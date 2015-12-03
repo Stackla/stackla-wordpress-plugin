@@ -326,6 +326,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                 $this->errors['terms'][$t['id']] = 'Invalid Term data';
             };
 
+            $isNew = false;
+
             if (Stackla_WP_Metabox_Validator::validate_string($t['termId']) === true) {
                 try {
                     $term = $this->stack->instance('Term', $t['termId']);
@@ -348,6 +350,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                             // user would have delete it), we should capture it
                             // and create a new term instead.
                             $term = $this->stack->instance('Term');
+                            $isNew = true;
                         }
                     } else {
                         // some other not defined exception, rethrow
@@ -356,21 +359,22 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                 }
             } else {
                 $term = $this->stack->instance('Term');
+                $isNew = true;
             }
 
-            $deslashed = sprintf("%s - %s - %s", $t['network'], $t['term'], $t['termValue']);
+            $name = sprintf("%s - %s - %s", $t['network'], $t['term'], $t['termValue']);
             if ($prefix) {
-                $deslashed = $prefix . $deslashed;
+                $name = $prefix . $name;
             }
 
-            $term->name = $deslashed;
-            $term->display_name = $deslashed;
+            $term->name = $name;
+            $term->display_name = $name;
             $term->network = $t['network'];
             $term->type = $t['term'];
             $term->term = $t['termValue'];
 
             try {
-                if (Stackla_WP_Metabox_Validator::validate_string($t['termId'])) {
+                if (!$isNew) {
                     $term->update();
                 } else {
                     $term->addTag($tag);
