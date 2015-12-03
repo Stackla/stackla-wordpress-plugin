@@ -19,6 +19,7 @@ require_once('class-stackla-wp-metabox.php');
 class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 {
     const NOT_FOUND_EXCEPTION_MESSAGE = 'Server return 404 error code. Invalid resource: Invalid resource specified or resource not found';
+    const TAG_EXISTS_EXCEPTION_MESSAGE = 'Server return 400 error code. Bad request: The request could not be understood. {"data":[],"errors":[{"message":"tag must be unique","code":400}]}';
 
     /**
      * @var    $user_settings      array   array of existing user settings;
@@ -203,26 +204,26 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
     }
 
     /**
-     *   Pushes a tag to Stackla;
-     * @param $name    string  the name of the tag;
-     * @return bool|Tag   Stackla Tag object if successful, false on fail;
+     * Pushes a tag to Stackla;
+     * @param $name string  the name of the tag;
+     * @return bool|Tag Stackla Tag object if successful, false on fail;
      */
     public function push_tag($name)
     {
         $tag = null;
 
-        if ($this->existing_tag_id !== '') {
+        if ($this->existing_tag_id) {
             $tag = $this->stack->instance('Tag', $this->existing_tag_id);
         } else {
             $tag = $this->stack->instance('Tag');
-            $tag->type = Stackla\Api\Tag::TYPE_CONTENT;
+            $tag->type = Tag::TYPE_CONTENT;
             $tag->publicly_visible = 0;
         }
 
-        $deslashed = stripslashes($name);
+        $name = stripslashes($name);
 
-        $tag->tag = $deslashed;
-        $tag->slug = $deslashed;
+        $tag->tag = $name;
+        $tag->slug = $name;
 
         try {
             if (Stackla_WP_Metabox_Validator::validate_string($this->existing_tag_id)) {
@@ -235,7 +236,19 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
             return $tag;
         } catch (Exception $e) {
-            $this->errors['title'] = $e->getMessage();
+            if ($e->getMessage() === self::TAG_EXISTS_EXCEPTION_MESSAGE) {
+                /*
+                 * It failed because it tries to create a tag with same name.
+                 * Usually this happens when a stack is used in 2 or more
+                 * WordPress blog and both posts have the same post ID.
+                 * It is easy for the user to recover by creating a new post
+                 * with a different ID (or delete the existing tag but deleting
+                 * the tag might affect other applications that rely on the tag)
+                 */
+                $this->errors['title'] = 'Term cannot be created due to name conflict. Please create a new post and try again.';
+            } else {
+                $this->errors['title'] = $e->getMessage();
+            }
             return false;
         }
 

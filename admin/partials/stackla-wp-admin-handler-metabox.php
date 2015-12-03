@@ -7,7 +7,7 @@ require_once '../../includes/class-stackla-wp-metabox.php';
 require_once '../../includes/class-stackla-wp-sdk-wrapper.php';
 
 $post_id = $_POST['postId'];
-$title = "WP-{$post_id}";
+$tagName = "WP-{$post_id}";
 $terms = $_POST['terms'];
 // $filters = $_POST['filters'];
 $widget = $_POST['widget'];
@@ -25,7 +25,7 @@ try {
         $oldData = $metabox->get_data();
         $oldWidget = json_decode($oldData['widget'], 1);
 
-        $defaultTag = $sdk->push_tag($title);
+        $defaultTag = $sdk->push_tag($tagName);
 
         if ($defaultTag === false) {
             echo $sdk->get_errors();
@@ -33,7 +33,7 @@ try {
         }
         $metabox->set_stackla_wp_tag($defaultTag);
 
-        $defaultFilter = $sdk->prepareDefaultFilter($defaultTag, $title . " - ", $mediaType);
+        $defaultFilter = $sdk->prepareDefaultFilter($defaultTag, $tagName . " - ", $mediaType);
 
         if ($defaultFilter === false && $defaultTag === false) {
             echo $sdk->get_errors();
@@ -42,9 +42,9 @@ try {
         $metabox->set_stackla_wp_defaultFilter($defaultFilter);
         $metabox->set_stackla_wp_defaultFilterMedia($mediaType);
 
-        $stackla_terms = $sdk->push_terms($terms, $defaultTag, $title . " - ");
-        // $stackla_filters = $sdk->push_filters($filters , $defaultTag, $title . " - ");
-        $stackla_widget = $sdk->push_widget($title, $defaultFilter, $widget, $oldWidget);
+        $stackla_terms = $sdk->push_terms($terms, $defaultTag, $tagName . " - ");
+        // $stackla_filters = $sdk->push_filters($filters , $defaultTag, $tagName . " - ");
+        $stackla_widget = $sdk->push_widget($tagName, $defaultFilter, $widget, $oldWidget);
 
         $sdk_valid = $sdk->validate();
 
