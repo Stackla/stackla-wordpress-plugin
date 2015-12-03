@@ -89,6 +89,7 @@ gulp.task('publicScss' , function() {
 gulp.task('adminJs' , function() {
     return gulp.src(paths.js.admin.src)
     .pipe(order([
+        'lib/lodash.js',
         'lib/jquery-1.11.1.js',
         'lib/jquery.cookie.js',
         'lib/react.js',
