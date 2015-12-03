@@ -52,8 +52,8 @@
                     },
                     errors: {
                         title: false,
-                        terms: [],
-                    },
+                        terms: []
+                    }
                 }
             },
             /**
@@ -65,7 +65,7 @@
             },
             sanitiseTermData: function (terms) {
                 if (!terms) return null;
-                var data = terms.map(function (term, i) {
+                return terms.map(function (term, i) {
                     var obj = {};
                     $.each(term, function (i) {
                         obj[i] = this;
@@ -82,7 +82,6 @@
                     });
                     return obj;
                 });
-                return data;
             },
             isTermsIdentical: function (a, b) {
                 var identical = true;
@@ -149,13 +148,12 @@
              *   @param e event object;
              *   @return void;
              */
-            compileData: function () {
+            compileData: function (e) {
                 //e.preventDefault();
 
                 var termsRefs = this.refs.terms.refs;
                 var widgetConfig = $.extend({}, this.refs.widget.refs.config.state);
                 var terms = [];
-                var data = {};
 
                 $.each(termsRefs, function (key, value) {
                     var state = $.extend({}, value.state);
@@ -173,7 +171,7 @@
                     return;
                 }
 
-                data = {
+                var data = {
                     'postId': stacklaWp.admin.metabox.postId,
                     'terms': terms,
                     'widget': {
@@ -257,12 +255,15 @@
                                 var keyId, valId;
                                 if (response.data) {
                                     for (var key in response.data) {
-                                        if ($('input[value=' + key + ']').length) {
-                                            keyId = $('input[value=' + key + ']').attr('id');
-                                            valId = keyId.replace(/\-key$/, '-value');
-                                            $('#' + valId).val(response.data[key]);
-                                        } else {
-                                            console.log('notexist', key);
+                                        if (response.data.hasOwnProperty(key)) {
+                                            var $input = $('input[value=' + key + ']');
+                                            if ($input.length) {
+                                                keyId = $input.attr('id');
+                                                valId = keyId.replace(/\-key$/, '-value');
+                                                $('#' + valId).val(response.data[key]);
+                                            } else {
+                                                console.log('notexist', key);
+                                            }
                                         }
                                     }
                                 }
@@ -281,13 +282,12 @@
             },
             /**
              *   Checks to see if errors are defined and if so, funnels them;
-             *   @param {errors} an object containing errors;
+             *   @param errors an object containing errors;
              *   @return void;
              */
             prepareErrors: function (errors) {
                 var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
                 var mediaTypeErrors = (typeof errors.media_type !== 'undefined') ? errors.media_type : false;
-                var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
                 var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
 
                 if (termsErrors) {
