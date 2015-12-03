@@ -6,13 +6,13 @@
 
     function arr_diff (a1, a2) {
 
-        var a = [], diff = [];
+        var a = [], diff = [], i;
 
-        for (var i = 0; i < a1.length; i++) {
+        for (i = 0; i < a1.length; i++) {
             a[a1[i]] = true;
         }
 
-        for (var i = 0; i < a2.length; i++) {
+        for (i = 0; i < a2.length; i++) {
             if (a[a2[i]]) {
                 delete a[a2[i]];
             } else {
@@ -21,11 +21,13 @@
         }
 
         for (var k in a) {
-            diff.push(k);
+            if (a.hasOwnProperty(k)) {
+                diff.push(k);
+            }
         }
 
         return diff;
-    };
+    }
 
     window.stacklaWp.admin.components.Metabox = React.createClass(
     {
@@ -78,7 +80,7 @@
                         case 'errors':
                         case 'edited':
                         case 'removed':
-                            obj[i] = this == 'false' ? false : true;
+                            obj[i] = this != 'false';
                             break;
                         case 'id':
                             obj[i] = parseInt(this, 10);
@@ -154,7 +156,7 @@
         },
         /**
         *   Compiles the data from the view to be posted to the db;
-        *   @param {e} event object;
+        *   @param e event object;
         *   @return void;
         */
         compileData:function()
@@ -178,7 +180,7 @@
                 return;
             }
 
-            if (!confirm("You are about to save Stackla widget data. This action will be applied to live widget. Are you still want to continue this action?")) {
+            if (!confirm("You are about to save Stackla widget data. This action will be applied to live widget. Do you still want to continue this action?")) {
                 return;
             }
 
@@ -198,7 +200,7 @@
         },
         /**
         *   Validates the data from the view;
-        *   @param {data} the compiled data from the view;
+        *   @param data the compiled data from the view;
         *   @return void;
         */
         validate: function(data) {
@@ -233,7 +235,7 @@
         /**
         *   Attempts to save the entered data;
         *   The handler saves data to WordPress, then to Stackla and finally to WordPress once again
-        *   @param {data} object containing the data to save;
+        *   @param data object containing the data to save;
         *   @return void;
         */
         save: function(data) {
@@ -317,8 +319,8 @@
         },
         /**
         *   Funnels errors to their correct dom nodes;
-        *   @param {errors} an errors object or array;
-        *   @param {refs} the dom nodes to funnel the errors to;
+        *   @param errors an errors object or array;
+        *   @param refs the dom nodes to funnel the errors to;
         *   @return void;
         */
         funnelErrors: function(errors , refs) {
@@ -330,7 +332,7 @@
                         errors:errors[index]
                     })
                 });
-            } else if(typeof errors == 'array') {
+            } else if(_.isArray(errors)) {
                 var length = errors.length;
                 var i;
 
@@ -343,7 +345,7 @@
         },
         /**
         *   Handles request failure errors;
-        *   @param {error} the xhr error object;
+        *   @param error the xhr error object;
         *   @return void;
         */
         handleRequestError:function(error)
@@ -355,7 +357,7 @@
         },
         /**
         *   Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
-        *   @param {e} event object;
+        *   @param e event object;
         *   @return void;
         */
         setRedirectCookie:function(e)
@@ -364,13 +366,11 @@
             var $target = $(e.target);
             $.cookie(stacklaWp.admin.settings.config.redirectCookieKey , window.location.href);
             window.location = $target.attr('href');
-            return;
         },
         handleFilterChange: function(e) {
             var target = $(e.currentTarget);
-            var diff = [];
 
-            diff = arr_diff([target.val()], this.state.mediaType.length ? this.state.mediaType: []);
+            var diff = arr_diff([target.val()], this.state.mediaType.length ? this.state.mediaType: []);
             this.setState({'mediaType' : diff});
         },
         /**
@@ -399,7 +399,7 @@
                     </div>
                 )
             }
-            var readonly = authenticated ? false : true;
+            var readonly = !authenticated;
 
             var defaultFilterOptions = [{value: 'text', name: 'Text'}, {value: 'image', name: 'Image'}, {value: 'video', name: 'Video'}, {value: 'html', name: 'HTML'}].map(function(option, i) {
 
@@ -466,13 +466,13 @@
                         </div>
                         <this.state.dependencies.RequestError ref='requestErrors' errors={this.state.errors.request} />
                         <section className='terms'>
-                            <this.state.dependencies.WidgetTerms ref='terms' initialData={this.state.data.terms} readonly={authenticated ? false : true} />
+                            <this.state.dependencies.WidgetTerms ref='terms' initialData={this.state.data.terms} readonly={!authenticated} />
                         </section>
                         <section>
                             {defaultFilter}
                         </section>
                         <section className='config'>
-                            <this.state.dependencies.Widget ref='widget' readonly={authenticated ? false : true} />
+                            <this.state.dependencies.Widget ref='widget' readonly={!authenticated} />
                         </section>
                     </div>
                 )
@@ -482,7 +482,7 @@
                 <div>
                     {authentication}
                     {widget}
-                    <div className="powered-by-stackla"/>
+                    <div className="powered-by-stackla"></div>
                 </div>
             );
         }
