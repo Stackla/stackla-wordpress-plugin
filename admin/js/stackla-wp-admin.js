@@ -42838,12 +42838,29 @@ if (!Array.prototype.indexOf) {
 
     var RequestError, WidgetTerms, Widget;
 
+    function sanitiseTermData(term) {
+        return {
+            id: parseInt(term.id),
+            name: term.name,
+            network: term.network,
+            termId: parseInt(term.termId),
+            term: term.term,
+            termValue: term.termValue,
+            termDelimited: term.network + '-' + term.term,
+            errors: false,
+            edited: false,
+            removed: false
+        };
+    }
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
         {displayName: "Metabox",
             propTypes: {},
             getInitialState: function () {
                 var data = stacklaWp.admin && stacklaWp.admin.metabox && stacklaWp.admin.metabox.data ? stacklaWp.admin.metabox.data : {},
                     mediaType = data.media_type && typeof data.media_type == 'object' ? data.media_type : ['text', 'image', 'video', 'html'];
+
+                data.terms = _.map(data.terms, sanitiseTermData);
 
                 RequestError = stacklaWp.admin.components.RequestError;
                 WidgetTerms = stacklaWp.admin.components.WidgetTerms;
@@ -42876,26 +42893,6 @@ if (!Array.prototype.indexOf) {
              */
             componentDidMount: function () {
                 this.addSaveHook();
-            },
-            sanitiseTermData: function (terms) {
-                if (!terms) return null;
-                return terms.map(function (term, i) {
-                    var obj = {};
-                    $.each(term, function (i) {
-                        obj[i] = this;
-                        switch (i) {
-                            case 'errors':
-                            case 'edited':
-                            case 'removed':
-                                obj[i] = this != 'false';
-                                break;
-                            case 'id':
-                                obj[i] = parseInt(this, 10);
-                                break;
-                        }
-                    });
-                    return obj;
-                });
             },
             isTermsIdentical: function (a, b) {
                 var identical = true;
@@ -42971,7 +42968,14 @@ if (!Array.prototype.indexOf) {
                     terms.push(state);
                 });
 
-                var sanitisedTerms = this.sanitiseTermData(this.state.data.terms);
+                function isValid(term) {
+                    return !!term.network;
+                }
+
+                var sanitisedTerms = this.state.data.terms;
+
+                sanitisedTerms = _.filter(sanitisedTerms, isValid);
+                terms = _.filter(terms, isValid);
 
 
                 /*
@@ -43336,6 +43340,15 @@ if (!Array.prototype.indexOf) {
 {
     'use strict';
 
+    var DEBUG = false;
+
+    function log(message, type) {
+        if (!type) type = 'INFO';
+        if (DEBUG) {
+            window.console.log('[' + type + '] ' + message);
+        }
+    }
+
     window.stacklaWp.admin.components.Term = React.createClass( {displayName: "Term",
         propTypes: {
             editWidgetTermsData: React.PropTypes.func,
@@ -43373,6 +43386,7 @@ if (!Array.prototype.indexOf) {
         */
         handleRemoveTerm(e) {
             e.preventDefault();
+            log('handleRemoveTerm');
             this.setState({removed:true , edited:true});
         },
         /**
@@ -43381,6 +43395,7 @@ if (!Array.prototype.indexOf) {
         *   @return void;
         */
         handleNameChange:function(e) {
+            log('handleNameChange');
             this.setState({name:e.target.value , edited:true});
         },
         /**
@@ -43402,6 +43417,7 @@ if (!Array.prototype.indexOf) {
                 $(React.findDOMNode(this.refs[value])).addClass('display');
             }
 
+            log('handleNetworkChange');
             this.setState( {
                 network: value,
                 term: '',
@@ -43422,6 +43438,7 @@ if (!Array.prototype.indexOf) {
 
             $(React.findDOMNode(this.refs[value])).addClass('display')
 
+            log('handleTypeChange');
             this.setState( {
                 term: split[1],
                 termValue: '',
@@ -43434,6 +43451,7 @@ if (!Array.prototype.indexOf) {
         *   @return void;
         */
         handleTermValueChange:function(e) {
+            log('handleTermValueChange');
             this.setState({termValue:e.target.value , edited:true});
         },
         /**
@@ -43486,6 +43504,7 @@ if (!Array.prototype.indexOf) {
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
+
         /**
         *   Renders a Term component;
         *   @return React component;
@@ -44099,101 +44118,91 @@ if (!Array.prototype.indexOf) {
     });
 }(window));
 
-(function(window)
-{
+(function (window) {
     'use strict';
 
     window.stacklaWp.admin.components.WidgetTerms = React.createClass(
-    {displayName: "WidgetTerms",
-        propTypes:
-        {
-            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
-        },
-        getInitialState:function()
-        {
-            return {
-                dependencies:
-                {
-                    Term:stacklaWp.admin.components.Term
-                },
-                count:(this.props.initialData) ? this.props.initialData.length : 1,
-                data:(this.props.initialData) ? this.props.initialData : [],
-                items:[],
-            }
-        },
-        /**
-        *   Adds one to the count of Term components to render;
-        *   @return void;
-        */
-        addTerm:function(e)
-        {
-            e.preventDefault();
+        {displayName: "WidgetTerms",
+            propTypes: {
+                initialData: React.PropTypes.oneOfType([React.PropTypes.array, React.PropTypes.bool])
+            },
+            getInitialState: function () {
+                return {
+                    dependencies: {
+                        Term: stacklaWp.admin.components.Term
+                    },
+                    count: (this.props.initialData) ? this.props.initialData.length : 1,
+                    data: (this.props.initialData) ? this.props.initialData : [],
+                    items: []
+                }
+            },
+            /**
+             *   Adds one to the count of Term components to render;
+             *   @return void;
+             */
+            addTerm: function (e) {
+                e.preventDefault();
 
-            this.setState(
-            {
-                items:[],
-                count:this.state.count + 1
-            });
-        },
-        /**
-        *   Loops through the count, pushes Term components to the items array;
-        *   Renders these components;
-        *   @return void;
-        */
-        render:function()
-        {
-            var i;
-            var readonly = this.props.readonly;
-            var addMoreBtn;
-
-            for(i = 0 ; i < this.state.count ; i++)
-            {
-                var fieldsetData = false;
-
-                if(this.state.data.length)
-                {
-                    if(typeof this.state.data[i] !== 'undefined')
+                this.setState(
                     {
-                        fieldsetData = this.state.data[i];
+                        items: [],
+                        count: this.state.count + 1
+                    });
+            },
+            /**
+             *   Loops through the count, pushes Term components to the items array;
+             *   Renders these components;
+             */
+            render: function () {
+                var i;
+                var readonly = this.props.readonly;
+                var addMoreBtn;
+
+                for (i = 0; i < this.state.count; i++) {
+                    var fieldsetData = false;
+
+                    if (this.state.data.length) {
+                        if (typeof this.state.data[i] !== 'undefined') {
+                            fieldsetData = this.state.data[i];
+                        }
                     }
+
+                    this.state.items.push(
+                        React.createElement(this.state.dependencies.Term, {
+                            editWidgetTermsData: this.editTermsData, 
+                            twitter: stacklaWp.admin.config.network.twitter, 
+                            facebook: stacklaWp.admin.config.network.facebook, 
+                            instagram: stacklaWp.admin.config.network.instagram, 
+                            youtube: stacklaWp.admin.config.network.youtube, 
+                            key: i, 
+                            id: i, 
+                            ref: i, 
+                            data: fieldsetData, 
+                            readonly: readonly}
+                        )
+                    );
                 }
 
-                this.state.items.push(
-                    React.createElement(this.state.dependencies.Term, {
-                        editWidgetTermsData: this.editTermsData, 
-                        twitter: stacklaWp.admin.config.network.twitter, 
-                        facebook: stacklaWp.admin.config.network.facebook, 
-                        instagram: stacklaWp.admin.config.network.instagram, 
-                        youtube: stacklaWp.admin.config.network.youtube, 
-                        key: i, 
-                        id: i, 
-                        ref: i, 
-                        data: fieldsetData, 
-                        readonly: readonly}
+                if (!readonly) {
+                    addMoreBtn = (
+                        React.createElement("div", {className: "add-wrap"}, 
+                            React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Another Term")
+                        )
+                    )
+                }
+
+                return (
+                    React.createElement("div", {className: "stackla-widget-terms"}, 
+                        React.createElement("header", null, 
+                            React.createElement("h2", null, "Create Terms")
+
+                        ), 
+                        this.state.items, 
+                        addMoreBtn
                     )
                 );
             }
-
-            if (!readonly) {
-                addMoreBtn = (
-                    React.createElement("div", {className: "add-wrap"}, 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Another Term")
-                    )
-                )
-            }
-
-            return (
-                React.createElement("div", {className: "stackla-widget-terms"}, 
-                    React.createElement("header", null, 
-                        React.createElement("h2", null, "Create Terms")
-
-                    ), 
-                    this.state.items, 
-                    addMoreBtn
-                )
-            );
-        }
-    });
+        });
 }(window));
 
 (function(window)

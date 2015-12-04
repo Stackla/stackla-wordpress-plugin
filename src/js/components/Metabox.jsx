@@ -30,12 +30,29 @@
 
     var RequestError, WidgetTerms, Widget;
 
+    function sanitiseTermData(term) {
+        return {
+            id: parseInt(term.id),
+            name: term.name,
+            network: term.network,
+            termId: parseInt(term.termId),
+            term: term.term,
+            termValue: term.termValue,
+            termDelimited: term.network + '-' + term.term,
+            errors: false,
+            edited: false,
+            removed: false
+        };
+    }
+
     window.stacklaWp.admin.components.Metabox = React.createClass(
         {
             propTypes: {},
             getInitialState: function () {
                 var data = stacklaWp.admin && stacklaWp.admin.metabox && stacklaWp.admin.metabox.data ? stacklaWp.admin.metabox.data : {},
                     mediaType = data.media_type && typeof data.media_type == 'object' ? data.media_type : ['text', 'image', 'video', 'html'];
+
+                data.terms = _.map(data.terms, sanitiseTermData);
 
                 RequestError = stacklaWp.admin.components.RequestError;
                 WidgetTerms = stacklaWp.admin.components.WidgetTerms;
@@ -68,26 +85,6 @@
              */
             componentDidMount: function () {
                 this.addSaveHook();
-            },
-            sanitiseTermData: function (terms) {
-                if (!terms) return null;
-                return terms.map(function (term, i) {
-                    var obj = {};
-                    $.each(term, function (i) {
-                        obj[i] = this;
-                        switch (i) {
-                            case 'errors':
-                            case 'edited':
-                            case 'removed':
-                                obj[i] = this != 'false';
-                                break;
-                            case 'id':
-                                obj[i] = parseInt(this, 10);
-                                break;
-                        }
-                    });
-                    return obj;
-                });
             },
             isTermsIdentical: function (a, b) {
                 var identical = true;
@@ -163,7 +160,14 @@
                     terms.push(state);
                 });
 
-                var sanitisedTerms = this.sanitiseTermData(this.state.data.terms);
+                function isValid(term) {
+                    return !!term.network;
+                }
+
+                var sanitisedTerms = this.state.data.terms;
+
+                sanitisedTerms = _.filter(sanitisedTerms, isValid);
+                terms = _.filter(terms, isValid);
 
 
                 /*

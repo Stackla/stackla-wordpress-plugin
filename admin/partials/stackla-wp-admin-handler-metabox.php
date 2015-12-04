@@ -19,7 +19,7 @@ $valid = $validator->validate();
 
 $response = array('errors' => false, 'result' => '1');
 try {
-    if ($valid && !$validator->emptyTerm) {
+    if ($valid) {
         $metabox = new Stackla_WP_Metabox($post_id);
         $sdk = new Stackla_WP_SDK_Wrapper($post_id);
         $oldData = $metabox->get_data();

@@ -13,6 +13,15 @@
 {
     'use strict';
 
+    var DEBUG = false;
+
+    function log(message, type) {
+        if (!type) type = 'INFO';
+        if (DEBUG) {
+            window.console.log('[' + type + '] ' + message);
+        }
+    }
+
     window.stacklaWp.admin.components.Term = React.createClass( {
         propTypes: {
             editWidgetTermsData: React.PropTypes.func,
@@ -50,6 +59,7 @@
         */
         handleRemoveTerm(e) {
             e.preventDefault();
+            log('handleRemoveTerm');
             this.setState({removed:true , edited:true});
         },
         /**
@@ -58,6 +68,7 @@
         *   @return void;
         */
         handleNameChange:function(e) {
+            log('handleNameChange');
             this.setState({name:e.target.value , edited:true});
         },
         /**
@@ -79,6 +90,7 @@
                 $(React.findDOMNode(this.refs[value])).addClass('display');
             }
 
+            log('handleNetworkChange');
             this.setState( {
                 network: value,
                 term: '',
@@ -99,6 +111,7 @@
 
             $(React.findDOMNode(this.refs[value])).addClass('display')
 
+            log('handleTypeChange');
             this.setState( {
                 term: split[1],
                 termValue: '',
@@ -111,6 +124,7 @@
         *   @return void;
         */
         handleTermValueChange:function(e) {
+            log('handleTermValueChange');
             this.setState({termValue:e.target.value , edited:true});
         },
         /**
@@ -163,6 +177,7 @@
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
+
         /**
         *   Renders a Term component;
         *   @return React component;
