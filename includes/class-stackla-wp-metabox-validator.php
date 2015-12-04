@@ -41,6 +41,7 @@ class Stackla_WP_Metabox_Validator
     public function __construct($data)
     {
         $this->data = $data;
+        $this->data['terms'] = $this->data['terms'] ?: array();
         $this->errors['title'] = false;
         $this->errors['media_type'] = false;
         $this->errors['terms'] = array();
@@ -202,9 +203,9 @@ class Stackla_WP_Metabox_Validator
             return false;
         }
 
-        if (empty($this->errors['terms'])) {
-            return false;
-        }
+//        if (empty($this->errors['terms'])) {
+//            return false;
+//        }
 
         if (count($this->data['terms']) !== count($this->errors['terms'])) {
             return false;
