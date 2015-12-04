@@ -41,7 +41,7 @@ class Stackla_WP_Metabox_Validator
     public function __construct($data)
     {
         $this->data = $data;
-        $this->data['terms'] = $this->data['terms'] ?: array();
+        $this->data['terms'] = empty($this->data['terms']) ? array() : $this->data['terms'];
         $this->errors['title'] = false;
         $this->errors['media_type'] = false;
         $this->errors['terms'] = array();
