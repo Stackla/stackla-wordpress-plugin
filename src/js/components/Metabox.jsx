@@ -165,6 +165,12 @@
 
                 var sanitisedTerms = this.sanitiseTermData(this.state.data.terms);
 
+
+                /*
+                 * If the terms configuration has not been changed, then proceed
+                 * with post saving, otherwise prevent post saving and save the
+                 * widget + term settings first.
+                 */
                 if (this.isTermsIdentical(sanitisedTerms, terms) && this.state.data.media_type == this.state.mediaType && this.state.data.widget.style == widgetConfig.style) {
                     WP_SAVE_CONTROLLER.trigger('click');
                     return;
