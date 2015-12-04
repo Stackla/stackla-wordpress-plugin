@@ -8,7 +8,7 @@ require_once '../../includes/class-stackla-wp-sdk-wrapper.php';
 
 $post_id = $_POST['postId'];
 $tagName = "WP-{$post_id}";
-$terms = $_POST['terms'];
+$terms = empty($_POST['terms']) ? array() : $_POST['terms'];
 // $filters = $_POST['filters'];
 $widget = $_POST['widget'];
 $mediaType = isset($_POST['media_type']) ? $_POST['media_type'] : array();
