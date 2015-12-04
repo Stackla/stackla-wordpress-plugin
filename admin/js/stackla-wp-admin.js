@@ -44127,11 +44127,12 @@ if (!Array.prototype.indexOf) {
                 initialData: React.PropTypes.oneOfType([React.PropTypes.array, React.PropTypes.bool])
             },
             getInitialState: function () {
+                var terms = this.props.initialData;
                 return {
                     dependencies: {
                         Term: stacklaWp.admin.components.Term
                     },
-                    count: (this.props.initialData) ? this.props.initialData.length : 1,
+                    count: (terms && terms.length > 0) ? terms.length : 1,
                     data: (this.props.initialData) ? this.props.initialData : [],
                     items: []
                 }
