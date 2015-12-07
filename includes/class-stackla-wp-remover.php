@@ -64,6 +64,18 @@ class Stackla_WP_Remover
             }
         }
 
+        if (wp_is_post_revision($post_id)) {
+            /*
+             * Ignore revision post created by WordPress autosave.
+             * $metabox->clear() calls delete_post_meta() which deletes the post
+             * meta data of the original post if the it detects the current post
+             * to be deleted is a revision.
+             * Revision post is created when [Preview Post] is clicked, which
+             * does not have any post meta data.
+             */
+            return;
+        }
+
         $metabox->clear();
     }
 }
