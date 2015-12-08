@@ -44,7 +44,6 @@ class Stackla_WP_Metabox
     *   -- CONSTRUCTOR --
     *   Sets the existing metabox data for a post;
     *   @param  int $id a post id;
-    *   @return void;
     */
     public function __construct($id)
     {
@@ -92,7 +91,7 @@ class Stackla_WP_Metabox
 
     /**
     *   Sets the stackla tag data into the postmeta table for $this->id;
-    *   @param object   $tag    a Stackla Tag object;
+    *   @param Stackla\Api\Tag   $tag    a Stackla Tag object;
     *   @return void;
     */
     public function set_stackla_wp_tag(Stackla\Api\Tag $tag)
@@ -114,7 +113,7 @@ class Stackla_WP_Metabox
 
     /**
     *   Sets the stackla tag data into the postmeta table for $this->id;
-    *   @param object   $tag    a Stackla Tag object;
+    *   @param Stackla\Api\Filter   $filter    a Stackla Filter object;
     *   @return void;
     */
     public function set_stackla_wp_defaultFilter(Stackla\Api\Filter $filter)
@@ -124,7 +123,7 @@ class Stackla_WP_Metabox
 
     /**
     *   Sets the stackla tag data into the postmeta table for $this->id;
-    *   @param object   $tag    a Stackla Tag object;
+    *   @param array   $filterMedia    a Stackla Tag object;
     *   @return void;
     */
     public function set_stackla_wp_defaultFilterMedia($filterMedia)

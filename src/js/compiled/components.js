@@ -362,21 +362,20 @@
     });
 
 }());
-(function()
-{
+(function () {
     'use strict';
 
     var WP_SAVE_CONTROLLER;
 
-    function arr_diff (a1, a2) {
+    function arr_diff(a1, a2) {
 
-        var a = [], diff = [];
+        var a = [], diff = [], i;
 
-        for (var i = 0; i < a1.length; i++) {
+        for (i = 0; i < a1.length; i++) {
             a[a1[i]] = true;
         }
 
-        for (var i = 0; i < a2.length; i++) {
+        for (i = 0; i < a2.length; i++) {
             if (a[a2[i]]) {
                 delete a[a2[i]];
             } else {
@@ -385,506 +384,503 @@
         }
 
         for (var k in a) {
-            diff.push(k);
+            if (a.hasOwnProperty(k)) {
+                diff.push(k);
+            }
         }
 
         return diff;
-    };
+    }
+
+    var RequestError, WidgetTerms, Widget;
+
+    function sanitiseTermData(term) {
+        return {
+            id: parseInt(term.id),
+            name: term.name,
+            network: term.network,
+            termId: parseInt(term.termId),
+            term: term.term,
+            termValue: term.termValue,
+            termDelimited: term.network + '-' + term.term,
+            errors: false,
+            edited: false,
+            removed: false
+        };
+    }
 
     window.stacklaWp.admin.components.Metabox = React.createClass(
-    {displayName: "Metabox",
-        propTypes:
-        {
+        {displayName: "Metabox",
+            propTypes: {},
+            getInitialState: function () {
+                var data = stacklaWp.admin && stacklaWp.admin.metabox && stacklaWp.admin.metabox.data ? stacklaWp.admin.metabox.data : {},
+                    mediaType = data.media_type && typeof data.media_type == 'object' ? data.media_type : ['text', 'image', 'video', 'html'];
 
-        },
-        getInitialState:function()
-        {
-            var data = stacklaWp.admin && stacklaWp.admin.metabox && stacklaWp.admin.metabox.data ? stacklaWp.admin.metabox.data : {},
-                mediaType= data.media_type && typeof data.media_type == 'object' ? data.media_type : ['text', 'image', 'video', 'html'];
+                data.terms = _.map(data.terms, sanitiseTermData);
 
-            return {
-                wpPublishSelector:"#publish",
-                wpDraftSelector:'#save-post',
-                wpFormSelector:'#post',
-                wpFormTitleSelector:'#post #title',
-                overlay:'#jsx-metabox .overlay',
-                data: data,
-                mediaType: mediaType,
-                mediaTypeErrors: false,
-                dependencies: {
-                    RequestError:stacklaWp.admin.components.RequestError,
-                    WidgetTitle:stacklaWp.admin.components.WidgetTitle,
-                    WidgetTerms:stacklaWp.admin.components.WidgetTerms,
-                    Widget:stacklaWp.admin.components.Widget
-                },
-                errors:
-                {
-                    title:false,
-                    terms:[],
-                },
-            }
-        },
-        /**
-        *   React method that runs when the component is mounted to the DOM;
-        *   @return void;
-        */
-        componentDidMount:function()
-        {
-            this.addSaveHook();
-        },
-        sanitiseTermData: function(terms) {
-           if (!terms) return null;
-           var data = terms.map(function(term, i){
-                var obj = {};
-                $.each(term, function(i){
-                    obj[i] = this;
-                    switch (i) {
-                        case 'errors':
-                        case 'edited':
-                        case 'removed':
-                            obj[i] = this == 'false' ? false : true;
-                            break;
-                        case 'id':
-                            obj[i] = parseInt(this, 10);
-                            break;
-                    }
-                });
-                return obj;
-            });
-            return data;
-        },
-        isTermsIdentical: function(a, b) {
-            var identical = true;
-            if (!a || a.length != b.length) {
-                identical = false;
-            }
+                RequestError = stacklaWp.admin.components.RequestError;
+                WidgetTerms = stacklaWp.admin.components.WidgetTerms;
+                Widget = stacklaWp.admin.components.Widget;
 
-            if (identical) {
-                $.each(a, function(i){
-                    var termA = a[i];
-                    var termB = b[i];
-                    $.each(termA, function(j){
-                        var termAV = termA[j];
-                        var termBV = typeof termB[j] != 'undefined' ? termB[j] : null;
-                        if (termAV != termBV) {
-                            identical = false;
-                            return identical;
-                        }
-                    });
-
-                    if (!identical) {
-                        return false;
-                    }
-                });
-            }
-            return identical;
-        },
-        /**
-        *   Applies the event catchers to the wp draft and publish buttons;
-        *   @return void;
-        */
-        addSaveHook:function()
-        {
-            var self = this;
-            var $metabox = $(stacklaWp.admin.config.wpMetabox);
-            var $body = $('html, body');
-
-            if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
-            } else {
-                $('#save-post , #publish').one('click' , function(e) {
-                    e.preventDefault();
-
-                    WP_SAVE_CONTROLLER = $(e.target);
-                    self.compileData();
-                    $body.animate({scrollTop:$metabox.offset().top}, '500', 'swing');
-                });
-            }
-        },
-        /**
-        *   Activates the ajax loader;
-        *   @return void;
-        */
-        activateLoader:function()
-        {
-            $(React.findDOMNode(this.refs.overlay)).addClass('display');
-        },
-        /**
-        *   Deactivates the ajax loader;
-        *   @return void;
-        */
-        deactivateLoader:function()
-        {
-            $(React.findDOMNode(this.refs.overlay)).removeClass('display');
-        },
-        /**
-        *   Compiles the data from the view to be posted to the db;
-        *   @param {e} event object;
-        *   @return void;
-        */
-        compileData:function()
-        {
-            //e.preventDefault();
-
-            var termsRefs = this.refs.terms.refs;
-            var widgetConfig = $.extend({} , this.refs.widget.refs.config.state);
-            var terms = [];
-            var data = {};
-
-            $.each(termsRefs , function(key , value) {
-                var state = $.extend({} , value.state);
-                terms.push(state);
-            });
-
-            var sanitisedTerms = this.sanitiseTermData(this.state.data.terms);
-
-            if (this.isTermsIdentical(sanitisedTerms, terms) && this.state.data.media_type == this.state.mediaType && this.state.data.widget.style == widgetConfig.style){
-                WP_SAVE_CONTROLLER.trigger('click');
-                return;
-            }
-
-            if (!confirm("You are about to save Stackla widget data. This action will be applied to live widget. Are you still want to continue this action?")) {
-                return;
-            }
-
-            data = {
-                'postId': stacklaWp.admin.metabox.postId,
-                'terms': terms,
-                'widget': {
-                    id: widgetConfig.id,
-                    copyId: widgetConfig.copyId,
-                    type: widgetConfig.type,
-                    style: widgetConfig.style
-                },
-                'media_type': this.state.mediaType
-            };
-
-            this.validate(data);
-        },
-        /**
-        *   Validates the data from the view;
-        *   @param {data} the compiled data from the view;
-        *   @return void;
-        */
-        validate: function(data) {
-            var self = this;
-            var $node = $(React.findDOMNode(this.refs.metabox));
-
-            if($node.hasClass('validating')) return;
-            $node.addClass('validating');
-
-            $.ajax({
-                url: stacklaWp.admin.metabox.validator,
-                type:'POST',
-                dataType:'json',
-                data:data
-            }).done(function(response) {
-                $node.removeClass('validating');
-
-                if (typeof response == 'object') {
-                    if (response.result == '1') {
-                        self.save(data);
-                    } else {
-                        self.prepareErrors(response.errors);
-                        self.addSaveHook();
+                return {
+                    wpPublishSelector: "#publish",
+                    wpDraftSelector: '#save-post',
+                    wpFormSelector: '#post',
+                    wpFormTitleSelector: '#post #title',
+                    overlay: '#jsx-metabox .overlay',
+                    data: data,
+                    mediaType: mediaType,
+                    mediaTypeErrors: false,
+                    dependencies: {
+                        RequestError: stacklaWp.admin.components.RequestError,
+                        WidgetTitle: stacklaWp.admin.components.WidgetTitle,
+                        WidgetTerms: stacklaWp.admin.components.WidgetTerms,
+                        Widget: stacklaWp.admin.components.Widget
+                    },
+                    errors: {
+                        title: false,
+                        terms: []
                     }
                 }
-            }).fail(function(xhr , status , error) {
-                $node.removeClass('validating');
-                self.addSaveHook();
-                self.handleRequestError(error);
-            });
-        },
-        /**
-        *   Attempts to save the entered data;
-        *   The handler saves data to WordPress, then to Stackla and finally to WordPress once again
-        *   @param {data} object containing the data to save;
-        *   @return void;
-        */
-        save: function(data) {
-            var self = this;
-            var $node = $(React.findDOMNode(this.refs.metabox));
-            var $title = $(self.state.wpFormTitleSelector);
+            },
+            /**
+             * React method that runs when the component is mounted to the DOM;
+             * @return void;
+             */
+            componentDidMount: function () {
+                this.addSaveHook();
+            },
+            isTermsIdentical: function (a, b) {
+                var identical = true;
+                if (!a || a.length != b.length) {
+                    identical = false;
+                }
 
-            if($node.hasClass('saving')) return;
+                if (identical) {
+                    $.each(a, function (i) {
+                        var termA = a[i];
+                        var termB = b[i];
+                        $.each(termA, function (j) {
+                            var termAV = termA[j];
+                            var termBV = typeof termB[j] != 'undefined' ? termB[j] : null;
+                            if (termAV != termBV) {
+                                identical = false;
+                                return identical;
+                            }
+                        });
 
-            if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
-            } else {
-                self.activateLoader();
-                $node.addClass('saving');
+                        if (!identical) {
+                            return false;
+                        }
+                    });
+                }
+                return identical;
+            },
+            /**
+             * Applies the event catchers to the wp draft and publish buttons;
+             * @return void;
+             */
+            addSaveHook: function () {
+                var self = this;
+                var $metabox = $(stacklaWp.admin.config.wpMetabox);
+                var $body = $('html, body');
+
+                if (window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
+                } else {
+                    $('#save-post , #publish').one('click', function (e) {
+                        e.preventDefault();
+
+                        WP_SAVE_CONTROLLER = $(e.target);
+                        self.compileData();
+                        $body.animate({scrollTop: $metabox.offset().top}, '500', 'swing');
+                    });
+                }
+            },
+            /**
+             * Activates the ajax loader;
+             * @return void;
+             */
+            activateLoader: function () {
+                $(React.findDOMNode(this.refs.overlay)).addClass('display');
+            },
+            /**
+             * Deactivates the ajax loader;
+             * @return void;
+             */
+            deactivateLoader: function () {
+                $(React.findDOMNode(this.refs.overlay)).removeClass('display');
+            },
+            /**
+             * Compiles the data from the view to be posted to the db;
+             * @return void;
+             */
+            compileData: function () {
+                var termsRefs = this.refs.terms.refs;
+                var widgetConfig = $.extend({}, this.refs.widget.refs.config.state);
+                var terms = [];
+
+                $.each(termsRefs, function (key, value) {
+                    var state = $.extend({}, value.state);
+                    terms.push(state);
+                });
+
+                function isValid(term) {
+                    return !!term.network;
+                }
+
+                var sanitisedTerms = this.state.data.terms;
+
+                sanitisedTerms = _.filter(sanitisedTerms, isValid);
+                terms = _.filter(terms, isValid);
+
+
+                /*
+                 * If the terms configuration has not been changed, then proceed
+                 * with post saving, otherwise prevent post saving and save the
+                 * widget + term settings first.
+                 */
+                if (this.isTermsIdentical(sanitisedTerms, terms) && this.state.data.media_type == this.state.mediaType && this.state.data.widget.style == widgetConfig.style) {
+                    WP_SAVE_CONTROLLER.trigger('click');
+                    return;
+                }
+
+                if (!confirm("You are about to save Stackla widget data. This action will be applied to live widget. Do you still want to continue this action?")) {
+                    return;
+                }
+
+                var data = {
+                    'postId': stacklaWp.admin.metabox.postId,
+                    'terms': terms,
+                    'widget': {
+                        id: widgetConfig.id,
+                        copyId: widgetConfig.copyId,
+                        type: widgetConfig.type,
+                        style: widgetConfig.style
+                    },
+                    'media_type': this.state.mediaType
+                };
+
+                this.validate(data);
+            },
+            /**
+             * Validates the data from the view;
+             * @param data the compiled data from the view;
+             * @return void;
+             */
+            validate: function (data) {
+                var self = this;
+                var $node = $(React.findDOMNode(this.refs.metabox));
+
+                if ($node.hasClass('validating')) return;
+                $node.addClass('validating');
 
                 $.ajax({
-                    url:stacklaWp.admin.metabox.handler,
-                    type:'POST',
-                    dataType:'json',
-                    data:data
-                }).done(function(response) {
-                    self.deactivateLoader();
-                    $node.removeClass('saving');
+                    url: stacklaWp.admin.metabox.validator,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data
+                }).done(function (response) {
+                    $node.removeClass('validating');
 
                     if (typeof response == 'object') {
                         if (response.result == '1') {
-                            if ($title.val() == '') {
-                                $title.val(data.title)
-                            }
-
-                            var keyId, valId;
-                            if (response.data) {
-                                for (var key in response.data) {
-                                    if ($('input[value='+key+']').length) {
-                                        keyId = $('input[value='+key+']').attr('id');
-                                        valId = keyId.replace(/\-key$/,'-value');
-                                        $('#'+valId).val(response.data[key]);
-                                    } else {
-                                        console.log('notexist', key);
-                                    }
-                                }
-                            }
-                            WP_SAVE_CONTROLLER.trigger('click');
+                            self.save(data);
                         } else {
-                            self.addSaveHook();
                             self.prepareErrors(response.errors);
+                            self.addSaveHook();
                         }
                     }
-                }).fail(function(xhr , status , error) {
-                    $node.removeClass('saving');
+                }).fail(function (xhr, status, error) {
+                    $node.removeClass('validating');
                     self.addSaveHook();
                     self.handleRequestError(error);
                 });
-            }
-        },
-        /**
-        *   Checks to see if errors are defined and if so, funnels them;
-        *   @param {errors} an object containing errors;
-        *   @return void;
-        */
-        prepareErrors: function(errors) {
-            var termsErrors = (typeof errors.terms !== 'undefined') ? errors.terms : false;
-            var mediaTypeErrors = (typeof errors.media_type!== 'undefined') ? errors.media_type: false;
-            var titleErrors = (typeof errors.title !== 'undefined') ? errors.title : false;
-            var widgetErrors = (typeof errors.widget !== 'undefined') ? errors.widget : false;
+            },
+            /**
+             * Attempts to save the entered data;
+             * The handler saves data to WordPress, then to Stackla and finally to WordPress once again
+             * @param data object containing the data to save;
+             * @return void;
+             */
+            save: function (data) {
+                var self = this;
+                var $node = $(React.findDOMNode(this.refs.metabox));
+                var $title = $(self.state.wpFormTitleSelector);
 
-            if (termsErrors) {
-                this.funnelErrors(termsErrors , this.refs.terms.refs);
-            }
+                if ($node.hasClass('saving')) return;
 
-            // if (titleErrors) {
-            //     this.refs.title.setState({error:errors.title});
-            // }
+                if (window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
+                } else {
+                    self.activateLoader();
+                    $node.addClass('saving');
 
-            if (mediaTypeErrors) {
-                this.setState({mediaTypeErrors: mediaTypeErrors});
-            }
+                    $.ajax({
+                        url: stacklaWp.admin.metabox.handler,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: data
+                    }).done(function (response) {
+                        self.deactivateLoader();
+                        $node.removeClass('saving');
 
-            if (widgetErrors) {
-                this.refs.widget.setState({error:errors.widget});
-            }
-        },
-        /**
-        *   Funnels errors to their correct dom nodes;
-        *   @param {errors} an errors object or array;
-        *   @param {refs} the dom nodes to funnel the errors to;
-        *   @return void;
-        */
-        funnelErrors: function(errors , refs) {
-            if(!errors || typeof errors == 'undefined') return;
+                        if (_.isObject(response)) {
+                            if (response.result === '1') {
+                                if ($title.val() == '') {
+                                    $title.val(data.title)
+                                }
 
-            if(typeof errors == 'object') {
-                $.each(errors , function(index , item) {
-                    refs[index].setState({
-                        errors:errors[index]
-                    })
-                });
-            } else if(typeof errors == 'array') {
-                var length = errors.length;
-                var i;
-
-                for(i = 0 ; i < length ; i ++) {
-                    refs[i].setState({
-                        errors:errors[i]
+                                var keyId, valId;
+                                if (response.data) {
+                                    for (var key in response.data) {
+                                        if (response.data.hasOwnProperty(key)) {
+                                            var $input = $('input[value=' + key + ']');
+                                            if ($input.length) {
+                                                keyId = $input.attr('id');
+                                                valId = keyId.replace(/\-key$/, '-value');
+                                                $('#' + valId).val(response.data[key]);
+                                            } else {
+                                                console.log('notexist', key);
+                                            }
+                                        }
+                                    }
+                                }
+                                WP_SAVE_CONTROLLER.trigger('click');
+                            } else {
+                                self.addSaveHook();
+                                if (response.errors.title) {
+                                    // error title is not handled anywhere
+                                    // I'll treat it as network errors for now
+                                    self.handleRequestError(response.errors.title);
+                                }
+                                self.prepareErrors(response.errors);
+                            }
+                        }
+                    }).fail(function (xhr, status, error) {
+                        $node.removeClass('saving');
+                        self.addSaveHook();
+                        self.handleRequestError(error);
                     });
                 }
-            }
-        },
-        /**
-        *   Handles request failure errors;
-        *   @param {error} the xhr error object;
-        *   @return void;
-        */
-        handleRequestError:function(error)
-        {
-            this.refs.requestErrors.setState(
-            {
-                errorMessage:error.toString()
-            });
-        },
-        /**
-        *   Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
-        *   @param {e} event object;
-        *   @return void;
-        */
-        setRedirectCookie:function(e)
-        {
-            e.preventDefault();
-            var $target = $(e.target);
-            $.cookie(stacklaWp.admin.settings.config.redirectCookieKey , window.location.href);
-            window.location = $target.attr('href');
-            return;
-        },
-        handleFilterChange: function(e) {
-            var target = $(e.currentTarget);
-            var diff = [];
+            },
+            /**
+             * Checks to see if errors are defined and if so, funnels them;
+             * @param errors an object containing errors;
+             * @return void;
+             */
+            prepareErrors: function (errors) {
+                if (errors.terms) {
+                    this.funnelErrors(errors.terms, this.refs.terms.refs);
+                }
 
-            diff = arr_diff([target.val()], this.state.mediaType.length ? this.state.mediaType: []);
-            this.setState({'mediaType' : diff});
-        },
-        /**
-        *   Renders the Metabox component;
-        *   @return React component;
-        */
-        render:function() {
-            var that = this;
-            var authentication, authenticated = true, widget;
+                if (errors.media_type) {
+                    this.setState({mediaTypeErrors: errors.media_type});
+                }
 
-            if(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false) {
-                authenticated = false;
-                authentication = (
-                    React.createElement("div", {className: "auth-notification prompt"}, 
-                        React.createElement("h3", null, 
-                            "Authorization Required"
-                        ), 
-                        React.createElement("ul", null, 
-                            React.createElement("li", null, 
-                                "Your WordPress account is not authorized to use this plugin instance. ", 
-                                React.createElement("a", {href: stacklaWp.admin.metabox.accessUri, onClick: this.setRedirectCookie}, 
-                                    'Authorize with Stackla'
+                if (errors.widget) {
+                    this.refs.widget.setState({error: errors.widget});
+                }
+            },
+            /**
+             * Funnels errors to their correct dom nodes;
+             * @param errors an errors object or array;
+             * @param refs the dom nodes to funnel the errors to;
+             * @return void;
+             */
+            funnelErrors: function (errors, refs) {
+                if (!errors || typeof errors == 'undefined') return;
+
+                if (typeof errors == 'object') {
+                    $.each(errors, function (index, item) {
+                        refs[index].setState({
+                            errors: errors[index]
+                        })
+                    });
+                } else if (_.isArray(errors)) {
+                    var length = errors.length;
+                    var i;
+
+                    for (i = 0; i < length; i++) {
+                        refs[i].setState({
+                            errors: errors[i]
+                        });
+                    }
+                }
+            },
+            /**
+             * Handles request failure errors;
+             * @param error the xhr error object;
+             * @return void;
+             */
+            handleRequestError: function (error) {
+                this.refs.requestErrors.setState({errorMessage: error.toString()});
+            },
+            /**
+             * Sets a cookie referencing the current window location, the user will be redirected here after authorisation;
+             * @param e event object;
+             * @return void;
+             */
+            setRedirectCookie: function (e) {
+                e.preventDefault();
+                var $target = $(e.target);
+                $.cookie(stacklaWp.admin.settings.config.redirectCookieKey, window.location.href);
+                window.location = $target.attr('href');
+            },
+            handleFilterChange: function (e) {
+                var target = $(e.currentTarget);
+
+                var diff = arr_diff([target.val()], this.state.mediaType.length ? this.state.mediaType : []);
+                this.setState({'mediaType': diff});
+            },
+            /**
+             * Renders the Metabox component;
+             * @return React component;
+             */
+            render: function () {
+                var that = this;
+                var authentication, widget;
+
+                var authenticated = !(window.stacklaWp.admin.metabox.token === '' || window.stacklaWp.admin.metabox.token === false);
+
+                if (!authenticated) {
+                    authentication = (
+                        React.createElement("div", {className: "auth-notification prompt"}, 
+                            React.createElement("h3", null, 
+                                "Authorization Required"
+                            ), 
+                            React.createElement("ul", null, 
+                                React.createElement("li", null, 
+                                    "Your WordPress account is not authorized to use this plugin instance. ", 
+                                    React.createElement("a", {href: stacklaWp.admin.metabox.accessUri, onClick: this.setRedirectCookie}, 
+                                        'Authorize with Stackla'
+                                    )
                                 )
                             )
                         )
                     )
-                )
-            }
-            var readonly = authenticated ? false : true;
+                }
+                var readonly = !authenticated;
 
-            var defaultFilterOptions = [{value: 'text', name: 'Text'}, {value: 'image', name: 'Image'}, {value: 'video', name: 'Video'}, {value: 'html', name: 'HTML'}].map(function(option, i) {
+                var defaultFilterOptions = [{
+                    value: 'text',
+                    name: 'Text'
+                }, {value: 'image', name: 'Image'}, {
+                    value: 'video',
+                    name: 'Video'
+                }, {value: 'html', name: 'HTML'}].map(function (option, i) {
 
-                var checked = false;
+                    var checked = false;
 
-                if (that.state.mediaType.indexOf(option.value) > -1) {
-                    checked = true;
+                    if (that.state.mediaType.indexOf(option.value) > -1) {
+                        checked = true;
+                    }
+
+                    return (
+                        React.createElement("fieldset", null, 
+                            React.createElement("label", {className: "checkbox"}, 
+                                React.createElement("input", {
+                                    type: "checkbox", 
+                                    value: option.value, 
+                                    checked: checked, 
+                                    disabled: readonly, 
+                                    onChange: that.handleFilterChange}), 
+                                option.name
+                            )
+                        )
+                    );
+                });
+
+                var defaultFilterErrors;
+                if (this.state.mediaTypeErrors) {
+                    defaultFilterErrors = (
+                        React.createElement("div", {className: "stackla-error-message"}, 
+                            React.createElement("ul", null, 
+                                React.createElement("li", null, 
+                                    this.state.mediaTypeErrors
+                                )
+                            )
+                        )
+                    );
+                }
+
+                var defaultFilter = (
+                    React.createElement("div", {ref: "filter", className: "stackla-filter"}, 
+                        React.createElement("header", null, 
+                            React.createElement("h2", null, "Media types")
+                        ), 
+                        React.createElement("div", {className: "stackla-block"}, 
+                            React.createElement("div", {className: defaultFilterErrors ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}, 
+                                defaultFilterOptions
+                            ), 
+                            defaultFilterErrors
+                        )
+                    )
+                );
+
+                if (authenticated || this.state.data.terms) {
+                    widget = (
+                        React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
+                            React.createElement("div", {className: "overlay", ref: "overlay"}, 
+                                React.createElement("div", {className: "loader"}, 
+                                    React.createElement("div", {className: "logo"}, 
+                                        React.createElement("div", {className: "message"}, 
+                                            "Stacking your widget, please wait" + ' ' +
+                                            "..."
+                                        )
+                                    )
+
+                                )
+                            ), 
+                            React.createElement(RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
+                            React.createElement("section", {className: "terms"}, 
+                                React.createElement(WidgetTerms, {ref: "terms", initialData: this.state.data.terms, readonly: !authenticated})
+                            ), 
+                            React.createElement("section", null, 
+                                defaultFilter
+                            ), 
+                            React.createElement("section", {className: "config"}, 
+                                React.createElement(Widget, {ref: "widget", readonly: !authenticated})
+                            )
+                        )
+                    )
                 }
 
                 return (
-                    React.createElement("fieldset", null, 
-                        React.createElement("label", {className: "checkbox"}, 
-                            React.createElement("input", {
-                                type: "checkbox", 
-                                value: option.value, 
-                                checked: checked, 
-                                disabled: readonly, 
-                                onChange: that.handleFilterChange}), 
-                            option.name
-                        )
-                    )
-                );
-            });
-
-            var defaultFilterErrors;
-            if (this.state.mediaTypeErrors) {
-                defaultFilterErrors = (
-                    React.createElement("div", {className: "stackla-error-message"}, 
-                        React.createElement("ul", null, 
-                            React.createElement("li", null, 
-                                this.state.mediaTypeErrors
-                            )
-                        )
+                    React.createElement("div", null, 
+                        authentication, 
+                        widget, 
+                        React.createElement("div", {className: "powered-by-stackla"})
                     )
                 );
             }
-
-            var defaultFilter = (
-                React.createElement("div", {ref: "filter", className: "stackla-filter"}, 
-                    React.createElement("header", null, 
-                        React.createElement("h2", null, "Media types")
-                    ), 
-                    React.createElement("div", {className: "stackla-block"}, 
-                        React.createElement("div", {className: defaultFilterErrors ? 'stackla-widget-section stackla-widget-error' : 'stackla-widget-section'}, 
-                            defaultFilterOptions
-                        ), 
-                        defaultFilterErrors
-                    )
-                )
-            );
-
-            if (authenticated || this.state.data.terms) {
-                widget = (
-                    React.createElement("div", {className: "jsx-metabox", ref: "metabox"}, 
-                        React.createElement("div", {className: "overlay", ref: "overlay"}, 
-                            React.createElement("div", {className: "loader"}, 
-                                React.createElement("div", {className: "logo"}, 
-                                    React.createElement("div", {className: "message"}, 
-                                        "Stacking your widget, please wait ..."
-                                    )
-                                )
-
-                            )
-                        ), 
-                        React.createElement(this.state.dependencies.RequestError, {ref: "requestErrors", errors: this.state.errors.request}), 
-                        React.createElement("section", {className: "terms"}, 
-                            React.createElement(this.state.dependencies.WidgetTerms, {ref: "terms", initialData: this.state.data.terms, readonly: authenticated ? false : true})
-                        ), 
-                        React.createElement("section", null, 
-                            defaultFilter
-                        ), 
-                        React.createElement("section", {className: "config"}, 
-                            React.createElement(this.state.dependencies.Widget, {ref: "widget", readonly: authenticated ? false : true})
-                        )
-                    )
-                )
-            }
-
-            return (
-                React.createElement("div", null, 
-                    authentication, 
-                    widget, 
-                    React.createElement("div", {className: "powered-by-stackla"})
-                )
-            );
-        }
-    });
+        });
 }());
 
-(function()
-{
+(function () {
     'use strict';
 
     window.stacklaWp.admin.components.RequestError = React.createClass(
-    {displayName: "RequestError",
-        propTypes:
-        {
-        
-        },
-        getInitialState:function()
-        {
-            return {
-                errorMessage:false
-            }
-        },
-        render:function()
-        {
-            var $class = (this.state.errorMessage) ? 'stackla-error-message stackla-request-error' : 'hide';
+        {displayName: "RequestError",
+            propTypes: {},
+            getInitialState: function () {
+                return {
+                    errorMessage: false
+                }
+            },
+            render: function () {
+                var $class = this.state.errorMessage ? 'stackla-error-message stackla-request-error' : 'hide';
 
-            return (
-                React.createElement("div", {className: $class}, 
-                    React.createElement("ul", null, 
-                        React.createElement("li", null, 
-                            this.state.errorMessage
+                return (
+                    React.createElement("div", {className: $class}, 
+                        React.createElement("ul", null, 
+                            React.createElement("li", null, 
+                                this.state.errorMessage
+                            )
                         )
                     )
-                )
-            );
-        }
-    });
-}());
+                );
+            }
+        });
+})();
 /*
     !! NOTE !!
 
@@ -899,6 +895,15 @@
 (function(window)
 {
     'use strict';
+
+    var DEBUG = false;
+
+    function log(message, type) {
+        if (!type) type = 'INFO';
+        if (DEBUG) {
+            window.console.log('[' + type + '] ' + message);
+        }
+    }
 
     window.stacklaWp.admin.components.Term = React.createClass( {displayName: "Term",
         propTypes: {
@@ -937,6 +942,7 @@
         */
         handleRemoveTerm(e) {
             e.preventDefault();
+            log('handleRemoveTerm');
             this.setState({removed:true , edited:true});
         },
         /**
@@ -945,6 +951,7 @@
         *   @return void;
         */
         handleNameChange:function(e) {
+            log('handleNameChange');
             this.setState({name:e.target.value , edited:true});
         },
         /**
@@ -966,6 +973,7 @@
                 $(React.findDOMNode(this.refs[value])).addClass('display');
             }
 
+            log('handleNetworkChange');
             this.setState( {
                 network: value,
                 term: '',
@@ -986,6 +994,7 @@
 
             $(React.findDOMNode(this.refs[value])).addClass('display')
 
+            log('handleTypeChange');
             this.setState( {
                 term: split[1],
                 termValue: '',
@@ -998,6 +1007,7 @@
         *   @return void;
         */
         handleTermValueChange:function(e) {
+            log('handleTermValueChange');
             this.setState({termValue:e.target.value , edited:true});
         },
         /**
@@ -1050,6 +1060,7 @@
             if(this.state.termDelimited == delimited) return this.state.termValue;
             return '';
         },
+
         /**
         *   Renders a Term component;
         *   @return React component;
@@ -1663,101 +1674,92 @@
     });
 }(window));
 
-(function(window)
-{
+(function (window) {
     'use strict';
 
     window.stacklaWp.admin.components.WidgetTerms = React.createClass(
-    {displayName: "WidgetTerms",
-        propTypes:
-        {
-            initialData:React.PropTypes.oneOfType([React.PropTypes.array , React.PropTypes.bool])
-        },
-        getInitialState:function()
-        {
-            return {
-                dependencies:
-                {
-                    Term:stacklaWp.admin.components.Term
-                },
-                count:(this.props.initialData) ? this.props.initialData.length : 1,
-                data:(this.props.initialData) ? this.props.initialData : [],
-                items:[],
-            }
-        },
-        /**
-        *   Adds one to the count of Term components to render;
-        *   @return void;
-        */
-        addTerm:function(e)
-        {
-            e.preventDefault();
+        {displayName: "WidgetTerms",
+            propTypes: {
+                initialData: React.PropTypes.oneOfType([React.PropTypes.array, React.PropTypes.bool])
+            },
+            getInitialState: function () {
+                var terms = this.props.initialData;
+                return {
+                    dependencies: {
+                        Term: stacklaWp.admin.components.Term
+                    },
+                    count: (terms && terms.length > 0) ? terms.length : 1,
+                    data: (this.props.initialData) ? this.props.initialData : [],
+                    items: []
+                }
+            },
+            /**
+             *   Adds one to the count of Term components to render;
+             *   @return void;
+             */
+            addTerm: function (e) {
+                e.preventDefault();
 
-            this.setState(
-            {
-                items:[],
-                count:this.state.count + 1
-            });
-        },
-        /**
-        *   Loops through the count, pushes Term components to the items array;
-        *   Renders these components;
-        *   @return void;
-        */
-        render:function()
-        {
-            var i;
-            var readonly = this.props.readonly;
-            var addMoreBtn;
-
-            for(i = 0 ; i < this.state.count ; i++)
-            {
-                var fieldsetData = false;
-
-                if(this.state.data.length)
-                {
-                    if(typeof this.state.data[i] !== 'undefined')
+                this.setState(
                     {
-                        fieldsetData = this.state.data[i];
+                        items: [],
+                        count: this.state.count + 1
+                    });
+            },
+            /**
+             *   Loops through the count, pushes Term components to the items array;
+             *   Renders these components;
+             */
+            render: function () {
+                var i;
+                var readonly = this.props.readonly;
+                var addMoreBtn;
+
+                for (i = 0; i < this.state.count; i++) {
+                    var fieldsetData = false;
+
+                    if (this.state.data.length) {
+                        if (typeof this.state.data[i] !== 'undefined') {
+                            fieldsetData = this.state.data[i];
+                        }
                     }
+
+                    this.state.items.push(
+                        React.createElement(this.state.dependencies.Term, {
+                            editWidgetTermsData: this.editTermsData, 
+                            twitter: stacklaWp.admin.config.network.twitter, 
+                            facebook: stacklaWp.admin.config.network.facebook, 
+                            instagram: stacklaWp.admin.config.network.instagram, 
+                            youtube: stacklaWp.admin.config.network.youtube, 
+                            key: i, 
+                            id: i, 
+                            ref: i, 
+                            data: fieldsetData, 
+                            readonly: readonly}
+                        )
+                    );
                 }
 
-                this.state.items.push(
-                    React.createElement(this.state.dependencies.Term, {
-                        editWidgetTermsData: this.editTermsData, 
-                        twitter: stacklaWp.admin.config.network.twitter, 
-                        facebook: stacklaWp.admin.config.network.facebook, 
-                        instagram: stacklaWp.admin.config.network.instagram, 
-                        youtube: stacklaWp.admin.config.network.youtube, 
-                        key: i, 
-                        id: i, 
-                        ref: i, 
-                        data: fieldsetData, 
-                        readonly: readonly}
+                if (!readonly) {
+                    addMoreBtn = (
+                        React.createElement("div", {className: "add-wrap"}, 
+                            React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Another Term")
+                        )
+                    )
+                }
+
+                return (
+                    React.createElement("div", {className: "stackla-widget-terms"}, 
+                        React.createElement("header", null, 
+                            React.createElement("h2", null, "Create Terms")
+
+                        ), 
+                        this.state.items, 
+                        addMoreBtn
                     )
                 );
             }
-
-            if (!readonly) {
-                addMoreBtn = (
-                    React.createElement("div", {className: "add-wrap"}, 
-                        React.createElement("a", {href: "#", className: "button", onClick: this.addTerm}, "Add Another Term")
-                    )
-                )
-            }
-
-            return (
-                React.createElement("div", {className: "stackla-widget-terms"}, 
-                    React.createElement("header", null, 
-                        React.createElement("h2", null, "Create Terms")
-
-                    ), 
-                    this.state.items, 
-                    addMoreBtn
-                )
-            );
-        }
-    });
+        });
 }(window));
 
 (function(window)
