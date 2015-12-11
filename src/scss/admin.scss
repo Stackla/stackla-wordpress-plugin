@@ -309,12 +309,10 @@
         border-bottom:0;
     }
     .stackla-error-message {
-        padding:$layout-margin-s;
-        padding-top:0;
+        padding: 0 $layout-margin-s;
         color:$color-error;
         background:lighten($color-error , 45%);
         border:1px solid $color-error;
-        border-top:0;
     }
     .stackla-request-error {
         margin-bottom:10px;
