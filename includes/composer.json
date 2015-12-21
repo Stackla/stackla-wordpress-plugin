@@ -1,0 +1,7 @@
+{
+    "require": {
+        "symfony/yaml": "2.7.7",
+        "symfony/translation": "2.7.7",
+        "stackla/stackla-php-sdk": "1.*"
+    }
+}
