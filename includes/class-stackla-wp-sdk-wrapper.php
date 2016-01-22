@@ -12,14 +12,15 @@
 use Stackla\Api\Filter;
 use Stackla\Api\Stack;
 use Stackla\Api\Tag;
+use Stackla\Exception\ApiException;
 use Symfony\Component\Yaml\Yaml;
 
 require_once('class-stackla-wp-metabox.php');
 
 class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 {
-    const NOT_FOUND_EXCEPTION_MESSAGE = 'Server return 404 error code. Invalid resource: Invalid resource specified or resource not found';
-    const TAG_EXISTS_EXCEPTION_MESSAGE = 'Server return 400 error code. Bad request: The request could not be understood. {"data":[],"errors":[{"message":"tag must be unique","code":400}]}';
+    const TERM_NOT_FOUND_ERROR = 1080404;
+    const TAG_EXISTS_ERROR = 1070409;
 
     /**
      * @var    $user_settings      array   array of existing user settings;
@@ -235,8 +236,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $this->tag = $tag;
 
             return $tag;
-        } catch (Exception $e) {
-            if ($e->getMessage() === self::TAG_EXISTS_EXCEPTION_MESSAGE) {
+        } catch (ApiException $e) {
+            if ($e->containsErrorByErrorCode(self::TAG_EXISTS_ERROR)) {
                 /*
                  * It failed because it tries to create a tag with same name.
                  * Usually this happens when a stack is used in 2 or more
@@ -249,6 +250,9 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             } else {
                 $this->errors['title'] = $e->getMessage();
             }
+            return false;
+        } catch (Exception $e) {
+            $this->errors['title'] = $e->getMessage();
             return false;
         }
 
@@ -342,9 +346,8 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
                             $term->delete();
                             continue;
                         }
-                    } catch (Exception $e) {
-                        $message = $e->getMessage();
-                        if ($message === self::NOT_FOUND_EXCEPTION_MESSAGE) {
+                    } catch (ApiException $e) {
+                        if ($e->containsErrorByErrorCode(self::TERM_NOT_FOUND_ERROR)) {
                             if (self::isTrue($t['removed'])) {
                                 // the user actually wanted to delete it, and someone
                                 // else has already deleted it
