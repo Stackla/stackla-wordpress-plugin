@@ -13,7 +13,7 @@
  * @package           Stackla_WP
  *
  * @wordpress-plugin
- * Plugin Name:       Stackla For Wordpress
+ * Plugin Name:       Stackla
  * Plugin URI:        http://stackla.com/
  * Description:       Enables Stackla widget integrations with the WordPress platform.
  * Version:           1.0.0

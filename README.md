@@ -1,11 +1,7 @@
-# Stackla WordPress integration.
+# Stackla
 
 ## Overview
-This plugin allows you to integrate Stackla Widgets into your WordPress site.
-Currently a 'Stackla Widget' field type is supported, that can be added to any
-fieldable entity. The widget options can be configured on the field, and the
-resultant widget will be displayed.
-More integrations are planned!
+Stackla is a social content marketing platform used by hundreds of global brands, agencies, media companies, and nonprofits to discover, curate and publish the best content from the social web. Stackla's Wordpress plugin allows you to display social media content and display via a Stackla widget directly on a Post or a Page.
 
 ## Requirements
 * Stackla Account
@@ -15,6 +11,11 @@ More integrations are planned!
 
 ## Installation
 
+1. Please make sure the hosting server is supporting php-cURL module.
+2. Upload the plugin files to the `/wp-content/plugins/stackla` directory, or install the plugin through the WordPress plugins screen directly.
+3. Activate the plugin through the 'Plugins' screen in WordPress
+4. Use the Settings->Plugin Name screen to configure the plugin
+5. (Make your instructions match the desired user flow for activating and installing your plugin. Include any steps that might be needed for explanatory purposes)
 
 ### Create an app in Stackla
 
