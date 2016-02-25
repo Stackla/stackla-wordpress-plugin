@@ -34,11 +34,14 @@
             }
         }
     } elseif (isset($_POST['revoke-token'])) { // Revoke user access token
-
-        $settings = new Stackla_WP_Settings();
-        $settings->clear_access_tokens();
-        echo json_encode(array('status' => true));
-        exit();
+        try {
+            $settings = new Stackla_WP_Settings();
+            $settings->clear_access_tokens();
+            echo json_encode(array('status' => true));
+            exit();
+        } catch(Exception $e) {
+            $settings->log($e->getMessage());
+        }
     }
 
     wp_redirect(admin_url('admin.php?page=stackla'));

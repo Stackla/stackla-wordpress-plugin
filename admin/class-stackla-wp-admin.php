@@ -96,7 +96,11 @@ class Stackla_WP_Admin {
 	public function render_settings_page()
 	{
         $stackla_wp_settings = new Stackla_WP_Settings;
-        $sdk = new Stackla_WP_SDK_Wrapper();
+        try{
+            $sdk = new Stackla_WP_SDK_Wrapper();
+        } catch (Exception $e) {
+            $stackla_wp_settings->log($e->getMessage());
+        }
         $settings = array(
             "current" => $stackla_wp_settings->get_user_settings(),
             "post_type_options" => $stackla_wp_settings->get_post_type_options(),
