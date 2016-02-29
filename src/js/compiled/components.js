@@ -367,6 +367,10 @@
 
     var WP_SAVE_CONTROLLER;
 
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
+
     function arr_diff(a1, a2) {
 
         var a = [], diff = [], i;
@@ -457,10 +461,10 @@
                 }
 
                 if (identical) {
-                    $.each(a, function (i) {
+                    _.each(a, function (val1, i) {
                         var termA = a[i];
                         var termB = b[i];
-                        $.each(termA, function (j) {
+                        _.each(termA, function (val2, j) {
                             var termAV = termA[j];
                             var termBV = typeof termB[j] != 'undefined' ? termB[j] : null;
                             if (termAV != termBV) {
@@ -519,7 +523,7 @@
                 var widgetConfig = $.extend({}, this.refs.widget.refs.config.state);
                 var terms = [];
 
-                $.each(termsRefs, function (key, value) {
+                _.each(termsRefs, function (value, key) {
                     var state = $.extend({}, value.state);
                     terms.push(state);
                 });
@@ -690,7 +694,7 @@
                 if (!errors || typeof errors == 'undefined') return;
 
                 if (typeof errors == 'object') {
-                    $.each(errors, function (index, item) {
+                    _.each(errors, function (item, index) {
                         refs[index].setState({
                             errors: errors[index]
                         })
@@ -775,7 +779,7 @@
                     }
 
                     return (
-                        React.createElement("fieldset", null, 
+                        React.createElement("fieldset", {key: i}, 
                             React.createElement("label", {className: "checkbox"}, 
                                 React.createElement("input", {
                                     type: "checkbox", 
@@ -897,6 +901,10 @@
     'use strict';
 
     var DEBUG = false;
+
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
 
     function log(message, type) {
         if (!type) type = 'INFO';
@@ -1352,6 +1360,10 @@
 {
     'use strict';
 
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
+
     window.stacklaWp.admin.components.WidgetConfig = React.createClass(
     {displayName: "WidgetConfig",
         propTypes: {
@@ -1463,7 +1475,7 @@
 
             if (this.state.type) {
                 widgetStyle.push(
-                    React.createElement("div", null, 
+                    React.createElement("div", {key: "first"}, 
                         React.createElement("fieldset", null, 
                             React.createElement("label", null, 
                                 "Step 2: ", this.state.types[this.state.type].subtitle
@@ -1475,7 +1487,7 @@
                 if (this.state.type == 'new') {
                     defaultWidgetStyle = this.state.style ? this.state.style : this.state.styles[0].name;
                     widgetStyle.push(
-                        React.createElement("div", {ref: "styles", className: "stackla-widgetStyle-wrapper"}, 
+                        React.createElement("div", {ref: "styles", className: "stackla-widgetStyle-wrapper", key: 'new'}, 
                             this.state.types[this.state.type].description, 
                             React.createElement("fieldset", null, 
                                 
@@ -1499,7 +1511,7 @@
                     );
                 } else {
                     widgetStyle.push(
-                        React.createElement("div", {ref: "widgets", className: "widget-choices"}, 
+                        React.createElement("div", {ref: "widgets", className: "widget-choices", key: 'edit'}, 
                             React.createElement("fieldset", null, 
                                 React.createElement("select", {
                                     disabled: readonly, 
@@ -1521,8 +1533,8 @@
             }
 
             var defaultWidgetType = this.state.type ? this.state.type : 'new';
-            $.each(this.state.types, function(i) {
-                var option = this;
+            _.each(this.state.types, function(value, i) {
+                var option = value;
                 widgetOptions.push(
                 React.createElement("label", {className: 'stackla-widgetType stackla-widgetType-'+option.name + (option.name == defaultWidgetType ? ' on' : ''), key: i}, 
                     React.createElement("input", {
@@ -1605,7 +1617,7 @@
         {
             var removed = 0;
 
-            $.each(this.refs , function(index , item)
+            _.each(this.refs , function(item, index)
             {
                 if(item.state && item.state.removed === true)
                 {

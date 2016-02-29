@@ -52,7 +52,7 @@ register_deactivation_hook( __FILE__, 'deactivate_stackla_wp' );
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-stackla-wp.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-stackla-wp.php';
 
 /**
  * Begins execution of the plugin.

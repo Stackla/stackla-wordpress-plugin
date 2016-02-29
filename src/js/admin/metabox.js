@@ -1,6 +1,9 @@
 (function()
 {
     'use strict';
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
 
     window.stacklaWp.admin.metabox =
     {

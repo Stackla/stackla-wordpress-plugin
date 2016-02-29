@@ -201,8 +201,8 @@ class Stackla_WP {
 		$metaboxes = new Stackla_WP_Metaboxes;
 		$remover = new Stackla_WP_Remover;
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 		$this->loader->add_action('admin_menu' , $plugin_admin , 'add_settings_page');
 		$this->loader->add_action('add_meta_boxes' , $metaboxes , 'setup_metaboxes');
 		$this->loader->add_action('before_delete_post' , $remover , 'remove_metabox_widget');
@@ -219,8 +219,8 @@ class Stackla_WP {
 
 		$plugin_public = new Stackla_WP_Public( $this->get_plugin_name(), $this->get_version() );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 		$this->loader->add_action('template_redirect' , $plugin_public , 'register_widget_shortcode');
 	}
 

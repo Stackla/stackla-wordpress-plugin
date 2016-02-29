@@ -44,11 +44,11 @@ var paths = {
     },
     'js': {
         'admin': {
-            'src':['js/**/*.js' , '!**/public/**'],
+            'src':['js/**/*.js', '!**/public/**'],
             'dest':pluginAdminDirectory + '/js/'
         },
         'public': {
-            'src':['js/lib/jquery-1.11.1.js' , 'js/app.js' , 'js/public/**/*.js'],
+            'src':['js/app.js', 'js/public/**/*.js'],
             'dest':pluginPublicDirectory + '/js/'
         }
     },
@@ -90,7 +90,6 @@ gulp.task('adminJs' , function() {
     return gulp.src(paths.js.admin.src)
     .pipe(order([
         'lib/lodash.js',
-        'lib/jquery-1.11.1.js',
         'lib/jquery.cookie.js',
         'lib/react.js',
         'app.js',

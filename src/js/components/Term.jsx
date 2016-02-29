@@ -15,6 +15,10 @@
 
     var DEBUG = false;
 
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
+
     function log(message, type) {
         if (!type) type = 'INFO';
         if (DEBUG) {

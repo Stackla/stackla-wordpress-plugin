@@ -1,7 +1,9 @@
 (function(window)
 {
     'use strict';
-
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
     window.stacklaWp.admin.settings =
     {
         config:

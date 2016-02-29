@@ -3,6 +3,10 @@
 
     var WP_SAVE_CONTROLLER;
 
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
+
     function arr_diff(a1, a2) {
 
         var a = [], diff = [], i;
@@ -93,10 +97,10 @@
                 }
 
                 if (identical) {
-                    $.each(a, function (i) {
+                    _.each(a, function (val1, i) {
                         var termA = a[i];
                         var termB = b[i];
-                        $.each(termA, function (j) {
+                        _.each(termA, function (val2, j) {
                             var termAV = termA[j];
                             var termBV = typeof termB[j] != 'undefined' ? termB[j] : null;
                             if (termAV != termBV) {
@@ -155,7 +159,7 @@
                 var widgetConfig = $.extend({}, this.refs.widget.refs.config.state);
                 var terms = [];
 
-                $.each(termsRefs, function (key, value) {
+                _.each(termsRefs, function (value, key) {
                     var state = $.extend({}, value.state);
                     terms.push(state);
                 });
@@ -326,7 +330,7 @@
                 if (!errors || typeof errors == 'undefined') return;
 
                 if (typeof errors == 'object') {
-                    $.each(errors, function (index, item) {
+                    _.each(errors, function (item, index) {
                         refs[index].setState({
                             errors: errors[index]
                         })
@@ -411,7 +415,7 @@
                     }
 
                     return (
-                        <fieldset>
+                        <fieldset key={i}>
                             <label className='checkbox'>
                                 <input
                                     type='checkbox'

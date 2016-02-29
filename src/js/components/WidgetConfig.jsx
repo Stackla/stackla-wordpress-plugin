@@ -2,6 +2,10 @@
 {
     'use strict';
 
+    if (typeof $ === 'undefined') {
+        var $ = jQuery;
+    }
+
     window.stacklaWp.admin.components.WidgetConfig = React.createClass(
     {
         propTypes: {
@@ -113,7 +117,7 @@
 
             if (this.state.type) {
                 widgetStyle.push(
-                    <div>
+                    <div key={"first"}>
                         <fieldset>
                             <label>
                                 Step 2: {this.state.types[this.state.type].subtitle}
@@ -125,7 +129,7 @@
                 if (this.state.type == 'new') {
                     defaultWidgetStyle = this.state.style ? this.state.style : this.state.styles[0].name;
                     widgetStyle.push(
-                        <div ref='styles' className='stackla-widgetStyle-wrapper'>
+                        <div ref='styles' className='stackla-widgetStyle-wrapper' key={'new'}>
                             {this.state.types[this.state.type].description}
                             <fieldset>
                                 {
@@ -149,7 +153,7 @@
                     );
                 } else {
                     widgetStyle.push(
-                        <div ref='widgets' className='widget-choices'>
+                        <div ref='widgets' className='widget-choices' key={'edit'}>
                             <fieldset>
                                 <select
                                     disabled={readonly}
@@ -171,8 +175,8 @@
             }
 
             var defaultWidgetType = this.state.type ? this.state.type : 'new';
-            $.each(this.state.types, function(i) {
-                var option = this;
+            _.each(this.state.types, function(value, i) {
+                var option = value;
                 widgetOptions.push(
                 <label className={'stackla-widgetType stackla-widgetType-'+option.name + (option.name == defaultWidgetType ? ' on' : '')} key={i} >
                     <input

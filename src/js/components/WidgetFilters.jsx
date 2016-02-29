@@ -40,7 +40,7 @@
         {
             var removed = 0;
 
-            $.each(this.refs , function(index , item)
+            _.each(this.refs , function(item, index)
             {
                 if(item.state && item.state.removed === true)
                 {

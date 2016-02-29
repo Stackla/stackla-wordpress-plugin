@@ -193,7 +193,13 @@ class Stackla_WP_Admin {
 			wp_enqueue_script( 'html5shiv', plugin_dir_url( __FILE__ ) . 'js/html5shiv.min.js', array(), $this->version , false );
 		}
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/stackla-wp-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script(
+            $this->plugin_name,
+            plugin_dir_url( __FILE__ ) . 'js/stackla-wp-admin.js',
+            array( 'jquery' ),
+            $this->version,
+            true
+        );
 	}
 
 }
