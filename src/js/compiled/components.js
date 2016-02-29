@@ -577,9 +577,9 @@
 
                 if ($node.hasClass('validating')) return;
                 $node.addClass('validating');
-
+                data.action = 'stackla_metabox_validation';
                 $.ajax({
-                    url: stacklaWp.admin.metabox.validator,
+                    url: ajaxurl, //stacklaWp.admin.metabox.validator,
                     type: 'POST',
                     dataType: 'json',
                     data: data
@@ -618,8 +618,9 @@
                     self.activateLoader();
                     $node.addClass('saving');
 
+                    data.action = 'stackla_metabox_save';
                     $.ajax({
-                        url: stacklaWp.admin.metabox.handler,
+                        url: ajaxurl, //stacklaWp.admin.metabox.handler,
                         type: 'POST',
                         dataType: 'json',
                         data: data

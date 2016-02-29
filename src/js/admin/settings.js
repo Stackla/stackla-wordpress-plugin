@@ -83,7 +83,7 @@
             // Revoke token
             $('#js-revoke-token').click(function(e){
                 var $this = $(this);
-                $.post($this.attr('data-url'), {'revoke-token': 1}, function(r) {
+                $.post(ajaxurl, {action: 'stackla_revoke_token'}, function(r) {
                     window.location.reload();
                 });
             });

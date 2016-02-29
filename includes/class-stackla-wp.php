@@ -201,8 +201,14 @@ class Stackla_WP {
 		$metaboxes = new Stackla_WP_Metaboxes;
 		$remover = new Stackla_WP_Remover;
 
+		$this->loader->add_action('wp_ajax_stackla_setting_save', $plugin_admin, 'wp_ajax_setting_save');
+		$this->loader->add_action('wp_ajax_stackla_revoke_token', $plugin_admin, 'wp_ajax_revoke_token');
+		$this->loader->add_action('wp_ajax_stackla_metabox_save', $plugin_admin, 'wp_ajax_metabox_save');
+		$this->loader->add_action('wp_ajax_stackla_metabox_validation', $plugin_admin, 'wp_ajax_metabox_validation');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
+        $this->loader->add_action('query_vars' , $plugin_admin , 'query_vars');
+        $this->loader->add_action('template_redirect' , $plugin_admin , 'template_redirect');
 		$this->loader->add_action('admin_menu' , $plugin_admin , 'add_settings_page');
 		$this->loader->add_action('add_meta_boxes' , $metaboxes , 'setup_metaboxes');
 		$this->loader->add_action('before_delete_post' , $remover , 'remove_metabox_widget');

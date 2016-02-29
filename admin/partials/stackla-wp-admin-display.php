@@ -12,6 +12,10 @@
  * @subpackage Stackla_WP/admin/partials
  */
 ?>
+<?php
+$callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
+?>
+
 <div id='wpbody' class="stacklaAdmin">
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
         <div class='wrap'>
@@ -55,7 +59,6 @@
                 id='stackla-settings-form'
                 class='settings-form'
                 method='POST'
-                action="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-settings.php"
                 data-accessuri=""
                 data-state="<?php echo $state?>"
             >

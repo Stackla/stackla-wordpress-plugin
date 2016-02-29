@@ -111,8 +111,6 @@ class Stackla_WP_Admin {
             $access_token = $sdk->isTokenValid();
         }
         $access_uri = $stackla_wp_settings->get_access_uri();
-        $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
-
         $enableAuthorize = false;
         if (
             !empty($settings['current']) &&
@@ -202,4 +200,159 @@ class Stackla_WP_Admin {
         );
 	}
 
+    public function query_vars($vars)
+    {
+        $vars[] = 'code';
+        return $vars;
+    }
+
+    public function template_redirect()
+    {
+        if (get_query_var('code')) {
+            $code = get_query_var('code');
+            $settings = new Stackla_WP_Settings();
+            $currentSettings = $settings->get_user_settings();
+
+            /** @var Stackla\Core\Credentials $credentials */
+            $credentials = $settings->get_credentials();
+            // $access_uri = $settings->get_access_uri();
+            $access_token = $settings->get_user_access_token();
+            $token_response = false;
+            $token_saved = false;
+            $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
+
+            if($credentials !== false && $currentSettings !== false) {
+                try {
+                    $token_response = $credentials->generateToken(
+                        $currentSettings['stackla_client_id'],
+                        $currentSettings['stackla_client_secret'],
+                        $code,
+                        $callback_url
+                    );
+                    if($token_response) {
+                        $access_token = $credentials->token;
+                        $token_saved = $settings->save_access_token($access_token);
+                    }
+                } catch(Exception $e) {
+                    $settings->log($e->getMessage());
+                }
+            }
+            wp_redirect(admin_url('admin.php?page=stackla'));
+            die();
+        }
+    }
+
+    public function wp_ajax_revoke_token()
+    {
+        try {
+            $settings = new Stackla_WP_Settings();
+            $settings->clear_access_tokens();
+            echo json_encode(array('status' => true));
+        } catch(Exception $e) {
+            $settings->log($e->getMessage());
+        }
+
+        wp_die();
+    }
+
+    public function wp_ajax_setting_validation()
+    {
+        $settings = new Stackla_WP_Settings;
+        $settings->save($_POST);
+
+        wp_die();
+    }
+
+    public function wp_ajax_metabox_validation()
+    {
+        $validator = new Stackla_WP_Metabox_Validator($_POST);
+        $valid = $validator->validate();
+
+        echo json_encode(array('errors' => $validator->errors, 'result' => $valid ? '1' : '0'));
+
+        wp_die();
+    }
+
+    public function wp_ajax_metabox_save()
+    {
+        $post_id = $_POST['postId'];
+        $tagName = "WP-{$post_id}";
+        $terms = empty($_POST['terms']) ? array() : $_POST['terms'];
+        // $filters = $_POST['filters'];
+        $widget = $_POST['widget'];
+        $mediaType = isset($_POST['media_type']) ? $_POST['media_type'] : array();
+
+        // $settings = new Stackla_WP_Settings();
+        $validator = new Stackla_WP_Metabox_Validator($_POST);
+        $valid = $validator->validate();
+
+        $response = array('errors' => false, 'result' => '1');
+        try {
+            if ($valid) {
+                if (!$validator->emptyTerm) {
+                    $metabox = new Stackla_WP_Metabox($post_id);
+                    $sdk = new Stackla_WP_SDK_Wrapper($post_id);
+                    $oldData = $metabox->get_data();
+                    $oldWidget = json_decode($oldData['widget'], 1);
+
+                    $defaultTag = $sdk->push_tag($tagName);
+
+                    if ($defaultTag === false) {
+                        echo $sdk->get_errors();
+                        wp_die();
+                    }
+                    $metabox->set_stackla_wp_tag($defaultTag);
+
+                    $defaultFilter = $sdk->prepareDefaultFilter($defaultTag, $tagName . " - ", $mediaType);
+
+                    if ($defaultFilter === false && $defaultTag === false) {
+                        echo $sdk->get_errors();
+                        wp_die();
+                    }
+                    $metabox->set_stackla_wp_defaultFilter($defaultFilter);
+                    $metabox->set_stackla_wp_defaultFilterMedia($mediaType);
+
+                    $stackla_terms = $sdk->push_terms($terms, $defaultTag, $tagName . " - ");
+                    // $stackla_filters = $sdk->push_filters($filters , $defaultTag, $tagName . " - ");
+                    $stackla_widget = $sdk->push_widget($tagName, $defaultFilter, $widget, $oldWidget);
+
+                    $sdk_valid = $sdk->validate();
+
+                    if ($sdk_valid === false || $stackla_widget === false) {
+                        echo $sdk->get_errors();
+                        wp_die();
+                    }
+
+                    $responseData[Stackla_WP_Metabox::$terms_meta_key] = $metabox->set_json($stackla_terms);
+                    $responseData[Stackla_WP_Metabox::$filter_id_meta_key] = $defaultFilter->id;
+                    $responseData[Stackla_WP_Metabox::$media_type_meta_key] = $metabox->set_json($mediaType);
+                    $responseData[Stackla_WP_Metabox::$widget_meta_key] = $metabox->set_json(array(
+                        'id' => $stackla_widget['id'],
+                        'copyId' => $stackla_widget['copyId'],
+                        'style' => $stackla_widget['style'],
+                        'type' => $stackla_widget['type']
+                    ));
+
+                    $responseData[Stackla_WP_Metabox::$widget_embed_meta_key] = $stackla_widget['embed'];
+
+                    $metabox->set_stackla_wp_terms($stackla_terms);
+                    // $metabox->set_stackla_wp_filters($stackla_filters);
+                    $metabox->set_stackla_wp_widget($stackla_widget);
+
+                    $response['data'] = $responseData;
+                }
+            } else {
+                $response['errors'] = $validator->errors;
+                $response['result'] = '0';
+            }
+        } catch (Exception $e) {
+            $response['errors'] = array(
+                'title' => $e->getMessage()
+            );
+            $response['result'] = '0';
+        }
+        echo json_encode($response);
+
+        wp_die();
+    }
 }

@@ -98,7 +98,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
     public static function getCallbackUrl()
     {
-        return plugin_dir_url(__FILE__) . "admin/callback-url.php";
+        return get_site_url();
     }
 
     public function get_errors()
