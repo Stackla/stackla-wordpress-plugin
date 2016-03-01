@@ -50,14 +50,14 @@ class Stackla_WP_Metabox
         $this->id = $id;
 
         self::$data = array(
-            "title" => get_post_meta($this->id , self::$title_meta_key , true),
-            "terms" => get_post_meta($this->id , self::$terms_meta_key , true),
-            "filters" => get_post_meta($this->id , self::$filters_meta_key , true),
-            "tag" => get_post_meta($this->id , self::$tag_meta_key , true),
-            "tag_id" => get_post_meta($this->id , self::$tag_id_meta_key , true),
-            "filter_id" => get_post_meta($this->id , self::$filter_id_meta_key , true),
-            "media_type" => json_decode(get_post_meta($this->id , self::$media_type_meta_key , true), true),
-            "widget" => get_post_meta($this->id , self::$widget_meta_key , true)
+            "title" => get_post_meta($this->id, self::$title_meta_key, true),
+            "terms" => get_post_meta($this->id, self::$terms_meta_key, true),
+            "filters" => get_post_meta($this->id, self::$filters_meta_key, true),
+            "tag" => get_post_meta($this->id, self::$tag_meta_key, true),
+            "tag_id" => get_post_meta($this->id, self::$tag_id_meta_key, true),
+            "filter_id" => get_post_meta($this->id, self::$filter_id_meta_key, true),
+            "media_type" => json_decode(get_post_meta($this->id, self::$media_type_meta_key, true), true),
+            "widget" => get_post_meta($this->id, self::$widget_meta_key, true)
         );
     }
 
@@ -76,7 +76,7 @@ class Stackla_WP_Metabox
     */
     public function get_json()
     {
-        return json_encode(self::$data , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+        return json_encode(self::$data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -86,7 +86,7 @@ class Stackla_WP_Metabox
     */
     public function set_json($data)
     {
-        return json_encode($data , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+        return json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -96,9 +96,9 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_tag(Stackla\Api\Tag $tag)
     {
-        update_post_meta($this->id , self::$tag_meta_key , $tag->tag);
+        update_post_meta($this->id, self::$tag_meta_key, sanitize_text_field($tag->tag));
 
-        update_post_meta($this->id , self::$tag_id_meta_key , $tag->id);
+        update_post_meta($this->id, self::$tag_id_meta_key, sanitize_text_field($tag->id));
     }
 
     /**
@@ -108,7 +108,7 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_title($title)
     {
-        update_post_meta($this->id , self::$title_meta_key , $title);
+        update_post_meta($this->id, self::$title_meta_key, sanitize_text_field($title));
     }
 
     /**
@@ -118,7 +118,7 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_defaultFilter(Stackla\Api\Filter $filter)
     {
-        update_post_meta($this->id , self::$filter_id_meta_key, $filter->id);
+        update_post_meta($this->id, self::$filter_id_meta_key, sanitize_text_field($filter->id));
     }
 
     /**
@@ -131,7 +131,7 @@ class Stackla_WP_Metabox
         if (gettype($filterMedia) !== 'array') {
             $filterMedia = array();
         }
-        update_post_meta($this->id , self::$media_type_meta_key, $this->set_json($filterMedia));
+        update_post_meta($this->id, self::$media_type_meta_key, $this->set_json($filterMedia));
     }
 
     /**
@@ -141,7 +141,7 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_terms($terms)
     {
-        update_post_meta($this->id , self::$terms_meta_key , $this->set_json($terms));
+        update_post_meta($this->id, self::$terms_meta_key, $this->set_json($terms));
     }
 
     /**
@@ -151,7 +151,7 @@ class Stackla_WP_Metabox
     */
     public function set_stackla_wp_filters($filters)
     {
-        update_post_meta($this->id , self::$filters_meta_key , $this->set_json($filters));
+        update_post_meta($this->id, self::$filters_meta_key, $this->set_json($filters));
     }
 
     /**
@@ -168,9 +168,9 @@ class Stackla_WP_Metabox
             'type' => $widget['type']
         );
 
-        update_post_meta($this->id , self::$widget_meta_key , $this->set_json($data));
+        update_post_meta($this->id, self::$widget_meta_key, $this->set_json($data));
 
-        update_post_meta($this->id , self::$widget_embed_meta_key , $widget['embed']);
+        update_post_meta($this->id, self::$widget_embed_meta_key, $widget['embed']);
     }
 
     public function clear()

@@ -255,7 +255,7 @@ class Stackla_WP_Admin {
         wp_die();
     }
 
-    public function wp_ajax_setting_validation()
+    public function wp_ajax_setting_save()
     {
         $settings = new Stackla_WP_Settings;
         $settings->save($_POST);

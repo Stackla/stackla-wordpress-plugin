@@ -155,19 +155,19 @@ class Stackla_WP_Settings
         if(!Stackla_WP_Metabox_Validator::validate_string($data['stack'])) {
             $this->errors['stack'] = "You must submit a valid stack name";
         } else {
-            $this->stackla_stack = $data['stack'];
+            $this->stackla_stack = sanitize_text_field($data['stack']);
         }
 
         if(!Stackla_WP_Metabox_Validator::validate_string($data['client_id'])) {
             $this->errors['client_id'] = 'You must submit a valid client id';
         } else {
-            $this->stackla_client_id = $data['client_id'];
+            $this->stackla_client_id = sanitize_text_field($data['client_id']);
         }
 
         if(!Stackla_WP_Metabox_Validator::validate_string($data['client_secret'])) {
             $this->errors['client_secret'] = 'You must submit a valid client secret';
         } else {
-            $this->stackla_client_secret = $data['client_secret'];
+            $this->stackla_client_secret = sanitize_text_field($data['client_secret']);
         }
 
         foreach($this->errors as $k => $v) {

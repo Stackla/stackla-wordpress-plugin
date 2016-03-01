@@ -55,6 +55,7 @@ class Stackla_WP_Metabox_Validator
      */
     public static function validate_string($var)
     {
+        $var = trim($var);
         return !(!$var || $var === '' || strlen($var) <= 0 || !isset($var));
     }
 

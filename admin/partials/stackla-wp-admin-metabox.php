@@ -13,11 +13,9 @@
     }
 ?>
 <div id='stackla-metabox'
-    data-stackla='<?php echo $metabox_json; ?>'
-    data-postid="<?php echo $object->ID ?>"
-    data-validator="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox-validator.php"
-    data-handler="<?php echo plugin_dir_url(__FILE__) ?>stackla-wp-admin-handler-metabox.php"
-    data-accessuri="<?php echo $access_uri ?>"
+    data-stackla="<?php echo esc_attr($metabox_json); ?>"
+    data-postid="<?php echo esc_attr($object->ID) ?>"
+    data-accessuri="<?php echo esc_attr($access_uri) ?>"
     data-token="<?php echo ($access_token) ? '1' : '' ?>"
-    data-widgets='<?php echo $widgets_json; ?>'
+    data-widgets='<?php echo esc_attr($widgets_json) ?>'
 ></div>

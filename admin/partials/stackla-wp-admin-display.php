@@ -83,19 +83,19 @@ $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
 
                     <div class="input-group">
                         <label for="stack">Stack Shortname</label>
-                        <input type='text' class='widefat' name='stack' id='stack' value="<?php echo ($settings['current']) ? $settings['current']['stackla_stack'] : ''; ?>">
+                        <input type='text' class='widefat' name='stack' id='stack' value="<?php echo esc_attr(($settings['current']) ? $settings['current']['stackla_stack'] : '') ?>">
                         <div class='error-message'></div>
                     </div>
 
                     <div class="input-group">
                         <label for="client_id">Client ID</label>
-                        <input type='text' class='widefat' name='client_id' id='client_id' value="<?php echo ($settings['current']) ? $settings['current']['stackla_client_id'] : ''; ?>">
+                        <input type='text' class='widefat' name='client_id' id='client_id' value="<?php echo esc_attr(($settings['current']) ? $settings['current']['stackla_client_id'] : '') ?>">
                         <div class='error-message'></div>
                     </div>
 
                     <div class="input-group">
                         <label for="client_secret">Client secret</label>
-                        <input type='text' class='widefat' name='client_secret' id='client_secret' value="<?php echo ($settings['current']) ? $settings['current']['stackla_client_secret'] : ''; ?>">
+                        <input type='text' class='widefat' name='client_secret' id='client_secret' value="<?php echo esc_attr(($settings['current']) ? $settings['current']['stackla_client_secret'] : '') ?>">
                         <div class='error-message'></div>
                     </div>
                 </section>
@@ -135,26 +135,21 @@ $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
                     <p>You need to authorize WordPress to access your Stackla account. Click 'Authorize' below, you'll be prompted to log in to Stackla to provide authorization.
 
                     <div>
+                        <?php $generateTokenText = "Authorize"; ?>
                         <?php if ($state == 'authorized') : ?>
+                            <?php $generateTokenText = "Reauthorize"; ?>
                         <input type='button'
                             id="js-revoke-token"
                             value='Revoke authorization'
                             class='button button-danger button-large'
                             data-url="<?php echo $callback_url ?>">
-                        <input type='button'
-                            id="js-regenerate-token"
-                            value='Reauthorize'
-                            class='button button-primary button-large'
-                            <?php echo $enableAuthorize ? '' : 'disabled' ?>
-                            data-url="<?php echo $access_uri ?>">
-                        <?php else: ?>
-                        <input type='button'
-                            id="js-regenerate-token"
-                            value='Authorize'
-                            class='button button-primary button-large'
-                            <?php echo $enableAuthorize ? '' : 'disabled' ?>
-                            data-url="<?php echo $access_uri ?>">
                         <?php endif; ?>
+                        <input type='button'
+                            id="js-regenerate-token"
+                            value='<?php echo $generateTokenText ?>'
+                            class='button button-primary button-large'
+                            <?php echo $enableAuthorize ? '' : 'disabled' ?>
+                            data-url="<?php echo $access_uri ?>">
                     </div>
                 </section>
 
