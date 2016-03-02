@@ -275,12 +275,35 @@ class Stackla_WP_Admin {
 
     public function wp_ajax_metabox_save()
     {
-        $post_id = $_POST['postId'];
+        $post_id = intval($_POST['postId']);
         $tagName = "WP-{$post_id}";
+
+        // Terms data
         $terms = empty($_POST['terms']) ? array() : $_POST['terms'];
+        foreach ($terms as $termKey => $termValue) {
+            $terms[$termKey]['id'] = isset($terms[$termKey]['id']) ? intval($terms[$termKey]['id']) : null;
+            $terms[$termKey]['name'] = isset($terms[$termKey]['name']) ? sanitize_text_field($terms[$termKey]['name']) : null;
+            $terms[$termKey]['network'] = isset($terms[$termKey]['network']) ? sanitize_text_field($terms[$termKey]['network']) : null;
+            $terms[$termKey]['termId'] = isset($terms[$termKey]['termId']) ? intval($terms[$termKey]['termId']) : null;
+            $terms[$termKey]['term'] = isset($terms[$termKey]['term']) ? sanitize_text_field($terms[$termKey]['term']) : null;
+            $terms[$termKey]['termValue'] = isset($terms[$termKey]['termValue']) ? sanitize_text_field($terms[$termKey]['termValue']) : null;
+            $terms[$termKey]['termDelimited'] = isset($terms[$termKey]['termDelimited']) ? sanitize_text_field($terms[$termKey]['termDelimited']) : null;
+        }
+
         // $filters = $_POST['filters'];
+
+        // Widget data
         $widget = $_POST['widget'];
+        $widget['id'] = isset($widget['id']) ? intval($widget['id']) : null;
+        $widget['copyId'] = isset($widget['copyId']) ? intval($widget['copyId']) : null;
+        $widget['style'] = isset($widget['style']) ? sanitize_text_field($widget['style']) : null;
+        $widget['type'] = isset($widget['type']) ? sanitize_text_field($widget['type']) : null;
+
+        // Media types data
         $mediaType = isset($_POST['media_type']) ? $_POST['media_type'] : array();
+        foreach($mediaType as $mediaKey => $media) {
+            $mediaType[$mediaKey] = sanitize_text_field($media);
+        }
 
         // $settings = new Stackla_WP_Settings();
         $validator = new Stackla_WP_Metabox_Validator($_POST);

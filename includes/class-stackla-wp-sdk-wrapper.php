@@ -223,6 +223,10 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
         $name = stripslashes($name);
 
+        if ($tag->tag !== $name) {
+            return $tag;
+        }
+
         $tag->tag = $name;
         $tag->slug = $name;
 
@@ -255,7 +259,6 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $this->errors['title'] = $e->getMessage();
             return false;
         }
-
     }
 
     /**
@@ -276,7 +279,12 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
             $filter->addTag($tag);
         }
 
-        $filter->name = $name . " - Latest";
+        $defaultName = $name . " - Latest";
+        if ($filter->name === $defaultName) {
+            return $filter;
+        }
+
+        $filter->name = $defaultName;
 
         $diff = array();
         if (gettype($media) == 'array') {
