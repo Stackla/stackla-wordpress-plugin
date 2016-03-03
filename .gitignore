@@ -1,5 +1,6 @@
 node_modules
 includes/vendor
+/svn
 .DS_Store
 
 stackla-phrase-key
