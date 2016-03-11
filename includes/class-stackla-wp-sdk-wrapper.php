@@ -224,6 +224,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         $name = stripslashes($name);
 
         if ($tag->tag === $name) {
+            $this->tag = $tag;
             return $tag;
         }
 
@@ -318,7 +319,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
      */
     public function push_terms($terms, $tag, $prefix = null)
     {
-        if ($this->tag === false) {
+        if ($tag === false) {
             throw new Error('Tag object not set');
         }
 
@@ -412,7 +413,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
     public function push_filters($filters, $tag, $prefix = null)
     {
-        if ($this->tag === false) {
+        if ($tag === false) {
             throw new Error('Tag object not set');
         }
 
