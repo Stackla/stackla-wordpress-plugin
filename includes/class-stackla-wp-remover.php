@@ -45,6 +45,13 @@ class Stackla_WP_Remover
                     }
 
                 break;
+                case 'filter_id':
+
+                    if($v === '' || !$v) continue;
+
+                    $sdk->remove_filter($v);
+
+                break;
                 case 'tag_id':
 
                     if($v === '' || !$v) continue;

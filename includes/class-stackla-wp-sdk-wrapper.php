@@ -223,7 +223,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
 
         $name = stripslashes($name);
 
-        if ($tag->tag !== $name) {
+        if ($tag->tag === $name) {
             return $tag;
         }
 
