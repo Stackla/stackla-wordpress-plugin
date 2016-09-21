@@ -61,23 +61,6 @@
     background-color:lighten($color-prompt , 15%);
 }
 
-.error {
-    border:1px solid $color-error !important;
-}
-
-.error-message {
-    display:none;
-    padding:10px;
-    color:$color-error;
-    background:lighten($color-error , 45%);
-    border:1px solid $color-error;
-    border-top:0;
-}
-
-.error-message.display {
-    display: block;
-}
-
 .stacklaAdmin{
     &-header{
         background-image: url(../img/powered-by-stackla.svg);
@@ -125,6 +108,23 @@
             margin: 0;
             padding: 0;
         }
+
+		.error {
+			border:1px solid $color-error;
+		}
+
+		.error-message {
+			display:none;
+			padding:10px;
+			color:$color-error;
+			background:lighten($color-error , 45%);
+			border:1px solid $color-error;
+			border-top:0;
+		}
+
+		.error-message.display {
+			display: block;
+		}
     }
     .button-danger{
         background: #ba0000;
@@ -139,6 +139,7 @@
             color: #fff;
         }
     }
+
 }
 
 #stackla-meta-box {

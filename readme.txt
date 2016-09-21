@@ -2,8 +2,8 @@
 Contributors: helmanbudianto
 Tags: social, widget, stackla, ugc
 Requires at least: 4.3
-Tested up to: 4.3
-Stable tag: 4.3
+Tested up to: 4.6
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,5 +42,18 @@ Twitter, Facebook, Instagram, YouTube and Google+
 
 == Changelog ==
 
-= 1.0 =
+= 1.0.4 =
+* Change input label from 'Callback URL' to 'Redirect URL' in Stackla config
+* Implement PHP cURL module checking
+
+= 1.0.3 =
+* Fix issue when updating Stackla field set
+
+= 1.0.2 =
+* Fix Stackla tag creation process
+
+= 1.0.1 =
+* Tag update
+
+= 1.0.0 =
 * First version

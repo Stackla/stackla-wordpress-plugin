@@ -175,7 +175,6 @@ class Stackla_WP {
 	 *
 	 * Uses the Stackla_WP_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
-	 *
 	 * @since    1.0.0
 	 * @access   private
 	 */
@@ -200,6 +199,10 @@ class Stackla_WP {
 		$plugin_admin = new Stackla_WP_Admin( $this->get_plugin_name(), $this->get_version() );
 		$metaboxes = new Stackla_WP_Metaboxes;
 		$remover = new Stackla_WP_Remover;
+
+        if (!Stackla_WP::hasCurlModule()) {
+			add_action('admin_notices', array('Stackla_WP', 'curlModuleError'));
+        }
 
 		$this->loader->add_action('wp_ajax_stackla_setting_save', $plugin_admin, 'wp_ajax_setting_save');
 		$this->loader->add_action('wp_ajax_stackla_revoke_token', $plugin_admin, 'wp_ajax_revoke_token');
@@ -269,5 +272,33 @@ class Stackla_WP {
 	public function get_version() {
 		return $this->version;
 	}
+
+	/**
+	 * Check if php-cUrl module is available.
+	 *
+	 * @since     1.0.4
+	 * @return    bool
+	 */
+    public static function hasCurlModule() {
+        if (extension_loaded('curl')) {
+            return true;
+        }
+
+        return false;
+    }
+
+	/**
+	 * Construct cURL error message.
+	 *
+	 * @since     1.0.4
+	 * @return    null
+	 */
+    public static function curlModuleError() {
+        ?>
+<div class="error notice">
+	<p><?php _e( '<b>Stackla for WordPress</b> plugin requires the PHP cURL module. Please contact your server administrator to find out how to enable PHP cURL on your server.', 'stackla_wp_error_message' ); ?></p>
+</div>
+        <?php
+    }
 
 }

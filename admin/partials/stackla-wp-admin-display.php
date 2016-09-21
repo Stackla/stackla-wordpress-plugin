@@ -13,14 +13,13 @@
  */
 ?>
 <?php
-$callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
+$redirect_url = Stackla_WP_SDK_Wrapper::getRedirectUrl();
 ?>
 
 <div id='wpbody' class="stacklaAdmin">
     <div id='wpbody-content' aria-label='Main content' tabindex='0'>
         <div class='wrap'>
             <h1 class="stacklaAdmin-header">Stackla For WordPress</h1>
-
             <?php
             if ($enableAuthorize) :
                 if($state == 'init'):
@@ -66,12 +65,12 @@ $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
                     <h2>Step 1: Configure Stackla</h2>
 
                     <p>Before you can configure WordPress, you need to first configure Stackla.</p>
-                    <p>Copy the 'Callback URL' below and paste it in the relevant field in the WordPress plugin configuration screen in Stackla.</p>
+                    <p>Copy the 'Redirect URL' below and paste it in the relevant field in the WordPress plugin configuration screen in Stackla.</p>
 
                     <div class="input-group">
-                        <label for="callback">Callback URL</label>
-                        <input type='text' class='widefat' name='callback' id='callback' readonly="readonly" value="<?php echo $callback_url; ?>">
-                        <p class="description">Please copy + paste this URL into the 'Callback URL' field in the WordPress plugin configuration screen in Stackla.</p>
+                        <label for="redirect">Redirect URL</label>
+                        <input type='text' class='widefat' name='redirect' id='redirect' readonly="readonly" value="<?php echo $redirect_url; ?>">
+                        <p class="description">Please copy + paste this URL into the 'Redirect URL' field in the WordPress plugin configuration screen in Stackla.</p>
                         <div class='error-message'></div>
                     </div>
                 </section>
@@ -142,7 +141,7 @@ $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
                             id="js-revoke-token"
                             value='Revoke authorization'
                             class='button button-danger button-large'
-                            data-url="<?php echo $callback_url ?>">
+                            data-url="<?php echo $redirect_url ?>">
                         <?php endif; ?>
                         <input type='button'
                             id="js-regenerate-token"
