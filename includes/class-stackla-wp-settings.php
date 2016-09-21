@@ -399,9 +399,9 @@ class Stackla_WP_Settings
             return false;
         }
 
-        $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
+        $redirect_url = Stackla_WP_SDK_Wrapper::getRedirectUrl();
         $credentials = $this->get_credentials();
-        $access_uri = $credentials->getAccessUri($current['stackla_client_id'], $current['stackla_client_secret'], $callback_url);
+        $access_uri = $credentials->getAccessUri($current['stackla_client_id'], $current['stackla_client_secret'], $redirect_url);
 
         return $access_uri;
     }

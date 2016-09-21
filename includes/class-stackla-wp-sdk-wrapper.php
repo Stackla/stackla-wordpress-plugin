@@ -96,7 +96,7 @@ class Stackla_WP_SDK_Wrapper extends Stackla_WP_Metabox
         return self::$host;
     }
 
-    public static function getCallbackUrl()
+    public static function getRedirectUrl()
     {
         return get_site_url();
     }

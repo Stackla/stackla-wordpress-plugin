@@ -16,7 +16,7 @@
  * Plugin Name:       Stackla
  * Plugin URI:        http://stackla.com/
  * Description:       Enables Stackla widget integrations with the WordPress platform.
- * Version:           1.0.3
+ * Version:           1.0.4
  * Author:            Stackla
  * Author URI:        http://stackla.com/
  * License:           GPLv2 or later

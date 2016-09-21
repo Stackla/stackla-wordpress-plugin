@@ -219,7 +219,7 @@ class Stackla_WP_Admin {
             $access_token = $settings->get_user_access_token();
             $token_response = false;
             $token_saved = false;
-            $callback_url = Stackla_WP_SDK_Wrapper::getCallbackUrl();
+            $redirect_url = Stackla_WP_SDK_Wrapper::getRedirectUrl();
 
             if($credentials !== false && $currentSettings !== false) {
                 try {
@@ -227,7 +227,7 @@ class Stackla_WP_Admin {
                         $currentSettings['stackla_client_id'],
                         $currentSettings['stackla_client_secret'],
                         $code,
-                        $callback_url
+                        $redirect_url
                     );
                     if($token_response) {
                         $access_token = $credentials->token;
