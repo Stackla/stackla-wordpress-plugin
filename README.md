@@ -1,5 +1,7 @@
 # Stackla
 
+# _Copyright © 2012 to present. Stackla, Inc., Stackla Pty Ltd., and Stackla Ltd. All rights reserved._
+
 ## Overview
 Stackla is a social content marketing platform used by hundreds of global brands, agencies, media companies, and nonprofits to discover, curate and publish the best content from the social web. Stackla's Wordpress plugin allows you to display social media content and display via a Stackla widget directly on a Post or a Page.
 
